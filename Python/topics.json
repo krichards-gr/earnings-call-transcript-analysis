@@ -1,0 +1,50 @@
+{
+  "topics": [
+    {
+      "label": "DEI",
+      "patterns": [
+        [
+          {
+            "LOWER": "dei"
+          }
+        ],
+        [
+          {
+            "LOWER": "diversity"
+          }
+        ]
+      ],
+      "anchors": [
+        "workforce diversity",
+        "inclusive hiring",
+        "equity in the workplace"
+      ]
+    },
+    {
+      "label": "Economic Empowerment",
+      "patterns": [
+        [
+          {
+            "LOWER": "ubi"
+          }
+        ],
+        [
+          {
+            "LOWER": "universal"
+          },
+          {
+            "LOWER": "basic"
+          },
+          {
+            "LOWER": "income"
+          }
+        ]
+      ],
+      "anchors": [
+        "guaranteed basic income",
+        "economic safety nets",
+        "financial empowerment"
+      ]
+    }
+  ]
+}
