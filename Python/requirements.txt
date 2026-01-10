@@ -2,3 +2,6 @@ sentence-transformers
 spacy
 torch
 numpy
+
+transformers
+sentencepiece

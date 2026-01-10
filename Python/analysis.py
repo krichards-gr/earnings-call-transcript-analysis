@@ -1,6 +1,7 @@
 import json
 import spacy
 from sentence_transformers import SentenceTransformer, util
+from transformers import pipeline
 import os
 import sys
 
@@ -38,6 +39,15 @@ try:
     embedder = SentenceTransformer('all-MiniLM-L6-v2')
 except Exception as e:
     print(f"Error loading SentenceTransformer model: {e}")
+    sys.exit(1)
+
+# Load Aspect-Based Sentiment Analysis (ABSA) model
+# We use 'yangheng/deberta-v3-base-absa-v1.1' as it is a general-purpose model
+# that supports determining sentiment relative to a specific aspect/topic.
+try:
+    sentiment_analyzer = pipeline("text-classification", model="yangheng/deberta-v3-base-absa-v1.1")
+except Exception as e:
+    print(f"Error loading ABSA model: {e}")
     sys.exit(1)
 
 print("Models loaded successfully.")
@@ -136,9 +146,27 @@ def analyze_text(text):
             print(f"    - Match: '{span.text}' -> Topic: {string_id}")
             found_topics.add(string_id)
         
-        # If we found exact matches, we return them.
         # Logic: If key terms are present, we are 100% sure of the topic.
-        return list(found_topics)
+        # Check sentiment for each found topic
+        results = []
+        for topic in found_topics:
+            try:
+                # The model expects text (context) and text_pair (aspect)
+                # Pass text as positional argument, text_pair as kwarg
+                sentiment = sentiment_analyzer(text, text_pair=topic)
+                # Result is a list like [{'label': 'Positive', 'score': 0.99}]
+                s_label = sentiment[0]['label']
+                s_score = sentiment[0]['score']
+                results.append({
+                    "topic": topic,
+                    "sentiment": s_label,
+                    "score": s_score
+                })
+            except Exception as e:
+                print(f"    [WARN] Sentiment analysis failed for topic '{topic}': {e}")
+                results.append({"topic": topic, "sentiment": "Unknown", "score": 0.0})
+        
+        return results
 
     # -------------------------------------------------------------------------
     # STEP 2: Vector Similarity (Anchor Terms)
@@ -191,7 +219,32 @@ def analyze_text(text):
         print(f"  [DEBUG] Vector matches found: {len(top_3)}")
         for r in top_3:
             print(f"    - Topic: {r['topic']} (Score: {r['score']:.4f}, Anchor: '{r['matched_anchor']}')")
-        return [r['topic'] for r in top_3]
+        # For vector matches, also calculate sentiment
+        final_output = []
+        for r in top_3:
+            topic = r['topic']
+            try:
+                sentiment = sentiment_analyzer(text, text_pair=topic)
+                s_label = sentiment[0]['label']
+                s_score = sentiment[0]['score']
+                final_output.append({
+                    "topic": topic,
+                    "sentiment": s_label,
+                    "score": s_score,
+                    "similarity_score": r['score'], # Keep the similarity score for reference
+                    "matched_anchor": r['matched_anchor']
+                })
+            except Exception as e:
+                 print(f"    [WARN] Sentiment analysis failed for topic '{topic}': {e}")
+                 final_output.append({
+                    "topic": topic, 
+                    "sentiment": "Unknown", 
+                    "score": 0.0,
+                    "similarity_score": r['score'],
+                    "matched_anchor": r['matched_anchor']
+                })
+
+        return final_output
             
     return []
 
@@ -224,4 +277,7 @@ if __name__ == "__main__":
         print(f"Paragraph {i+1}: \"{paragraph[:100]}...\"")
         detected_topics = analyze_text(paragraph)
         print(f"Result: {detected_topics}")
+        if detected_topics:
+            for dt in detected_topics:
+                print(f"    -> Topic: {dt['topic']}, Sentiment: {dt['sentiment']} ({dt['score']:.2f})")
         print("-" * 60)
