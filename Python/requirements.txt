@@ -5,3 +5,6 @@ numpy
 
 transformers
 sentencepiece
+pandas
+google-cloud-bigquery
+db-dtypes

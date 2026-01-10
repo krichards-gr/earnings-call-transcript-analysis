@@ -2,6 +2,8 @@ import json
 import spacy
 from sentence_transformers import SentenceTransformer, util
 from transformers import pipeline
+import pandas as pd
+from google.cloud import bigquery
 import os
 import sys
 
@@ -16,6 +18,12 @@ TOPICS_FILE = os.path.join(current_dir, 'topics.json')
 # Threshold for vector similarity (0 to 1). 
 # Text with similarity score below this will not be considered a match for that anchor.
 SIMILARITY_THRESHOLD = 0.3
+
+# BigQuery Configuration
+BQ_PROJECT_ID = "sri-benchmarking-databases"
+BQ_DATASET = "pressure_monitoring"
+BQ_SOURCE_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_content"
+BQ_DEST_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_enriched"
 
 # =================================================================================================
 # MODEL LOADING
@@ -266,10 +274,106 @@ def analyze_text(text):
     return []
 
 # =================================================================================================
+# BIGQUERY PROCESSING
+# =================================================================================================
+
+def process_from_bigquery():
+    """
+    Reads transcripts from BigQuery, analyzes them, and writes enriched data back.
+    """
+    print(f"Connecting to BigQuery...")
+    try:
+        client = bigquery.Client(project=BQ_PROJECT_ID)
+    except Exception as e:
+        print(f"Error connecting to BigQuery: {e}")
+        return
+
+    print(f"Reading from {BQ_SOURCE_TABLE}...")
+    query = f"""
+        SELECT transcript_id, paragraph_number, content 
+        FROM `{BQ_SOURCE_TABLE}`
+    """
+    
+    try:
+        df = client.query(query).to_dataframe()
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return
+
+    if df.empty:
+        print("No data found in source table.")
+        return
+        
+    print(f"Loaded {len(df)} rows. Starting analysis...")
+    
+    enriched_rows = []
+    
+    # Iterate and analyze
+    for index, row in df.iterrows():
+        text = row['content']
+        transcript_id = row['transcript_id']
+        paragraph_number = row['paragraph_number']
+        
+        # Skip empty text
+        if not isinstance(text, str) or not text.strip():
+            continue
+            
+        detected = analyze_text(text)
+        
+        # Transform to Tidy Format: One row per detected topic
+        if detected:
+            for d in detected:
+                # Append row dictionary
+                enriched_rows.append({
+                    "transcript_id": transcript_id,
+                    "paragraph_number": paragraph_number,
+                    "topic": d['topic'],
+                    "sentiment_label": d['sentiment'],
+                    "sentiment_score": d['score']
+                })
+    
+    if not enriched_rows:
+        print("Analysis complete. No topics detected.")
+        return
+
+    # Create DataFrame for destination
+    enriched_df = pd.DataFrame(enriched_rows)
+    
+    print(f"Analysis complete. Detected {len(enriched_df)} topic instances.")
+    print(f"Writing to {BQ_DEST_TABLE}...")
+    
+    # Configure Load Job
+    job_config = bigquery.LoadJobConfig(
+        # Append to existing table or create if not exists
+        write_disposition="WRITE_APPEND", 
+        schema=[
+            bigquery.SchemaField("transcript_id", "STRING"),
+            bigquery.SchemaField("paragraph_number", "INTEGER"),
+            bigquery.SchemaField("topic", "STRING"),
+            bigquery.SchemaField("sentiment_label", "STRING"),
+            bigquery.SchemaField("sentiment_score", "FLOAT"),
+        ]
+    )
+    
+    try:
+        job = client.load_table_from_dataframe(enriched_df, BQ_DEST_TABLE, job_config=job_config)
+        job.result() # Wait for job to complete
+        print(f"Successfully loaded {len(enriched_df)} rows to {BQ_DEST_TABLE}")
+    except Exception as e:
+        print(f"Error writing to BigQuery: {e}")
+
+# =================================================================================================
 # MAIN EXECUTION
 # =================================================================================================
 
 if __name__ == "__main__":
+    
+    # Check for BigQuery Flag
+    if "--bq" in sys.argv:
+        print("Running in BigQuery Mode...")
+        process_from_bigquery()
+        sys.exit(0)
+
     # If a file argument is provided, read it. Otherwise use the default sample.
     input_file = os.path.join(current_dir, 'inputs', 'sample_transcript.txt')
     if len(sys.argv) > 1:
