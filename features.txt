@@ -1,0 +1,27 @@
+# Features of R Process
+
+## 1. Transcript Parsing (`parse_transcript_text.R`)
+*   **PDF Ingestion**: Reads transcript data from PDF files.
+*   **Text Cleaning**: Removes artifacts like headers ("about:srcdoc..."), timestamps, and generic labels ("analysts", "executives").
+*   **Speaker Identification**: Parses participants from the "Event Participants" section to dynamically identify speakers.
+*   **Role Assignment**: Classifies speakers into "Executive", "Analyst", or "Operator".
+*   **Segmentation**: Splits the text by speaker.
+*   **Q&A Grouping**: Logic to identify "Question" vs "Answer" sequences (Interaction_Type, QA_group).
+
+## 2. Metadata Extraction (`get_metadata.R`)
+*   **File Path Parsing**: Extracts Sector and Industry based on interactive position selection in the file path.
+*   **Filename Parsing**: Extracts Company Name, Quarter (Q4), and Year (2025) from the filename.
+*   **Date Extraction**: Scrapes the specific call date/time from the first page of the PDF text.
+
+## 3. Topic & Term Tagging (`term_topic_ingest.R`, `parse_transcript_text.R`)
+*   **Ingestion**: Interactively selects a CSV containing Key Terms and Topics.
+*   **Tagging**: Flags segments that contain specific key terms (`key_terms_mentioned`).
+*   **Topic Labeling**: Aggregates terms into broader topics and labels segments (`topics_mentioned`).
+
+## 4. Feature Engineering (`build_features.R`)
+*   **Term Counts**: Counts the frequency of specific key terms in the text.
+*   **Sentiment (VADER)**: [Legacy/Commented Code] Calculates compound sentiment scores using `tidyvader` at the sentence level.
+
+## 5. Data Management (`main.R`)
+*   **SQLite Integration**: Reads/Writes results to a SQLite database (`.db` file).
+*   **Interactive Workflow**: Uses `tcltk` for interactive folder/file selection dialogs.

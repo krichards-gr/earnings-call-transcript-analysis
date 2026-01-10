@@ -288,11 +288,35 @@ def process_from_bigquery():
         print(f"Error connecting to BigQuery: {e}")
         return
 
-    print(f"Reading from {BQ_SOURCE_TABLE}...")
-    query = f"""
-        SELECT transcript_id, paragraph_number, content 
-        FROM `{BQ_SOURCE_TABLE}`
-    """
+    print(f"Reading from {BQ_SOURCE_TABLE} (excluding already-processed rows)...")
+    
+    # Check if the destination table exists. If not, we need to process all rows.
+    try:
+        client.get_table(BQ_DEST_TABLE)
+        dest_table_exists = True
+    except Exception:
+        dest_table_exists = False
+        print(f"  [INFO] Destination table {BQ_DEST_TABLE} does not exist yet. Will process all rows.")
+    
+    if dest_table_exists:
+        # Use LEFT JOIN to filter out rows that have already been processed.
+        # This makes the script idempotent - running it multiple times will only process new rows.
+        query = f"""
+            SELECT c.transcript_id, c.paragraph_number, c.content 
+            FROM `{BQ_SOURCE_TABLE}` c
+            LEFT JOIN (
+                SELECT DISTINCT transcript_id, paragraph_number 
+                FROM `{BQ_DEST_TABLE}`
+            ) e
+            ON c.transcript_id = e.transcript_id AND c.paragraph_number = e.paragraph_number
+            WHERE e.transcript_id IS NULL
+        """
+    else:
+        # Destination table doesn't exist, so process all rows
+        query = f"""
+            SELECT transcript_id, paragraph_number, content 
+            FROM `{BQ_SOURCE_TABLE}`
+        """
     
     try:
         df = client.query(query).to_dataframe()
@@ -368,9 +392,11 @@ def process_from_bigquery():
 
 if __name__ == "__main__":
     
-    # Check for BigQuery Flag
-    if "--bq" in sys.argv:
-        print("Running in BigQuery Mode...")
+    # Default to BigQuery mode. Use --local for file-based processing.
+    if "--local" in sys.argv:
+        print("Running in Local File Mode...")
+    else:
+        print("Running in BigQuery Mode (default)...")
         process_from_bigquery()
         sys.exit(0)
 
