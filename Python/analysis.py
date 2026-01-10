@@ -153,14 +153,26 @@ def analyze_text(text):
             try:
                 # The model expects text (context) and text_pair (aspect)
                 # Pass text as positional argument, text_pair as kwarg
-                sentiment = sentiment_analyzer(text, text_pair=topic)
-                # Result is a list like [{'label': 'Positive', 'score': 0.99}]
-                s_label = sentiment[0]['label']
-                s_score = sentiment[0]['score']
+                # top_k=None returns all scores
+                sentiment = sentiment_analyzer(text, text_pair=topic, top_k=None)
+                
+                # sentiment is a list of dicts: [{'label': 'Positive', 'score': 0.9}, {'label': 'Neutral', ...}]
+                # Sort by score desc to be safe, though usually returned sorted
+                # But we want to capture the simplified top label AND the full breakdown
+                sentiment.sort(key=lambda x: x['score'], reverse=True)
+                
+                top_label = sentiment[0]['label']
+                top_score = sentiment[0]['score']
+                
+                # Create a compact string representation of all scores for display
+                # e.g. "Pos: 0.60, Neu: 0.30, Neg: 0.10"
+                scores_str = ", ".join([f"{s['label'][:3]}: {s['score']:.2f}" for s in sentiment])
+
                 results.append({
                     "topic": topic,
-                    "sentiment": s_label,
-                    "score": s_score
+                    "sentiment": top_label,
+                    "score": top_score,
+                    "all_scores": scores_str
                 })
             except Exception as e:
                 print(f"    [WARN] Sentiment analysis failed for topic '{topic}': {e}")
@@ -224,13 +236,18 @@ def analyze_text(text):
         for r in top_3:
             topic = r['topic']
             try:
-                sentiment = sentiment_analyzer(text, text_pair=topic)
-                s_label = sentiment[0]['label']
-                s_score = sentiment[0]['score']
+                sentiment = sentiment_analyzer(text, text_pair=topic, top_k=None)
+                sentiment.sort(key=lambda x: x['score'], reverse=True)
+                
+                top_label = sentiment[0]['label']
+                top_score = sentiment[0]['score']
+                scores_str = ", ".join([f"{s['label'][:3]}: {s['score']:.2f}" for s in sentiment])
+                
                 final_output.append({
                     "topic": topic,
-                    "sentiment": s_label,
-                    "score": s_score,
+                    "sentiment": top_label,
+                    "score": top_score,
+                    "all_scores": scores_str,
                     "similarity_score": r['score'], # Keep the similarity score for reference
                     "matched_anchor": r['matched_anchor']
                 })
@@ -279,5 +296,7 @@ if __name__ == "__main__":
         print(f"Result: {detected_topics}")
         if detected_topics:
             for dt in detected_topics:
-                print(f"    -> Topic: {dt['topic']}, Sentiment: {dt['sentiment']} ({dt['score']:.2f})")
+                print(f"    -> Topic: {dt['topic']}")
+                print(f"       Sentiment: {dt['sentiment']} ({dt['score']:.2f})")
+                print(f"       Breakdown: [{dt.get('all_scores', '')}]")
         print("-" * 60)
