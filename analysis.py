@@ -12,7 +12,8 @@ import sys
 # =================================================================================================
 
 # Define paths relative to the script location to ensure portability
-current_dir = os.path.dirname(os.path.abspath(__file__))
+# current_dir = os.path.dirname(os.path.abspath(__file__)) # For cloud operations
+current_dir = os.getcwd() # For local operations
 TOPICS_FILE = os.path.join(current_dir, 'topics.json')
 
 # Threshold for vector similarity (0 to 1). 
