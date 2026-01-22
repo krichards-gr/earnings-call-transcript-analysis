@@ -1,8 +1,8 @@
 topic,term,type
-AI & Technology,AI,anchor term
+AI & Technology,AI ,anchor term
 AI & Technology,artificial intelligence,anchor term
 AI & Technology,Generative AI,anchor term
-AI & Technology,ai,pattern
+AI & Technology,ai ,pattern
 AI & Technology,artificial intelligence,pattern
 AI & Technology,generative ai,pattern
 Animal Welfare,US Livestock policy,anchor term
