@@ -6,10 +6,14 @@ import pandas as pd
 from google.cloud import bigquery
 import os
 import sys
+from generate_topics import generate_topics_json
 
 # =================================================================================================
 # CONFIGURATION & SETUP
 # =================================================================================================
+
+# Automatically regenerate topics.json from topic_definitions.csv
+generate_topics_json()
 
 current_dir = os.getcwd() 
 TOPICS_FILE = os.path.join(current_dir, 'topics.json')
