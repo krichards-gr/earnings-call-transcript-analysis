@@ -15,7 +15,7 @@ current_dir = os.getcwd()
 TOPICS_FILE = os.path.join(current_dir, 'topics.json')
 
 # Threshold for vector similarity (0 to 1). 
-SIMILARITY_THRESHOLD = 0.3
+SIMILARITY_THRESHOLD = 0.7
 
 # BigQuery Configuration
 BQ_PROJECT_ID = "sri-benchmarking-databases"
@@ -248,6 +248,19 @@ def run_local_analysis():
                 all_results.append(result_row)
         else:
             print("   (No topics detected)")
+             # Add row with empty topic/sentiment info
+            result_row = {
+                "transcript_id": transcript_id,
+                "paragraph_number": paragraph,
+                "content": text,
+                "topic": None,
+                "sentiment": None,
+                "score": None,
+                "all_scores": None,
+                "similarity_score": None,
+                "matched_anchor": None
+            }
+            all_results.append(result_row)
 
     # Save to CSV
     if all_results:
