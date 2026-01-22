@@ -214,6 +214,8 @@ def run_local_analysis():
         
     print(f"Loaded {len(df)} rows. Starting analysis...")
     
+    all_results = []
+    
     for index, row in df.iterrows():
         text = row['content']
         transcript_id = row['transcript_id']
@@ -230,8 +232,38 @@ def run_local_analysis():
         if detected:
             for d in detected:
                 print(f"   >>> FOUND: Topic={d['topic']}, Sent={d['sentiment']} ({d['score']:.2f})")
+                
+                # Combine metadata with results
+                result_row = {
+                    "transcript_id": transcript_id,
+                    "paragraph_number": paragraph,
+                    "content": text,
+                    "topic": d['topic'],
+                    "sentiment": d['sentiment'],
+                    "score": d['score'],
+                    "all_scores": d['all_scores'],
+                    "similarity_score": d.get('similarity_score'),
+                    "matched_anchor": d.get('matched_anchor')
+                }
+                all_results.append(result_row)
         else:
             print("   (No topics detected)")
+
+    # Save to CSV
+    if all_results:
+        results_df = pd.DataFrame(all_results)
+        
+        # Ensure output directory exists
+        output_dir = os.path.join(current_dir, 'outputs')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        output_path = os.path.join(output_dir, 'local_analysis_results.csv')
+        results_df.to_csv(output_path, index=False)
+        print(f"\nAnalysis complete. Results saved to: {output_path}")
+        print(f"Total rows analyzed: {len(df)}")
+        print(f"Total topics detected: {len(results_df)}")
+    else:
+        print("\nAnalysis complete. No topics detected in the sample.")
 
 if __name__ == "__main__":
     run_local_analysis()
