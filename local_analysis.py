@@ -26,6 +26,7 @@ BQ_PROJECT_ID = "sri-benchmarking-databases"
 BQ_DATASET = "pressure_monitoring"
 BQ_SOURCE_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_content"
 BQ_METADATA_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_metadata"
+BQ_DEST_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_enriched"
 
 # =================================================================================================
 # MODEL LOADING
@@ -282,7 +283,43 @@ def run_local_analysis():
         
         output_path = os.path.join(output_dir, 'local_analysis_results.csv')
         results_df.to_csv(output_path, index=False)
-        print(f"\nAnalysis complete. Results saved to: {output_path}")
+        print(f"\nAnalysis complete. Results saved locally to: {output_path}")
+        
+        # Write back to BigQuery
+        print(f"Writing results to BigQuery table: {BQ_DEST_TABLE}...")
+        
+        # Mapping internal columns to BQ schema
+        # Current result columns: transcript_id, paragraph_number, topic, sentiment, score, all_scores, similarity_score, matched_anchor
+        # Map sentiment -> sentiment_label, score -> sentiment_score
+        bq_df = results_df.rename(columns={
+            "sentiment": "sentiment_label",
+            "score": "sentiment_score"
+        })
+        
+        job_config = bigquery.LoadJobConfig(
+            # NOTE: We use WRITE_TRUNCATE here to replace the table for the first run
+            # as requested. For subsequent runs where you want to append data, 
+            # change this to "WRITE_APPEND".
+            write_disposition="WRITE_TRUNCATE", 
+            schema=[
+                bigquery.SchemaField("transcript_id", "STRING"),
+                bigquery.SchemaField("paragraph_number", "INTEGER"),
+                bigquery.SchemaField("topic", "STRING"),
+                bigquery.SchemaField("sentiment_label", "STRING"),
+                bigquery.SchemaField("sentiment_score", "FLOAT"),
+                bigquery.SchemaField("all_scores", "STRING"),
+                bigquery.SchemaField("similarity_score", "FLOAT"),
+                bigquery.SchemaField("matched_anchor", "STRING"),
+            ]
+        )
+        
+        try:
+            job = client.load_table_from_dataframe(bq_df, BQ_DEST_TABLE, job_config=job_config)
+            job.result()
+            print(f"Successfully replaced/updated {BQ_DEST_TABLE} with {len(bq_df)} enriched rows.")
+        except Exception as e:
+            print(f"Error writing to BigQuery: {e}")
+            
         print(f"Total rows analyzed: {len(df)}")
         print(f"Total topics detected: {len(results_df)}")
     else:
