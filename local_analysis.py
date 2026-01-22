@@ -25,6 +25,7 @@ SIMILARITY_THRESHOLD = 0.7
 BQ_PROJECT_ID = "sri-benchmarking-databases"
 BQ_DATASET = "pressure_monitoring"
 BQ_SOURCE_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_content"
+BQ_METADATA_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_metadata"
 
 # =================================================================================================
 # MODEL LOADING
@@ -202,11 +203,18 @@ def run_local_analysis():
     client = bigquery.Client(project=BQ_PROJECT_ID)
 
     # Simple read - LIMIT to 50 for quick iterative testing
-    print(f"Reading SAMPLE (Limit 50) from {BQ_SOURCE_TABLE}...")
+    print(f"Reading SAMPLE (Limit 50) from {BQ_SOURCE_TABLE} joined with {BQ_METADATA_TABLE}...")
     
     query = f"""
-        SELECT transcript_id, paragraph_number, content 
-        FROM `{BQ_SOURCE_TABLE}`
+        SELECT 
+            t.transcript_id, 
+            t.paragraph_number, 
+            t.content,
+            m.report_date,
+            m.symbol
+        FROM `{BQ_SOURCE_TABLE}` t
+        JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+        ORDER BY m.report_date DESC, t.transcript_id, t.paragraph_number
         LIMIT 50
     """
     
@@ -241,7 +249,6 @@ def run_local_analysis():
                 result_row = {
                     "transcript_id": transcript_id,
                     "paragraph_number": paragraph,
-                    "content": text,
                     "topic": d['topic'],
                     "sentiment": d['sentiment'],
                     "score": d['score'],
@@ -256,7 +263,6 @@ def run_local_analysis():
             result_row = {
                 "transcript_id": transcript_id,
                 "paragraph_number": paragraph,
-                "content": text,
                 "topic": None,
                 "sentiment": None,
                 "score": None,
