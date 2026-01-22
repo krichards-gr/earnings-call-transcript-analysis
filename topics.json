@@ -5,7 +5,7 @@
       "patterns": [
         [
           {
-            "LOWER": "ai"
+            "LOWER": "ai "
           }
         ],
         [
@@ -21,7 +21,7 @@
             "LOWER": "generative"
           },
           {
-            "LOWER": "ai"
+            "LOWER": "ai "
           }
         ]
       ],
@@ -1699,7 +1699,7 @@
       ]
     },
     {
-      "label": "Workers\u2019 Rights",
+      "label": "Workers’ Rights",
       "patterns": [
         [
           {
