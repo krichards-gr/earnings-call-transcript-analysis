@@ -81,6 +81,3 @@ The comprehensive local table includes all production fields plus:
 
 1.  **Dependencies**: `pip install -r requirements.txt`
 2.  **spaCy**: `python -m spacy download en_core_web_sm`
-
-
-Minor change to test auto-build
