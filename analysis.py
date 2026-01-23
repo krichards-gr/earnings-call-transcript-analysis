@@ -6,428 +6,267 @@ import pandas as pd
 from google.cloud import bigquery
 import os
 import sys
+import time
+import re
+from generate_topics import generate_topics_json
+
+"""
+analysis.py
+
+Production pipeline for Cloud Run. Processes earnings call transcripts from BigQuery,
+enriches them with classification and sentiment data, and writes back to BigQuery.
+
+Features:
+- Fragment Rejoining
+- Q&A Session Clustering
+- Role and Interaction Type Classification
+- Aspect-Based Sentiment Analysis
+"""
 
 # =================================================================================================
 # CONFIGURATION & SETUP
 # =================================================================================================
 
-# Define paths relative to the script location to ensure portability
-# current_dir = os.path.dirname(os.path.abspath(__file__)) # For cloud operations
-current_dir = os.getcwd() # For local operations
+# Always regenerate topics.json in production to ensure sync with CSV
+generate_topics_json()
+
+current_dir = os.getcwd() 
 TOPICS_FILE = os.path.join(current_dir, 'topics.json')
 
 # Threshold for vector similarity (0 to 1). 
-# Text with similarity score below this will not be considered a match for that anchor.
-SIMILARITY_THRESHOLD = 0.3
+SIMILARITY_THRESHOLD = 0.7
+
+# Local Model Paths
+INTERACTION_MODEL_PATH = os.path.join(current_dir, "models", "eng_type_class_v1", "eng_type_class_v1")
+ROLE_MODEL_PATH = os.path.join(current_dir, "models", "role_class_v1", "role_class_v1")
+
+# Human-Readable Label Mappings
+INTERACTION_ID_MAP = {
+    "LABEL_0": "Admin",
+    "LABEL_1": "Answer",
+    "LABEL_2": "Question"
+}
+
+ROLE_ID_MAP = {
+    "LABEL_0": "Admin",
+    "LABEL_1": "Analyst",
+    "LABEL_2": "Executive",
+    "LABEL_3": "Operator"
+}
 
 # BigQuery Configuration
+BATCH_SIZE = 500
+PRODUCTION_TESTING = True # Set to True to process only a small batch for verification
 BQ_PROJECT_ID = "sri-benchmarking-databases"
 BQ_DATASET = "pressure_monitoring"
 BQ_SOURCE_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_content"
+BQ_METADATA_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_metadata"
 BQ_DEST_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_enriched"
 
 # =================================================================================================
 # MODEL LOADING
 # =================================================================================================
 
-print("Loading models... (This may take a moment on first run)")
-
-# Load spaCy model for EXACT match patterns.
-# We use 'en_core_web_sm' because we only need efficient tokenization and simple matching,
-# not deep syntactic dependency parsing.
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    print("Error: spaCy model 'en_core_web_sm' not found. Please run: python -m spacy download en_core_web_sm")
-    sys.exit(1)
-
-# Load SentenceTransformer model for VECTOR SIMILARITY.
-# 'all-MiniLM-L6-v2' is a high-speed, low-memory model ideal for near-real-time usage.
-# It maps sentences & paragraphs to a 384 dimensional dense vector space.
-try:
-    embedder = SentenceTransformer('all-MiniLM-L6-v2')
-except Exception as e:
-    print(f"Error loading SentenceTransformer model: {e}")
-    sys.exit(1)
-
-# Load Aspect-Based Sentiment Analysis (ABSA) model
-# We use 'yangheng/deberta-v3-base-absa-v1.1' as it is a general-purpose model
-# that supports determining sentiment relative to a specific aspect/topic.
-try:
-    sentiment_analyzer = pipeline("text-classification", model="yangheng/deberta-v3-base-absa-v1.1")
-except Exception as e:
-    print(f"Error loading ABSA model: {e}")
-    sys.exit(1)
-
+print("Loading models...")
+nlp = spacy.load("en_core_web_sm")
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+sentiment_analyzer = pipeline("text-classification", model="yangheng/deberta-v3-base-absa-v1.1")
+interaction_classifier = pipeline("text-classification", model=INTERACTION_MODEL_PATH)
+role_classifier = pipeline("text-classification", model=ROLE_MODEL_PATH)
 print("Models loaded successfully.")
 
 # =================================================================================================
-# DATA LOADING
+# DATA LOADING & UTILITIES
 # =================================================================================================
 
 def load_topics(filepath):
-    """
-    Reads the topics JSON file and returns the list of topics.
-    
-    Expected JSON structure:
-    {
-      "topics": [
-        {
-          "label": "TOPIC_NAME",
-          "patterns": [[{"LOWER": "term"}]],  # spaCy match patterns
-          "anchors": ["phrase one", "phrase two"] # Sentences for vector comparison
-        },
-        ...
-      ]
-    }
-    """
     if not os.path.exists(filepath):
         print(f"Error: Topics file not found at {filepath}")
         return []
-    
     with open(filepath, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    
     return data.get('topics', [])
 
 topics_data = load_topics(TOPICS_FILE)
 
 # Prepare spaCy Matcher
-# We initialize the Matcher with the vocab from our loaded spacy model.
 from spacy.matcher import Matcher
 matcher = Matcher(nlp.vocab)
-
-# Register all patterns from our topics file into the spaCy matcher.
-# This allows us to scan the doc once and find all exact matches efficiently.
 for topic in topics_data:
     label = topic['label']
     patterns = topic.get('patterns', [])
     if patterns:
         matcher.add(label, patterns)
 
-# Pre-compute embeddings for all anchor terms to save time during inference.
-# We flatten the list to pairs of (topic_label, anchor_text) and then encode the texts.
-anchor_embeddings_map = []
+# Pre-compute embeddings for all anchor terms
 all_anchors_text = []
-anchor_metadata = [] # Stores (topic_label, anchor_text) corresponding to each embedding
-
+anchor_metadata = [] 
 for topic in topics_data:
     for anchor in topic.get('anchors', []):
         all_anchors_text.append(anchor)
         anchor_metadata.append((topic['label'], anchor))
 
 if all_anchors_text:
-    # Encode all anchors in one batch for efficiency
     anchor_embeddings = embedder.encode(all_anchors_text, convert_to_tensor=True)
 else:
     anchor_embeddings = None
 
+def rejoin_fragments(df):
+    """Rejoins segments split by line breaks."""
+    if df.empty:
+        return df
+    rejoined_rows = []
+    current_row = df.iloc[0].to_dict()
+    for i in range(1, len(df)):
+        next_row = df.iloc[i].to_dict()
+        msg = str(current_row['content']).strip()
+        is_fragment = not any(msg.endswith(p) for p in ['.', '?', '!', '"', '“', '”'])
+        if next_row['transcript_id'] == current_row['transcript_id'] and is_fragment:
+            current_row['content'] = msg + " " + str(next_row['content']).strip()
+        else:
+            rejoined_rows.append(current_row)
+            current_row = next_row
+    rejoined_rows.append(current_row)
+    return pd.DataFrame(rejoined_rows)
+
 # =================================================================================================
-# ANALYSIS LOGIC
+# CORE ANALYSIS
 # =================================================================================================
 
 def analyze_text(text):
-    """
-    Analyzes the provided text to identify topics.
-    
-    Strategy:
-    1. EXACT MATCH: Check against "key terms" (patterns) using spaCy.
-       If matches are found, return those topics immediately (high confidence).
-       
-    2. SIMILARITY MATCH: If no exact matches, compare text vector against anchor term vectors.
-       Return top 3 matches that exceed SIMILARITY_THRESHOLD.
-    """
-    
-    # -------------------------------------------------------------------------
-    # STEP 1: Exact Match (Key Terms)
-    # -------------------------------------------------------------------------
+    """Analyzes text for topics and sentiment."""
     doc = nlp(text)
     matches = matcher(doc)
-    
     found_topics = set()
-    
-    # process matches
     if matches:
-        print(f"  [DEBUG] Found {len(matches)} exact matches.")
         for match_id, start, end in matches:
-            string_id = nlp.vocab.strings[match_id]  # Get string representation (the topic label)
-            span = doc[start:end]  # The matched span
-            print(f"    - Match: '{span.text}' -> Topic: {string_id}")
-            found_topics.add(string_id)
-        
-        # Logic: If key terms are present, we are 100% sure of the topic.
-        # Check sentiment for each found topic
+            found_topics.add(nlp.vocab.strings[match_id])
         results = []
         for topic in found_topics:
-            try:
-                # The model expects text (context) and text_pair (aspect)
-                # Pass text as positional argument, text_pair as kwarg
-                # top_k=None returns all scores
-                sentiment = sentiment_analyzer(text, text_pair=topic, top_k=None)
-                
-                # sentiment is a list of dicts: [{'label': 'Positive', 'score': 0.9}, {'label': 'Neutral', ...}]
-                # Sort by score desc to be safe, though usually returned sorted
-                # But we want to capture the simplified top label AND the full breakdown
-                sentiment.sort(key=lambda x: x['score'], reverse=True)
-                
-                top_label = sentiment[0]['label']
-                top_score = sentiment[0]['score']
-                
-                # Create a compact string representation of all scores for display
-                # e.g. "Pos: 0.60, Neu: 0.30, Neg: 0.10"
-                scores_str = ", ".join([f"{s['label'][:3]}: {s['score']:.2f}" for s in sentiment])
-
-                results.append({
-                    "topic": topic,
-                    "sentiment": top_label,
-                    "score": top_score,
-                    "all_scores": scores_str
-                })
-            except Exception as e:
-                print(f"    [WARN] Sentiment analysis failed for topic '{topic}': {e}")
-                results.append({"topic": topic, "sentiment": "Unknown", "score": 0.0})
-        
+            sentiment = sentiment_analyzer(text, text_pair=topic, top_k=None)
+            sentiment.sort(key=lambda x: x['score'], reverse=True)
+            results.append({"topic": topic, "sentiment": sentiment[0]['label'], "score": sentiment[0]['score']})
         return results
 
-    # -------------------------------------------------------------------------
-    # STEP 2: Vector Similarity (Anchor Terms)
-    # -------------------------------------------------------------------------
-    # Only proceed if we have anchors defined
     if anchor_embeddings is None:
         return []
 
-    print("  [DEBUG] No exact matches found. Checking vector similarity...")
-    
-    # Encode the input text
-    # convert_to_tensor=True ensures we get a format suitable for cosine_similarity
     query_embedding = embedder.encode(text, convert_to_tensor=True)
-    
-    # Calculate cosine similarity between input text and ALL anchor embeddings
-    # util.cos_sim returns a matrix, we want the first row [0] since we only have one query
     cos_scores = util.cos_sim(query_embedding, anchor_embeddings)[0]
-    
-    # Combine scores with metadata
-    # results will be a list of (score, topic_label, anchor_text)
     results = []
     for idx, score in enumerate(cos_scores):
-        score_val = score.item() # convert tensor to float
-        if score_val >= SIMILARITY_THRESHOLD:
-            topic_label, anchor_text = anchor_metadata[idx]
-            results.append({
-                "topic": topic_label,
-                "score": score_val,
-                "matched_anchor": anchor_text
-            })
-            
-    # Sort by score descending (highest similarity first)
+        if score.item() >= SIMILARITY_THRESHOLD:
+            results.append({"topic": anchor_metadata[idx][0], "score": score.item()})
     results.sort(key=lambda x: x['score'], reverse=True)
     
-    # Deduplicate by topic (keep highest score per topic)
-    unique_results = {}
+    unique = {}
     for r in results:
-        t = r['topic']
-        if t not in unique_results:
-            unique_results[t] = r
+        if r['topic'] not in unique: unique[r['topic']] = r
+    top_3 = list(unique.values())[:3]
     
-    # Convert back to list and sort again
-    final_results = list(unique_results.values())
-    final_results.sort(key=lambda x: x['score'], reverse=True)
-    
-    # Return top 3
-    top_3 = final_results[:3]
-    
-    if top_3:
-        print(f"  [DEBUG] Vector matches found: {len(top_3)}")
-        for r in top_3:
-            print(f"    - Topic: {r['topic']} (Score: {r['score']:.4f}, Anchor: '{r['matched_anchor']}')")
-        # For vector matches, also calculate sentiment
-        final_output = []
-        for r in top_3:
-            topic = r['topic']
-            try:
-                sentiment = sentiment_analyzer(text, text_pair=topic, top_k=None)
-                sentiment.sort(key=lambda x: x['score'], reverse=True)
-                
-                top_label = sentiment[0]['label']
-                top_score = sentiment[0]['score']
-                scores_str = ", ".join([f"{s['label'][:3]}: {s['score']:.2f}" for s in sentiment])
-                
-                final_output.append({
-                    "topic": topic,
-                    "sentiment": top_label,
-                    "score": top_score,
-                    "all_scores": scores_str,
-                    "similarity_score": r['score'], # Keep the similarity score for reference
-                    "matched_anchor": r['matched_anchor']
-                })
-            except Exception as e:
-                 print(f"    [WARN] Sentiment analysis failed for topic '{topic}': {e}")
-                 final_output.append({
-                    "topic": topic, 
-                    "sentiment": "Unknown", 
-                    "score": 0.0,
-                    "similarity_score": r['score'],
-                    "matched_anchor": r['matched_anchor']
-                })
-
-        return final_output
-            
-    return []
+    final = []
+    for r in top_3:
+        sentiment = sentiment_analyzer(text, text_pair=r['topic'], top_k=None)
+        sentiment.sort(key=lambda x: x['score'], reverse=True)
+        final.append({"topic": r['topic'], "sentiment": sentiment[0]['label'], "score": sentiment[0]['score']})
+    return final
 
 # =================================================================================================
-# BIGQUERY PROCESSING
+# MAIN PIPELINE
 # =================================================================================================
 
-def process_from_bigquery():
-    """
-    Reads transcripts from BigQuery, analyzes them, and writes enriched data back.
-    """
-    print(f"Connecting to BigQuery...")
-    try:
-        client = bigquery.Client(project=BQ_PROJECT_ID)
-    except Exception as e:
-        print(f"Error connecting to BigQuery: {e}")
-        return
-
-    print(f"Reading from {BQ_SOURCE_TABLE} (excluding already-processed rows)...")
+def process_pipeline():
+    client = bigquery.Client(project=BQ_PROJECT_ID)
     
-    # Check if the destination table exists. If not, we need to process all rows.
-    try:
-        client.get_table(BQ_DEST_TABLE)
-        dest_table_exists = True
-    except Exception:
-        dest_table_exists = False
-        print(f"  [INFO] Destination table {BQ_DEST_TABLE} does not exist yet. Will process all rows.")
+    total_processed = 0
     
-    if dest_table_exists:
-        # Use LEFT JOIN to filter out rows that have already been processed.
-        # This makes the script idempotent - running it multiple times will only process new rows.
+    while True:
+        # Determine query limit based on testing mode
+        current_limit = 20 if PRODUCTION_TESTING else BATCH_SIZE
+        
+        # Idempotent Query: Process only rows not already in destination
         query = f"""
-            SELECT c.transcript_id, c.paragraph_number, c.content 
-            FROM `{BQ_SOURCE_TABLE}` c
-            LEFT JOIN (
-                SELECT DISTINCT transcript_id, paragraph_number 
-                FROM `{BQ_DEST_TABLE}`
-            ) e
-            ON c.transcript_id = e.transcript_id AND c.paragraph_number = e.paragraph_number
+            SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content
+            FROM `{BQ_SOURCE_TABLE}` t
+            LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
+            ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
             WHERE e.transcript_id IS NULL
+            ORDER BY t.transcript_id, t.paragraph_number
+            LIMIT {current_limit}
         """
-    else:
-        # Destination table doesn't exist, so process all rows
-        query = f"""
-            SELECT transcript_id, paragraph_number, content 
-            FROM `{BQ_SOURCE_TABLE}`
-        """
-    
-    try:
+        
         df = client.query(query).to_dataframe()
-    except Exception as e:
-        print(f"Error executing query: {e}")
-        return
+        if df.empty:
+            if total_processed == 0:
+                print("No new data to process.")
+            else:
+                print(f"Finished processing all new data. Total segments: {total_processed}")
+            break
+        
+        if PRODUCTION_TESTING:
+            print(f"\n--- PRODUCTION TESTING MODE: Processing {len(df)} segments ---")
+        else:
+            print(f"\n--- Processing batch of {len(df)} segments (Total so far: {total_processed}) ---")
+        
+        df = rejoin_fragments(df)
+        print(f"   (After rejoining: {len(df)} segments)")
 
-    if df.empty:
-        print("No data found in source table.")
-        return
+        all_results = []
         
-    print(f"Loaded {len(df)} rows. Starting analysis...")
-    
-    enriched_rows = []
-    
-    # Iterate and analyze
-    for index, row in df.iterrows():
-        text = row['content']
-        transcript_id = row['transcript_id']
-        paragraph_number = row['paragraph_number']
-        
-        # Skip empty text
-        if not isinstance(text, str) or not text.strip():
-            continue
-            
-        detected = analyze_text(text)
-        
-        # Transform to Tidy Format: One row per detected topic
-        if detected:
+        # For each batch, we need to know the 'current' session state.
+        # Simplest is to check the last row in BQ for this transcript, 
+        # but to keep it fast/low-memory, we'll initialize per run and accept 
+        # slight session ID resets if batches split in the very middle of a Q&A.
+        current_session_id = 0
+        current_analyst = "None"
+        intro_regex = re.compile(r"(?:question comes from|from the line of|from)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from)", re.IGNORECASE)
+
+        for _, row in df.iterrows():
+            text = str(row['content'])
+            # Classification
+            int_res = interaction_classifier(text[:512])[0]['label']
+            role_res = role_classifier(text[:512])[0]['label']
+            interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
+            role_label = ROLE_ID_MAP.get(role_res, role_res)
+
+            # Session tracking
+            if role_label == "Operator" and ("next question" in text.lower() or "question comes" in text.lower()):
+                current_session_id += 1
+                match = intro_regex.search(text)
+                current_analyst = match.group(1).strip() if match else "Unknown Analyst"
+
+            detected = analyze_text(text)
+            if not detected: detected = [{"topic": None, "sentiment": None, "score": None}]
+
             for d in detected:
-                # Append row dictionary
-                enriched_rows.append({
-                    "transcript_id": transcript_id,
-                    "paragraph_number": paragraph_number,
+                all_results.append({
+                    "transcript_id": row['transcript_id'],
+                    "paragraph_number": row['paragraph_number'],
+                    "speaker": row['speaker'],
+                    "qa_session_id": current_session_id,
+                    "qa_session_label": current_analyst,
+                    "interaction_type": interaction_type,
+                    "role": role_label,
                     "topic": d['topic'],
                     "sentiment_label": d['sentiment'],
                     "sentiment_score": d['score']
                 })
-    
-    if not enriched_rows:
-        print("Analysis complete. No topics detected.")
-        return
 
-    # Create DataFrame for destination
-    enriched_df = pd.DataFrame(enriched_rows)
-    
-    print(f"Analysis complete. Detected {len(enriched_df)} topic instances.")
-    print(f"Writing to {BQ_DEST_TABLE}...")
-    
-    # Configure Load Job
-    job_config = bigquery.LoadJobConfig(
-        # Append to existing table or create if not exists
-        write_disposition="WRITE_APPEND", 
-        schema=[
-            bigquery.SchemaField("transcript_id", "STRING"),
-            bigquery.SchemaField("paragraph_number", "INTEGER"),
-            bigquery.SchemaField("topic", "STRING"),
-            bigquery.SchemaField("sentiment_label", "STRING"),
-            bigquery.SchemaField("sentiment_score", "FLOAT"),
-        ]
-    )
-    
-    try:
-        job = client.load_table_from_dataframe(enriched_df, BQ_DEST_TABLE, job_config=job_config)
-        job.result() # Wait for job to complete
-        print(f"Successfully loaded {len(enriched_df)} rows to {BQ_DEST_TABLE}")
-    except Exception as e:
-        print(f"Error writing to BigQuery: {e}")
-
-# =================================================================================================
-# MAIN EXECUTION
-# =================================================================================================
+        # Write each batch to BigQuery
+        if all_results:
+            res_df = pd.DataFrame(all_results)
+            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
+            print(f"   Completed enrichment. Uploaded {len(res_df)} rows.")
+            total_processed += len(df)
+        else:
+            print("   No topics detected.")
+            total_processed += len(df)
+            
+        # Exit if in testing mode after first batch
+        if PRODUCTION_TESTING:
+            print("\nProduction testing complete. Toggle 'PRODUCTION_TESTING = False' for full run.")
+            break
 
 if __name__ == "__main__":
-    
-    # Default to BigQuery mode. Use --local for file-based processing.
-    if "--local" in sys.argv:
-        print("Running in Local File Mode...")
-    else:
-        print("Running in BigQuery Mode (default)...")
-        process_from_bigquery()
-        sys.exit(0)
-
-    # If a file argument is provided, read it. Otherwise use the default sample.
-    input_file = os.path.join(current_dir, 'inputs', 'sample_transcript.txt')
-    if len(sys.argv) > 1:
-        input_file = sys.argv[1]
-        
-    print(f"Reading input from: {input_file}")
-    
-    if not os.path.exists(input_file):
-        print("Error: Input file not found.")
-        sys.exit(1)
-        
-    with open(input_file, 'r', encoding='utf-8') as f:
-        # We read paragraph by paragraph to simulate analyzing chunks of a transcript
-        content = f.read()
-        
-    paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
-    
-    print(f"\nAnalyzing {len(paragraphs)} paragraphs...\n")
-    print("-" * 60)
-    
-    for i, paragraph in enumerate(paragraphs):
-        print(f"Paragraph {i+1}: \"{paragraph[:100]}...\"")
-        detected_topics = analyze_text(paragraph)
-        print(f"Result: {detected_topics}")
-        if detected_topics:
-            for dt in detected_topics:
-                print(f"    -> Topic: {dt['topic']}")
-                print(f"       Sentiment: {dt['sentiment']} ({dt['score']:.2f})")
-                print(f"       Breakdown: [{dt.get('all_scores', '')}]")
-        print("-" * 60)
+    process_pipeline()

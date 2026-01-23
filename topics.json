@@ -1,6 +1,469 @@
 {
   "topics": [
     {
+      "label": "Workers\u2019 Rights",
+      "patterns": [
+        [
+          {
+            "LOWER": "401k"
+          }
+        ],
+        [
+          {
+            "LOWER": "collective"
+          },
+          {
+            "LOWER": "bargaining"
+          }
+        ],
+        [
+          {
+            "LOWER": "employee"
+          },
+          {
+            "LOWER": "representation"
+          }
+        ],
+        [
+          {
+            "LOWER": "employee"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "employee"
+          },
+          {
+            "LOWER": "wellfare"
+          }
+        ],
+        [
+          {
+            "LOWER": "executive"
+          },
+          {
+            "LOWER": "compensation"
+          }
+        ],
+        [
+          {
+            "LOWER": "executive"
+          },
+          {
+            "LOWER": "pay"
+          }
+        ],
+        [
+          {
+            "LOWER": "fair"
+          },
+          {
+            "LOWER": "wage"
+          }
+        ],
+        [
+          {
+            "LOWER": "labor"
+          },
+          {
+            "LOWER": "compliance"
+          }
+        ],
+        [
+          {
+            "LOWER": "labor"
+          },
+          {
+            "LOWER": "day"
+          }
+        ],
+        [
+          {
+            "LOWER": "labor"
+          },
+          {
+            "LOWER": "standards"
+          }
+        ],
+        [
+          {
+            "LOWER": "labor"
+          },
+          {
+            "LOWER": "union"
+          },
+          {
+            "LOWER": "partnerships"
+          }
+        ],
+        [
+          {
+            "LOWER": "pensions"
+          }
+        ],
+        [
+          {
+            "LOWER": "personal"
+          },
+          {
+            "LOWER": "time"
+          },
+          {
+            "LOWER": "off"
+          }
+        ],
+        [
+          {
+            "LOWER": "retirement"
+          },
+          {
+            "LOWER": "benefits"
+          }
+        ],
+        [
+          {
+            "LOWER": "time"
+          },
+          {
+            "LOWER": "off"
+          }
+        ],
+        [
+          {
+            "LOWER": "workers'"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "working"
+          },
+          {
+            "LOWER": "conditions"
+          }
+        ],
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "equity"
+          }
+        ],
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "fairness"
+          }
+        ]
+      ],
+      "anchors": [
+        "401k",
+        "Collective Bargaining",
+        "Employee Representation",
+        "employee rights",
+        "employee wellfare",
+        "executive compensation",
+        "executive pay",
+        "fair wage",
+        "labor compliance",
+        "labor day",
+        "labor standards",
+        "Labor Union Partnerships",
+        "pensions",
+        "personal time off",
+        "retirement benefits",
+        "time off",
+        "Workers' Rights",
+        "working conditions",
+        "workplace equity",
+        "Workplace Fairness"
+      ]
+    },
+    {
+      "label": "Reproductive Rights",
+      "patterns": [
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "contraception"
+          }
+        ],
+        [
+          {
+            "LOWER": "family"
+          },
+          {
+            "LOWER": "planning"
+          }
+        ],
+        [
+          {
+            "LOWER": "reproductive"
+          },
+          {
+            "LOWER": "healthcare"
+          }
+        ],
+        [
+          {
+            "LOWER": "reproductive"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "women's"
+          },
+          {
+            "LOWER": "health"
+          }
+        ]
+      ],
+      "anchors": [
+        "abortion access",
+        "contraception",
+        "family planning",
+        "reproductive healthcare",
+        "reproductive rights",
+        "women's health"
+      ]
+    },
+    {
+      "label": "Disability Rights",
+      "patterns": [
+        [
+          {
+            "LOWER": "accessibility"
+          }
+        ],
+        [
+          {
+            "LOWER": "accessible"
+          }
+        ],
+        [
+          {
+            "LOWER": "ada"
+          }
+        ],
+        [
+          {
+            "LOWER": "americans"
+          },
+          {
+            "LOWER": "with"
+          },
+          {
+            "LOWER": "disabilities"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "disability"
+          }
+        ],
+        [
+          {
+            "LOWER": "neurodiversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "physical"
+          },
+          {
+            "LOWER": "disability"
+          }
+        ],
+        [
+          {
+            "LOWER": "sensory"
+          },
+          {
+            "LOWER": "friendly"
+          }
+        ]
+      ],
+      "anchors": [
+        "accessibility",
+        "accessible",
+        "ADA",
+        "Americans with Disabilities Act",
+        "disability",
+        "neurodiversity",
+        "physical disability",
+        "sensory friendly"
+      ]
+    },
+    {
+      "label": "Economic Empowerment",
+      "patterns": [
+        [
+          {
+            "LOWER": "affordable"
+          },
+          {
+            "LOWER": "housing"
+          }
+        ],
+        [
+          {
+            "LOWER": "broadband"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "child"
+          },
+          {
+            "LOWER": "tax"
+          },
+          {
+            "LOWER": "credit"
+          }
+        ],
+        [
+          {
+            "LOWER": "childcare"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "cost"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "living"
+          }
+        ],
+        [
+          {
+            "LOWER": "economic"
+          },
+          {
+            "LOWER": "opportunity"
+          }
+        ],
+        [
+          {
+            "LOWER": "education"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "financial"
+          },
+          {
+            "LOWER": "literacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "inflation"
+          }
+        ],
+        [
+          {
+            "LOWER": "internet"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "minimum"
+          },
+          {
+            "LOWER": "wage"
+          }
+        ],
+        [
+          {
+            "LOWER": "small"
+          },
+          {
+            "LOWER": "business"
+          },
+          {
+            "LOWER": "support"
+          }
+        ],
+        [
+          {
+            "LOWER": "student"
+          },
+          {
+            "LOWER": "debt"
+          }
+        ],
+        [
+          {
+            "LOWER": "student"
+          },
+          {
+            "LOWER": "loans"
+          }
+        ],
+        [
+          {
+            "LOWER": "wealth"
+          },
+          {
+            "LOWER": "gap"
+          }
+        ]
+      ],
+      "anchors": [
+        "affordable housing",
+        "broadband access",
+        "child tax credit",
+        "childcare access",
+        "cost of living",
+        "economic opportunity",
+        "education access",
+        "financial literacy",
+        "inflation",
+        "internet access",
+        "minimum wage",
+        "small business support",
+        "student debt",
+        "student loans",
+        "wealth gap"
+      ]
+    },
+    {
       "label": "AI & Technology",
       "patterns": [
         [
@@ -29,127 +492,6 @@
         "AI",
         "artificial intelligence",
         "Generative AI"
-      ]
-    },
-    {
-      "label": "Animal Welfare",
-      "patterns": [
-        [
-          {
-            "LOWER": "us"
-          },
-          {
-            "LOWER": "livestock"
-          },
-          {
-            "LOWER": "policy"
-          }
-        ],
-        [
-          {
-            "LOWER": "animal"
-          },
-          {
-            "LOWER": "testing"
-          }
-        ],
-        [
-          {
-            "LOWER": "animal"
-          },
-          {
-            "LOWER": "vaccines"
-          }
-        ],
-        [
-          {
-            "LOWER": "pork"
-          },
-          {
-            "LOWER": "housing"
-          }
-        ],
-        [
-          {
-            "LOWER": "sow"
-          },
-          {
-            "LOWER": "housing"
-          }
-        ],
-        [
-          {
-            "LOWER": "gestation"
-          },
-          {
-            "LOWER": "crates"
-          }
-        ],
-        [
-          {
-            "LOWER": "animal"
-          },
-          {
-            "LOWER": "equality"
-          }
-        ],
-        [
-          {
-            "LOWER": "cage-free"
-          },
-          {
-            "LOWER": "hens"
-          }
-        ],
-        [
-          {
-            "LOWER": "no"
-          },
-          {
-            "LOWER": "antibiotics"
-          },
-          {
-            "LOWER": "ever"
-          }
-        ],
-        [
-          {
-            "LOWER": "crate-free"
-          },
-          {
-            "LOWER": "pork"
-          }
-        ],
-        [
-          {
-            "LOWER": "frankenchicken"
-          }
-        ],
-        [
-          {
-            "LOWER": "better"
-          },
-          {
-            "LOWER": "chicken"
-          },
-          {
-            "LOWER": "commitment"
-          }
-        ]
-      ],
-      "anchors": [
-        "US Livestock policy",
-        "Animal testing",
-        "animal vaccines",
-        "Pork housing",
-        "sow housing",
-        "Gestation crates",
-        "Animal Equality",
-        "Cage-free hens",
-        "No Antibiotics Ever",
-        "Crate-free pork",
-        "Frankenchicken",
-        "Better Chicken Commitment"
       ]
     },
     {
@@ -541,260 +883,86 @@
       ]
     },
     {
-      "label": "Crime & Safety",
+      "label": "Animal Welfare",
       "patterns": [
         [
           {
-            "LOWER": "organized"
+            "LOWER": "animal"
           },
           {
-            "LOWER": "retail"
+            "LOWER": "equality"
+          }
+        ],
+        [
+          {
+            "LOWER": "animal"
           },
           {
-            "LOWER": "crime"
+            "LOWER": "testing"
           }
         ],
         [
           {
-            "LOWER": "orc"
-          }
-        ],
-        [
-          {
-            "LOWER": "retail"
+            "LOWER": "animal"
           },
           {
-            "LOWER": "theft"
+            "LOWER": "vaccines"
           }
         ],
         [
           {
-            "LOWER": "shoplifting"
-          }
-        ],
-        [
-          {
-            "LOWER": "shrink"
-          }
-        ],
-        [
-          {
-            "LOWER": "theft"
-          }
-        ],
-        [
-          {
-            "LOWER": "safety"
-          }
-        ],
-        [
-          {
-            "LOWER": "worker"
+            "LOWER": "better"
           },
           {
-            "LOWER": "safety"
-          }
-        ],
-        [
-          {
-            "LOWER": "police"
-          }
-        ],
-        [
-          {
-            "LOWER": "law"
+            "LOWER": "chicken"
           },
           {
-            "LOWER": "enforcement"
+            "LOWER": "commitment"
           }
         ],
         [
           {
-            "LOWER": "public"
+            "LOWER": "cage-free"
           },
           {
-            "LOWER": "safety"
-          }
-        ]
-      ],
-      "anchors": [
-        "organized retail crime",
-        "ORC",
-        "retail theft",
-        "shoplifting",
-        "shrink",
-        "theft",
-        "safety",
-        "worker safety",
-        "police",
-        "law enforcement",
-        "public safety"
-      ]
-    },
-    {
-      "label": "Disability Rights",
-      "patterns": [
-        [
-          {
-            "LOWER": "ada"
+            "LOWER": "hens"
           }
         ],
         [
           {
-            "LOWER": "accessibility"
-          }
-        ],
-        [
-          {
-            "LOWER": "accessible"
-          }
-        ],
-        [
-          {
-            "LOWER": "americans"
+            "LOWER": "crate-free"
           },
           {
-            "LOWER": "with"
-          },
-          {
-            "LOWER": "disabilities"
-          },
-          {
-            "LOWER": "act"
+            "LOWER": "pork"
           }
         ],
         [
           {
-            "LOWER": "disability"
+            "LOWER": "frankenchicken"
           }
         ],
         [
           {
-            "LOWER": "neurodiversity"
+            "LOWER": "gestation"
+          },
+          {
+            "LOWER": "crates"
           }
         ],
         [
           {
-            "LOWER": "physical"
+            "LOWER": "no"
           },
           {
-            "LOWER": "disability"
+            "LOWER": "antibiotics"
+          },
+          {
+            "LOWER": "ever"
           }
         ],
         [
           {
-            "LOWER": "sensory"
-          },
-          {
-            "LOWER": "friendly"
-          }
-        ]
-      ],
-      "anchors": [
-        "ADA",
-        "accessibility",
-        "accessible",
-        "Americans with Disabilities Act",
-        "disability",
-        "neurodiversity",
-        "physical disability",
-        "sensory friendly"
-      ]
-    },
-    {
-      "label": "Drug Pricing",
-      "patterns": [
-        [
-          {
-            "LOWER": "drug"
-          },
-          {
-            "LOWER": "affordability"
-          }
-        ],
-        [
-          {
-            "LOWER": "drug"
-          },
-          {
-            "LOWER": "costs"
-          }
-        ],
-        [
-          {
-            "LOWER": "drug"
-          },
-          {
-            "LOWER": "pricing"
-          }
-        ],
-        [
-          {
-            "LOWER": "insulin"
-          },
-          {
-            "LOWER": "costs"
-          }
-        ],
-        [
-          {
-            "LOWER": "medication"
-          },
-          {
-            "LOWER": "costs"
-          }
-        ],
-        [
-          {
-            "LOWER": "medication"
-          },
-          {
-            "LOWER": "pricing"
-          }
-        ],
-        [
-          {
-            "LOWER": "pharmaceutical"
-          },
-          {
-            "LOWER": "costs"
-          }
-        ],
-        [
-          {
-            "LOWER": "pharmaceutical"
-          },
-          {
-            "LOWER": "pricing"
-          }
-        ],
-        [
-          {
-            "LOWER": "prescription"
-          },
-          {
-            "LOWER": "drugs"
-          }
-        ]
-      ],
-      "anchors": [
-        "drug affordability",
-        "drug costs",
-        "drug pricing",
-        "insulin costs",
-        "medication costs",
-        "medication pricing",
-        "pharmaceutical costs",
-        "pharmaceutical pricing",
-        "prescription drugs"
-      ]
-    },
-    {
-      "label": "Economic Empowerment",
-      "patterns": [
-        [
-          {
-            "LOWER": "affordable"
+            "LOWER": "pork"
           },
           {
             "LOWER": "housing"
@@ -802,139 +970,220 @@
         ],
         [
           {
-            "LOWER": "broadband"
+            "LOWER": "sow"
           },
           {
-            "LOWER": "access"
+            "LOWER": "housing"
           }
         ],
         [
           {
-            "LOWER": "child"
+            "LOWER": "us"
           },
           {
-            "LOWER": "tax"
+            "LOWER": "livestock"
           },
           {
-            "LOWER": "credit"
-          }
-        ],
-        [
-          {
-            "LOWER": "childcare"
-          },
-          {
-            "LOWER": "access"
-          }
-        ],
-        [
-          {
-            "LOWER": "cost"
-          },
-          {
-            "LOWER": "of"
-          },
-          {
-            "LOWER": "living"
-          }
-        ],
-        [
-          {
-            "LOWER": "economic"
-          },
-          {
-            "LOWER": "opportunity"
-          }
-        ],
-        [
-          {
-            "LOWER": "education"
-          },
-          {
-            "LOWER": "access"
-          }
-        ],
-        [
-          {
-            "LOWER": "financial"
-          },
-          {
-            "LOWER": "literacy"
-          }
-        ],
-        [
-          {
-            "LOWER": "inflation"
-          }
-        ],
-        [
-          {
-            "LOWER": "internet"
-          },
-          {
-            "LOWER": "access"
-          }
-        ],
-        [
-          {
-            "LOWER": "minimum"
-          },
-          {
-            "LOWER": "wage"
-          }
-        ],
-        [
-          {
-            "LOWER": "small"
-          },
-          {
-            "LOWER": "business"
-          },
-          {
-            "LOWER": "support"
-          }
-        ],
-        [
-          {
-            "LOWER": "student"
-          },
-          {
-            "LOWER": "debt"
-          }
-        ],
-        [
-          {
-            "LOWER": "student"
-          },
-          {
-            "LOWER": "loans"
-          }
-        ],
-        [
-          {
-            "LOWER": "wealth"
-          },
-          {
-            "LOWER": "gap"
+            "LOWER": "policy"
           }
         ]
       ],
       "anchors": [
-        "affordable housing",
-        "broadband access",
-        "child tax credit",
-        "childcare access",
-        "cost of living",
-        "economic opportunity",
-        "education access",
-        "financial literacy",
-        "inflation",
-        "internet access",
-        "minimum wage",
-        "small business support",
-        "student debt",
-        "student loans",
-        "wealth gap"
+        "Animal Equality",
+        "Animal testing",
+        "animal vaccines",
+        "Better Chicken Commitment",
+        "Cage-free hens",
+        "Crate-free pork",
+        "Frankenchicken",
+        "Gestation crates",
+        "No Antibiotics Ever",
+        "Pork housing",
+        "sow housing",
+        "US Livestock policy"
+      ]
+    },
+    {
+      "label": "Racial Equity",
+      "patterns": [
+        [
+          {
+            "LOWER": "anti-racism"
+          }
+        ],
+        [
+          {
+            "LOWER": "civil"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "dei"
+          }
+        ],
+        [
+          {
+            "LOWER": "diversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "inclusion"
+          }
+        ],
+        [
+          {
+            "LOWER": "racial"
+          },
+          {
+            "LOWER": "justice"
+          }
+        ],
+        [
+          {
+            "LOWER": "systemic"
+          },
+          {
+            "LOWER": "racism"
+          }
+        ]
+      ],
+      "anchors": [
+        "anti-racism",
+        "civil rights",
+        "DEI",
+        "diversity",
+        "inclusion",
+        "racial justice",
+        "systemic racism"
+      ]
+    },
+    {
+      "label": "Veterans' Rights",
+      "patterns": [
+        [
+          {
+            "LOWER": "armed"
+          },
+          {
+            "LOWER": "services"
+          }
+        ],
+        [
+          {
+            "LOWER": "first"
+          },
+          {
+            "LOWER": "responders"
+          }
+        ],
+        [
+          {
+            "LOWER": "military"
+          }
+        ],
+        [
+          {
+            "LOWER": "service"
+          },
+          {
+            "LOWER": "members"
+          }
+        ],
+        [
+          {
+            "LOWER": "veterans"
+          }
+        ],
+        [
+          {
+            "LOWER": "veterans"
+          },
+          {
+            "LOWER": "day"
+          }
+        ]
+      ],
+      "anchors": [
+        "armed services",
+        "first responders",
+        "military",
+        "service members",
+        "Veterans",
+        "veterans day"
+      ]
+    },
+    {
+      "label": "Immigration",
+      "patterns": [
+        [
+          {
+            "LOWER": "asylum"
+          }
+        ],
+        [
+          {
+            "LOWER": "border"
+          },
+          {
+            "LOWER": "security"
+          }
+        ],
+        [
+          {
+            "LOWER": "daca"
+          }
+        ],
+        [
+          {
+            "LOWER": "dreamers"
+          }
+        ],
+        [
+          {
+            "LOWER": "immigration"
+          },
+          {
+            "LOWER": "reform"
+          }
+        ],
+        [
+          {
+            "LOWER": "migrant"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "pathway"
+          },
+          {
+            "LOWER": "to"
+          },
+          {
+            "LOWER": "citizenship"
+          }
+        ],
+        [
+          {
+            "LOWER": "refugees"
+          }
+        ]
+      ],
+      "anchors": [
+        "asylum",
+        "border security",
+        "DACA",
+        "dreamers",
+        "immigration reform",
+        "migrant rights",
+        "pathway to citizenship",
+        "refugees"
       ]
     },
     {
@@ -1029,6 +1278,146 @@
         "voter rights",
         "voter suppression",
         "voting rights"
+      ]
+    },
+    {
+      "label": "Religious & Political Diversity",
+      "patterns": [
+        [
+          {
+            "LOWER": "bipartisanship"
+          }
+        ],
+        [
+          {
+            "LOWER": "freedom"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "religion"
+          }
+        ],
+        [
+          {
+            "LOWER": "interfaith"
+          },
+          {
+            "LOWER": "dialogue"
+          }
+        ],
+        [
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "diversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "freedom"
+          }
+        ]
+      ],
+      "anchors": [
+        "bipartisanship",
+        "freedom of religion",
+        "interfaith dialogue",
+        "political diversity",
+        "religious freedom"
+      ]
+    },
+    {
+      "label": "Drug Pricing",
+      "patterns": [
+        [
+          {
+            "LOWER": "drug"
+          },
+          {
+            "LOWER": "affordability"
+          }
+        ],
+        [
+          {
+            "LOWER": "drug"
+          },
+          {
+            "LOWER": "costs"
+          }
+        ],
+        [
+          {
+            "LOWER": "drug"
+          },
+          {
+            "LOWER": "pricing"
+          }
+        ],
+        [
+          {
+            "LOWER": "insulin"
+          },
+          {
+            "LOWER": "costs"
+          }
+        ],
+        [
+          {
+            "LOWER": "medication"
+          },
+          {
+            "LOWER": "costs"
+          }
+        ],
+        [
+          {
+            "LOWER": "medication"
+          },
+          {
+            "LOWER": "pricing"
+          }
+        ],
+        [
+          {
+            "LOWER": "pharmaceutical"
+          },
+          {
+            "LOWER": "costs"
+          }
+        ],
+        [
+          {
+            "LOWER": "pharmaceutical"
+          },
+          {
+            "LOWER": "pricing"
+          }
+        ],
+        [
+          {
+            "LOWER": "prescription"
+          },
+          {
+            "LOWER": "drugs"
+          }
+        ]
+      ],
+      "anchors": [
+        "drug affordability",
+        "drug costs",
+        "drug pricing",
+        "insulin costs",
+        "medication costs",
+        "medication pricing",
+        "pharmaceutical costs",
+        "pharmaceutical pricing",
+        "prescription drugs"
       ]
     },
     {
@@ -1141,219 +1530,6 @@
       ]
     },
     {
-      "label": "Health Access",
-      "patterns": [
-        [
-          {
-            "LOWER": "healthcare"
-          },
-          {
-            "LOWER": "access"
-          }
-        ],
-        [
-          {
-            "LOWER": "healthcare"
-          },
-          {
-            "LOWER": "affordability"
-          }
-        ],
-        [
-          {
-            "LOWER": "health"
-          },
-          {
-            "LOWER": "equity"
-          }
-        ],
-        [
-          {
-            "LOWER": "insurance"
-          },
-          {
-            "LOWER": "coverage"
-          }
-        ],
-        [
-          {
-            "LOWER": "medicaid"
-          }
-        ],
-        [
-          {
-            "LOWER": "medicare"
-          }
-        ],
-        [
-          {
-            "LOWER": "mental"
-          },
-          {
-            "LOWER": "health"
-          },
-          {
-            "LOWER": "access"
-          }
-        ],
-        [
-          {
-            "LOWER": "public"
-          },
-          {
-            "LOWER": "health"
-          }
-        ],
-        [
-          {
-            "LOWER": "rural"
-          },
-          {
-            "LOWER": "healthcare"
-          }
-        ],
-        [
-          {
-            "LOWER": "telehealth"
-          }
-        ]
-      ],
-      "anchors": [
-        "healthcare access",
-        "healthcare affordability",
-        "health equity",
-        "insurance coverage",
-        "medicaid",
-        "medicare",
-        "mental health access",
-        "public health",
-        "rural healthcare",
-        "telehealth"
-      ]
-    },
-    {
-      "label": "Immigration",
-      "patterns": [
-        [
-          {
-            "LOWER": "asylum"
-          }
-        ],
-        [
-          {
-            "LOWER": "border"
-          },
-          {
-            "LOWER": "security"
-          }
-        ],
-        [
-          {
-            "LOWER": "daca"
-          }
-        ],
-        [
-          {
-            "LOWER": "dreamers"
-          }
-        ],
-        [
-          {
-            "LOWER": "immigration"
-          },
-          {
-            "LOWER": "reform"
-          }
-        ],
-        [
-          {
-            "LOWER": "migrant"
-          },
-          {
-            "LOWER": "rights"
-          }
-        ],
-        [
-          {
-            "LOWER": "pathway"
-          },
-          {
-            "LOWER": "to"
-          },
-          {
-            "LOWER": "citizenship"
-          }
-        ],
-        [
-          {
-            "LOWER": "refugees"
-          }
-        ]
-      ],
-      "anchors": [
-        "asylum",
-        "border security",
-        "DACA",
-        "dreamers",
-        "immigration reform",
-        "migrant rights",
-        "pathway to citizenship",
-        "refugees"
-      ]
-    },
-    {
-      "label": "International Reputational Risks",
-      "patterns": [
-        [
-          {
-            "LOWER": "global"
-          },
-          {
-            "LOWER": "human"
-          },
-          {
-            "LOWER": "rights"
-          }
-        ],
-        [
-          {
-            "LOWER": "international"
-          },
-          {
-            "LOWER": "labor"
-          },
-          {
-            "LOWER": "standards"
-          }
-        ],
-        [
-          {
-            "LOWER": "supply"
-          },
-          {
-            "LOWER": "chain"
-          },
-          {
-            "LOWER": "ethics"
-          }
-        ],
-        [
-          {
-            "LOWER": "trade"
-          },
-          {
-            "LOWER": "compliance"
-          }
-        ]
-      ],
-      "anchors": [
-        "global human rights",
-        "international labor standards",
-        "supply chain ethics",
-        "trade compliance"
-      ]
-    },
-    {
       "label": "LGBTQ+ Equality",
       "patterns": [
         [
@@ -1422,7 +1598,7 @@
             "LOWER": "food"
           },
           {
-            "LOWER": "insecurity"
+            "LOWER": "deserts"
           }
         ],
         [
@@ -1430,7 +1606,7 @@
             "LOWER": "food"
           },
           {
-            "LOWER": "deserts"
+            "LOWER": "insecurity"
           }
         ],
         [
@@ -1461,8 +1637,8 @@
         ]
       ],
       "anchors": [
-        "food insecurity",
         "food deserts",
+        "food insecurity",
         "hunger relief",
         "nutrition assistance",
         "SNAP",
@@ -1470,16 +1646,14 @@
       ]
     },
     {
-      "label": "Racial Equity",
+      "label": "International Reputational Risks",
       "patterns": [
         [
           {
-            "LOWER": "anti-racism"
-          }
-        ],
-        [
+            "LOWER": "global"
+          },
           {
-            "LOWER": "civil"
+            "LOWER": "human"
           },
           {
             "LOWER": "rights"
@@ -1487,298 +1661,8 @@
         ],
         [
           {
-            "LOWER": "dei"
-          }
-        ],
-        [
-          {
-            "LOWER": "diversity"
-          }
-        ],
-        [
-          {
-            "LOWER": "equity"
-          }
-        ],
-        [
-          {
-            "LOWER": "inclusion"
-          }
-        ],
-        [
-          {
-            "LOWER": "racial"
+            "LOWER": "international"
           },
-          {
-            "LOWER": "justice"
-          }
-        ],
-        [
-          {
-            "LOWER": "systemic"
-          },
-          {
-            "LOWER": "racism"
-          }
-        ]
-      ],
-      "anchors": [
-        "anti-racism",
-        "civil rights",
-        "DEI",
-        "diversity",
-        "equity",
-        "inclusion",
-        "racial justice",
-        "systemic racism"
-      ]
-    },
-    {
-      "label": "Religious & Political Diversity",
-      "patterns": [
-        [
-          {
-            "LOWER": "bipartisanship"
-          }
-        ],
-        [
-          {
-            "LOWER": "freedom"
-          },
-          {
-            "LOWER": "of"
-          },
-          {
-            "LOWER": "religion"
-          }
-        ],
-        [
-          {
-            "LOWER": "interfaith"
-          },
-          {
-            "LOWER": "dialogue"
-          }
-        ],
-        [
-          {
-            "LOWER": "political"
-          },
-          {
-            "LOWER": "diversity"
-          }
-        ],
-        [
-          {
-            "LOWER": "religious"
-          },
-          {
-            "LOWER": "freedom"
-          }
-        ]
-      ],
-      "anchors": [
-        "bipartisanship",
-        "freedom of religion",
-        "interfaith dialogue",
-        "political diversity",
-        "religious freedom"
-      ]
-    },
-    {
-      "label": "Reproductive Rights",
-      "patterns": [
-        [
-          {
-            "LOWER": "abortion"
-          },
-          {
-            "LOWER": "access"
-          }
-        ],
-        [
-          {
-            "LOWER": "contraception"
-          }
-        ],
-        [
-          {
-            "LOWER": "family"
-          },
-          {
-            "LOWER": "planning"
-          }
-        ],
-        [
-          {
-            "LOWER": "reproductive"
-          },
-          {
-            "LOWER": "healthcare"
-          }
-        ],
-        [
-          {
-            "LOWER": "reproductive"
-          },
-          {
-            "LOWER": "rights"
-          }
-        ],
-        [
-          {
-            "LOWER": "women's"
-          },
-          {
-            "LOWER": "health"
-          }
-        ]
-      ],
-      "anchors": [
-        "abortion access",
-        "contraception",
-        "family planning",
-        "reproductive healthcare",
-        "reproductive rights",
-        "women's health"
-      ]
-    },
-    {
-      "label": "Veterans' Rights",
-      "patterns": [
-        [
-          {
-            "LOWER": "armed"
-          },
-          {
-            "LOWER": "services"
-          }
-        ],
-        [
-          {
-            "LOWER": "first"
-          },
-          {
-            "LOWER": "responders"
-          }
-        ],
-        [
-          {
-            "LOWER": "military"
-          }
-        ],
-        [
-          {
-            "LOWER": "service"
-          },
-          {
-            "LOWER": "members"
-          }
-        ],
-        [
-          {
-            "LOWER": "veterans"
-          }
-        ],
-        [
-          {
-            "LOWER": "veterans"
-          },
-          {
-            "LOWER": "day"
-          }
-        ]
-      ],
-      "anchors": [
-        "armed services",
-        "first responders",
-        "military",
-        "service members",
-        "Veterans",
-        "veterans day"
-      ]
-    },
-    {
-      "label": "Workers\u2019 Rights",
-      "patterns": [
-        [
-          {
-            "LOWER": "401k"
-          }
-        ],
-        [
-          {
-            "LOWER": "collective"
-          },
-          {
-            "LOWER": "bargaining"
-          }
-        ],
-        [
-          {
-            "LOWER": "employee"
-          },
-          {
-            "LOWER": "representation"
-          }
-        ],
-        [
-          {
-            "LOWER": "employee"
-          },
-          {
-            "LOWER": "rights"
-          }
-        ],
-        [
-          {
-            "LOWER": "employee"
-          },
-          {
-            "LOWER": "wellfare"
-          }
-        ],
-        [
-          {
-            "LOWER": "executive"
-          },
-          {
-            "LOWER": "compensation"
-          }
-        ],
-        [
-          {
-            "LOWER": "executive"
-          },
-          {
-            "LOWER": "pay"
-          }
-        ],
-        [
-          {
-            "LOWER": "fair"
-          },
-          {
-            "LOWER": "wage"
-          }
-        ],
-        [
-          {
-            "LOWER": "labor"
-          },
-          {
-            "LOWER": "compliance"
-          }
-        ],
-        [
-          {
-            "LOWER": "labor"
-          },
-          {
-            "LOWER": "day"
-          }
-        ],
-        [
           {
             "LOWER": "labor"
           },
@@ -1788,66 +1672,37 @@
         ],
         [
           {
-            "LOWER": "labor"
+            "LOWER": "supply"
           },
           {
-            "LOWER": "union"
+            "LOWER": "chain"
           },
           {
-            "LOWER": "partnerships"
+            "LOWER": "ethics"
           }
         ],
         [
           {
-            "LOWER": "pensions"
-          }
-        ],
-        [
-          {
-            "LOWER": "personal"
+            "LOWER": "trade"
           },
           {
-            "LOWER": "time"
-          },
-          {
-            "LOWER": "off"
+            "LOWER": "compliance"
           }
-        ],
+        ]
+      ],
+      "anchors": [
+        "global human rights",
+        "international labor standards",
+        "supply chain ethics",
+        "trade compliance"
+      ]
+    },
+    {
+      "label": "Health Access",
+      "patterns": [
         [
           {
-            "LOWER": "retirement"
-          },
-          {
-            "LOWER": "benefits"
-          }
-        ],
-        [
-          {
-            "LOWER": "time"
-          },
-          {
-            "LOWER": "off"
-          }
-        ],
-        [
-          {
-            "LOWER": "workers'"
-          },
-          {
-            "LOWER": "rights"
-          }
-        ],
-        [
-          {
-            "LOWER": "working"
-          },
-          {
-            "LOWER": "conditions"
-          }
-        ],
-        [
-          {
-            "LOWER": "workplace"
+            "LOWER": "health"
           },
           {
             "LOWER": "equity"
@@ -1855,34 +1710,173 @@
         ],
         [
           {
-            "LOWER": "workplace"
+            "LOWER": "healthcare"
           },
           {
-            "LOWER": "fairness"
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "healthcare"
+          },
+          {
+            "LOWER": "affordability"
+          }
+        ],
+        [
+          {
+            "LOWER": "insurance"
+          },
+          {
+            "LOWER": "coverage"
+          }
+        ],
+        [
+          {
+            "LOWER": "medicaid"
+          }
+        ],
+        [
+          {
+            "LOWER": "medicare"
+          }
+        ],
+        [
+          {
+            "LOWER": "mental"
+          },
+          {
+            "LOWER": "health"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "public"
+          },
+          {
+            "LOWER": "health"
+          }
+        ],
+        [
+          {
+            "LOWER": "rural"
+          },
+          {
+            "LOWER": "healthcare"
+          }
+        ],
+        [
+          {
+            "LOWER": "telehealth"
           }
         ]
       ],
       "anchors": [
-        "401k",
-        "Collective Bargaining",
-        "Employee Representation",
-        "employee rights",
-        "employee wellfare",
-        "executive compensation",
-        "executive pay",
-        "fair wage",
-        "labor compliance",
-        "labor day",
-        "labor standards",
-        "Labor Union Partnerships",
-        "pensions",
-        "personal time off",
-        "retirement benefits",
-        "time off",
-        "Workers' Rights",
-        "working conditions",
-        "workplace equity",
-        "Workplace Fairness"
+        "health equity",
+        "healthcare access",
+        "healthcare affordability",
+        "insurance coverage",
+        "medicaid",
+        "medicare",
+        "mental health access",
+        "public health",
+        "rural healthcare",
+        "telehealth"
+      ]
+    },
+    {
+      "label": "Crime & Safety",
+      "patterns": [
+        [
+          {
+            "LOWER": "law"
+          },
+          {
+            "LOWER": "enforcement"
+          }
+        ],
+        [
+          {
+            "LOWER": "orc"
+          }
+        ],
+        [
+          {
+            "LOWER": "organized"
+          },
+          {
+            "LOWER": "retail"
+          },
+          {
+            "LOWER": "crime"
+          }
+        ],
+        [
+          {
+            "LOWER": "police"
+          }
+        ],
+        [
+          {
+            "LOWER": "public"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ],
+        [
+          {
+            "LOWER": "retail"
+          },
+          {
+            "LOWER": "theft"
+          }
+        ],
+        [
+          {
+            "LOWER": "safety"
+          }
+        ],
+        [
+          {
+            "LOWER": "shoplifting"
+          }
+        ],
+        [
+          {
+            "LOWER": "shrink"
+          }
+        ],
+        [
+          {
+            "LOWER": "theft"
+          }
+        ],
+        [
+          {
+            "LOWER": "worker"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ]
+      ],
+      "anchors": [
+        "law enforcement",
+        "ORC",
+        "organized retail crime",
+        "police",
+        "public safety",
+        "retail theft",
+        "safety",
+        "shoplifting",
+        "shrink",
+        "theft",
+        "worker safety"
       ]
     }
   ]

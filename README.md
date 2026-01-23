@@ -1,84 +1,96 @@
 # Earnings Call Transcript Analysis
 
-This tool matches text segments from earnings call transcripts to predefined topics and assesses the sentiment specifically toward those topics.
+This tool performs deep analysis on earnings call transcripts by identifying topics, assessing sentiment, and classifying speaker roles and interaction types. It also clusters question-and-answer sequences for better traceability.
 
 ## Features
 
 *   **Topic Detection**:
-    *   **Exact Match**: Uses spaCy to find specific keywords defined in `topics.json`.
-    *   **Vector Similarity**: Uses `sentence-transformers` (`all-MiniLM-L6-v2`) to find semantically similar text if no exact matches are found.
+    *   **Exact Match**: Uses spaCy match patterns to find specific keywords.
+    *   **Vector Similarity**: Uses `sentence-transformers` (`all-MiniLM-L6-v2`) for semantic matching.
 *   **Aspect-Based Sentiment Analysis (ABSA)**:
-    *   Uses `yangheng/deberta-v3-base-absa-v1.1` to determine the sentiment (Positive, Negative, Neutral) of the text *specifically regarding the detected topic*.
-    *   Provides a confidence score and a full breakdown of sentiment probabilities.
-
-## Installation
-
-1.  **Install Python Dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-2.  **Download spaCy Model**:
-    ```bash
-    python -m spacy download en_core_web_sm
-    ```
-
-   *Note: On the first run, the script will automatically download the SentenceTransformer model (~90MB) and the DeBERTa ABSA model (~400MB) from Hugging Face.*
+    *   Uses `yangheng/deberta-v3-base-absa-v1.1` to determine sentiment toward detected topics.
+*   **Speaker & Role Classification**:
+    *   **Role**: Classifies speakers as **Analyst**, **Executive**, **Operator**, or **Admin** using the local `role_class_v1` model.
+    *   **Interaction Type**: Classifies segments as **Admin**, **Answer**, or **Question** using the `eng_type_class_v1` model.
+*   **Q&A Clustering**:
+    *   Automatically groups questions and their corresponding answers into "Sessions" based on Operator introductions.
+*   **Data Integrity**:
+    *   **Fragment Rejoining**: Automatically rejoins segments split by line breaks to ensure models process complete statements.
+    *   **Performance Monitoring**: Prints inference time per classification in the console.
 
 ## Usage
 
-Run the script on a transcript file:
+### Local Analysis (`local_analysis.py`)
+
+Run the script to process data from BigQuery and save results locally:
 
 ```bash
-python analysis.py inputs/sample_transcript.txt
+python local_analysis.py
 ```
 
-### BigQuery Integration
+**Workflow Configuration**:
+- `PRODUCTION_TESTING`: Set to `True` (default) to process only 20 segments for verification. Set to `False` for the full run.
+- `WRITE_TO_BQ`: Set to `True` to upload results to the cloud.
+- `INCLUDE_CONTENT`: Set to `True` to include the original text in the output for verification.
 
-To read from and write to BigQuery, use the `--bq` flag:
+## Deployment (Cloud Run)
 
-```bash
-python analysis.py --bq
+This repository is designed to be deployed to **Google Cloud Run** using a GitHub-to-Run pipeline.
+
+### Model Storage (Recommended)
+Since the classification models are approximately 500MB, the recommended approach is to **include them directly in your Docker image**. This ensures zero runtime latency and simplifies deployment.
+
+### Sample Dockerfile
+```dockerfile
+# Use a python base image
+FROM python:3.11-slim
+
+# Copy the application and models
+COPY . /app
+WORKDIR /app
+
+# Install dependencies
+RUN pip install -r requirements.txt
+RUN python -m spacy download en_core_web_sm
+
+# Set the command to run the production script
+CMD ["python", "analysis.py"]
 ```
 
-*   **Source Table**: `sri-benchmarking-databases.pressure_monitoring.earnings_call_transcript_content`
-*   **Destination Table**: `sri-benchmarking-databases.pressure_monitoring.earnings_call_transcript_enriched`
+### Topic Regeneration
+If you modify `topic_definitions.csv`, the script will automatically regenerate `topics.json` on the next run.
 
-**Output Schema (Tidy/Long Format)**:
-The enriched table will have one row per detected topic instance:
-*   `transcript_id` (STRING)
-*   `paragraph_number` (INTEGER)
-*   `topic` (STRING)
-*   `sentiment_label` (STRING)
-*   `sentiment_score` (FLOAT)
+### Production Output Schema (`earnings_call_transcript_enriched`)
 
-### Output Format (Local)
+The focused production table contains:
 
-The script outputs the analyzed paragraphs, detected topics, and sentiment:
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `transcript_id` | STRING | Unique ID for the transcript. |
+| `paragraph_number` | INTEGER | Original paragraph/segment number. |
+| `speaker` | STRING | Name of the speaker. |
+| `qa_session_id` | INTEGER | ID grouping a specific analyst exchange. |
+| `qa_session_label` | STRING | Name of the analyst in the exchange. |
+| `interaction_type` | STRING | Admin, Question, or Answer. |
+| `role` | STRING | Analyst, Executive, Operator, or Admin. |
+| `topic` | STRING | The detected topic label. |
+| `sentiment_label` | STRING | Positive, Negative, or Neutral. |
+| `sentiment_score` | FLOAT | Confidence score for the sentiment. |
 
-```text
-Paragraph 1: "This is a sample text about DEI..."
-  [DEBUG] Found 1 exact matches.
-    - Match: 'DEI' -> Topic: DEI
-Result: [{'topic': 'DEI', 'sentiment': 'Positive', 'score': 0.63, 'all_scores': 'Pos: 0.63, Neu: 0.36, Neg: 0.01'}]
-    -> Topic: DEI
-       Sentiment: Positive (0.63)
-       Breakdown: [Pos: 0.63, Neu: 0.36, Neg: 0.01]
-```
+### Local/Debug Output Schema (`earnings_call_transcript_enriched_local`)
 
-## Configuration
+The comprehensive local table includes all production fields plus:
 
-Topics are defined in `topics.json`:
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `all_scores` | STRING | Full sentiment probability breakdown. |
+| `similarity_score` | FLOAT | Score for vector-based topic matches. |
+| `matched_anchor` | STRING | The anchor term matched via vector similarity. |
+| `content` | STRING | The original segment text (if enabled). |
+| `report_date` | DATE | Date of the earnings call. |
+| `symbol` | STRING | Ticker symbol. |
 
-*   **label**: The display name of the topic.
-*   **patterns**: List of spaCy match patterns for exact matching.
-*   **anchors**: List of phrases used for vector similarity comparison.
+## Installation
 
-Example:
-```json
-{
-  "label": "DEI",
-  "patterns": [[{"LOWER": "dei"}]],
-  "anchors": ["workforce diversity", "inclusive hiring"]
-}
-```
+1.  **Dependencies**: `pip install -r requirements.txt`
+2.  **spaCy**: `python -m spacy download en_core_web_sm`
