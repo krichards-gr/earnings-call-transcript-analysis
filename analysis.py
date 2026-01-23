@@ -37,8 +37,8 @@ TOPICS_FILE = os.path.join(current_dir, 'topics.json')
 SIMILARITY_THRESHOLD = 0.7
 
 # Local Model Paths
-INTERACTION_MODEL_PATH = os.path.join(current_dir, "models", "eng_type_class_v1", "eng_type_class_v1")
-ROLE_MODEL_PATH = os.path.join(current_dir, "models", "role_class_v1", "role_class_v1")
+INTERACTION_MODEL_PATH = os.path.join(current_dir, "models", "eng_type_class_v1")
+ROLE_MODEL_PATH = os.path.join(current_dir, "models", "role_class_v1")
 EMBEDDING_MODEL_PATH = os.path.join(current_dir, "models", "all-MiniLM-L6-v2")
 SENTIMENT_MODEL_PATH = os.path.join(current_dir, "models", "deberta-v3-base-absa-v1.1")
 
@@ -72,26 +72,28 @@ BQ_DEST_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_enriched
 print("Loading models...")
 nlp = spacy.load("en_core_web_sm")
 
-# Load embedding model (prefer local)
-if os.path.exists(EMBEDDING_MODEL_PATH):
-    print(f"Loading embedding model from {EMBEDDING_MODEL_PATH}")
-    # Force local loading to avoid HF hub connection attempts
-    embedder = SentenceTransformer(EMBEDDING_MODEL_PATH, local_files_only=True)
-else:
-    print("Loading embedding model from Hugging Face")
-    embedder = SentenceTransformer('all-MiniLM-L6-v2')
+def load_model_safely(model_path, model_type="embedding"):
+    if not os.path.exists(model_path):
+        print(f"CRITICAL ERROR: Model path not found: {model_path}")
+        print("Ensure models are baked into the Docker image during build.")
+        sys.exit(1)
+        
+    print(f"Loading {model_type} model from {model_path}")
+    try:
+        if model_type == "embedding":
+            return SentenceTransformer(model_path, local_files_only=True)
+        else:
+            return pipeline("text-classification", model=model_path, local_files_only=True)
+    except Exception as e:
+        print(f"CRITICAL ERROR loading {model_type} model: {e}")
+        sys.exit(1)
 
-# Load sentiment model (prefer local)
-if os.path.exists(SENTIMENT_MODEL_PATH):
-    print(f"Loading sentiment model from {SENTIMENT_MODEL_PATH}")
-    # Force local loading to avoid HF hub connection attempts
-    sentiment_analyzer = pipeline("text-classification", model=SENTIMENT_MODEL_PATH, local_files_only=True)
-else:
-    print("Loading sentiment model from Hugging Face")
-    sentiment_analyzer = pipeline("text-classification", model="yangheng/deberta-v3-base-absa-v1.1")
+# Load all models strictly from local paths
+embedder = load_model_safely(EMBEDDING_MODEL_PATH, "embedding")
+sentiment_analyzer = load_model_safely(SENTIMENT_MODEL_PATH, "sentiment")
+interaction_classifier = load_model_safely(INTERACTION_MODEL_PATH, "interaction")
+role_classifier = load_model_safely(ROLE_MODEL_PATH, "role")
 
-interaction_classifier = pipeline("text-classification", model=INTERACTION_MODEL_PATH)
-role_classifier = pipeline("text-classification", model=ROLE_MODEL_PATH)
 print("Models loaded successfully.")
 
 # =================================================================================================
