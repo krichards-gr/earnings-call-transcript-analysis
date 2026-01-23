@@ -75,7 +75,8 @@ nlp = spacy.load("en_core_web_sm")
 # Load embedding model (prefer local)
 if os.path.exists(EMBEDDING_MODEL_PATH):
     print(f"Loading embedding model from {EMBEDDING_MODEL_PATH}")
-    embedder = SentenceTransformer(EMBEDDING_MODEL_PATH)
+    # Force local loading to avoid HF hub connection attempts
+    embedder = SentenceTransformer(EMBEDDING_MODEL_PATH, local_files_only=True)
 else:
     print("Loading embedding model from Hugging Face")
     embedder = SentenceTransformer('all-MiniLM-L6-v2')
@@ -83,7 +84,8 @@ else:
 # Load sentiment model (prefer local)
 if os.path.exists(SENTIMENT_MODEL_PATH):
     print(f"Loading sentiment model from {SENTIMENT_MODEL_PATH}")
-    sentiment_analyzer = pipeline("text-classification", model=SENTIMENT_MODEL_PATH)
+    # Force local loading to avoid HF hub connection attempts
+    sentiment_analyzer = pipeline("text-classification", model=SENTIMENT_MODEL_PATH, local_files_only=True)
 else:
     print("Loading sentiment model from Hugging Face")
     sentiment_analyzer = pipeline("text-classification", model="yangheng/deberta-v3-base-absa-v1.1")
