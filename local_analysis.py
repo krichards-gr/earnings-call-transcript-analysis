@@ -42,6 +42,8 @@ SIMILARITY_THRESHOLD = 0.7
 # These paths point to the local directories containing the pretrained models.
 INTERACTION_MODEL_PATH = os.path.join(current_dir, "models", "eng_type_class_v1")
 ROLE_MODEL_PATH = os.path.join(current_dir, "models", "role_class_v1")
+EMBEDDING_MODEL_PATH = os.path.join(current_dir, "models", "all-MiniLM-L6-v2")
+SENTIMENT_MODEL_PATH = os.path.join(current_dir, "models", "deberta-v3-base-absa-v1.1")
 
 # Human-Readable Label Mappings
 # Maps internal model output labels (e.g., LABEL_1) to descriptive names.
@@ -76,11 +78,21 @@ print("Loading models...")
 # Load spaCy model
 nlp = spacy.load("en_core_web_sm")
 
-# Load SentenceTransformer model
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
+# Load embedding model (prefer local)
+if os.path.exists(EMBEDDING_MODEL_PATH):
+    print(f"Loading embedding model from {EMBEDDING_MODEL_PATH}")
+    embedder = SentenceTransformer(EMBEDDING_MODEL_PATH)
+else:
+    print("Loading embedding model from Hugging Face")
+    embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Load ABSA model
-sentiment_analyzer = pipeline("text-classification", model="yangheng/deberta-v3-base-absa-v1.1")
+# Load sentiment model (prefer local)
+if os.path.exists(SENTIMENT_MODEL_PATH):
+    print(f"Loading sentiment model from {SENTIMENT_MODEL_PATH}")
+    sentiment_analyzer = pipeline("text-classification", model=SENTIMENT_MODEL_PATH)
+else:
+    print("Loading sentiment model from Hugging Face")
+    sentiment_analyzer = pipeline("text-classification", model="yangheng/deberta-v3-base-absa-v1.1")
 
 # Load Interaction Type model
 interaction_classifier = pipeline("text-classification", model=INTERACTION_MODEL_PATH)

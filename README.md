@@ -35,27 +35,14 @@ python local_analysis.py
 
 ## Deployment (Cloud Run)
 
-This repository is designed to be deployed to **Google Cloud Run** using a GitHub-to-Run pipeline.
+### Model Storage (Automatic)
+The `Dockerfile` is configured to automatically download and bake all external models into the image during the build process. This includes:
+- `en_core_web_sm` (spaCy)
+- `all-MiniLM-L6-v2` (SentenceTransformer)
+- `deberta-v3-base-absa-v1.1` (Sentiment)
+- Local classification models (`eng_type_class_v1`, `role_class_v1`)
 
-### Model Storage (Recommended)
-Since the classification models are approximately 500MB, the recommended approach is to **include them directly in your Docker image**. This ensures zero runtime latency and simplifies deployment.
-
-### Sample Dockerfile
-```dockerfile
-# Use a python base image
-FROM python:3.11-slim
-
-# Copy the application and models
-COPY . /app
-WORKDIR /app
-
-# Install dependencies
-RUN pip install -r requirements.txt
-RUN python -m spacy download en_core_web_sm
-
-# Set the command to run the production script
-CMD ["python", "analysis.py"]
-```
+This ensures zero runtime latency and removes the need for internet access during execution on Cloud Run.
 
 ### Topic Regeneration
 If you modify `topic_definitions.csv`, the script will automatically regenerate `topics.json` on the next run.

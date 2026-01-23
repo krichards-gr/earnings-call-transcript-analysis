@@ -14,5 +14,8 @@ WORKDIR /app
 RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m spacy download en_core_web_sm
 
+# Pre-download models to bake them into the image
+RUN python download_models.py && rm download_models.py
+
 # Set the command to run the production script
 CMD ["python", "analysis.py"]
