@@ -7,6 +7,7 @@ from google.cloud import storage
 
 # --- CONFIGURATION ---
 GCS_BUCKET_NAME = "earnings-analysis-models" 
+BQ_PROJECT_ID = "sri-benchmarking-databases"
 
 # Maps local folder names to their HF source (only used if GCS pull fails)
 MODELS_TO_SYNC = {
@@ -35,7 +36,7 @@ def download_from_gcs(bucket_name, model_name, destination_base_dir):
     """Downloads a model folder from GCS."""
     print(f"Checking GCS for model: {model_name}...")
     try:
-        storage_client = storage.Client()
+        storage_client = storage.Client(project=BQ_PROJECT_ID)
         bucket = storage_client.bucket(bucket_name)
         prefix = f"models/{model_name}/"
         
