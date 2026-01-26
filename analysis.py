@@ -254,6 +254,7 @@ def analyze_text(text):
 # MAIN PIPELINE
 # =================================================================================================
 
+def process_pipeline():
     logger.info("Models verified on disk. Starting pipeline logic...")
     client = bigquery.Client(project=BQ_PROJECT_ID)
     
@@ -291,64 +292,61 @@ def analyze_text(text):
             else:
                 logger.info(f"--- Processing batch of {len(df)} segments (Total so far: {total_processed}) ---")
         
-        df = rejoin_fragments(df)
-        print(f"   (After rejoining: {len(df)} segments)")
+            df = rejoin_fragments(df)
+            logger.info(f"   (After rejoining: {len(df)} segments)")
 
-        all_results = []
-        
-        # For each batch, we need to know the 'current' session state.
-        # Simplest is to check the last row in BQ for this transcript, 
-        # but to keep it fast/low-memory, we'll initialize per run and accept 
-        # slight session ID resets if batches split in the very middle of a Q&A.
-        current_session_id = 0
-        current_analyst = "None"
-        intro_regex = re.compile(r"(?:question comes from|from the line of|from)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from)", re.IGNORECASE)
-
-        for _, row in df.iterrows():
-            text = str(row['content'])
-            # Classification
-            int_res = interaction_classifier(text[:512])[0]['label']
-            role_res = role_classifier(text[:512])[0]['label']
-            interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
-            role_label = ROLE_ID_MAP.get(role_res, role_res)
-
-            # Session tracking
-            if role_label == "Operator" and ("next question" in text.lower() or "question comes" in text.lower()):
-                current_session_id += 1
-                match = intro_regex.search(text)
-                current_analyst = match.group(1).strip() if match else "Unknown Analyst"
-
-            detected = analyze_text(text)
-            if not detected: detected = [{"topic": None, "sentiment": None, "score": None}]
-
-            for d in detected:
-                all_results.append({
-                    "transcript_id": row['transcript_id'],
-                    "paragraph_number": row['paragraph_number'],
-                    "speaker": row['speaker'],
-                    "qa_session_id": current_session_id,
-                    "qa_session_label": current_analyst,
-                    "interaction_type": interaction_type,
-                    "role": role_label,
-                    "topic": d['topic'],
-                    "sentiment_label": d['sentiment'],
-                    "sentiment_score": d['score']
-                })
-
-        if all_results:
-            res_df = pd.DataFrame(all_results)
-            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
-            logger.info(f"   Completed enrichment. Uploaded {len(res_df)} rows to {BQ_DEST_TABLE}")
-            total_processed += len(df)
-        else:
-            logger.info("   No topics detected in this batch.")
-            total_processed += len(df)
+            all_results = []
             
-        # Exit if in testing mode after first batch
-        if PRODUCTION_TESTING:
-            logger.info("Production testing complete. Set 'PRODUCTION_MODE=true' env var for full run.")
-            break
+            # For each batch, we need to know the 'current' session state.
+            current_session_id = 0
+            current_analyst = "None"
+            intro_regex = re.compile(r"(?:question comes from|from the line of|from)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from)", re.IGNORECASE)
+
+            for _, row in df.iterrows():
+                text = str(row['content'])
+                # Classification
+                int_res = interaction_classifier(text[:512])[0]['label']
+                role_res = role_classifier(text[:512])[0]['label']
+                interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
+                role_label = ROLE_ID_MAP.get(role_res, role_res)
+
+                # Session tracking
+                if role_label == "Operator" and ("next question" in text.lower() or "question comes" in text.lower()):
+                    current_session_id += 1
+                    match = intro_regex.search(text)
+                    current_analyst = match.group(1).strip() if match else "Unknown Analyst"
+
+                detected = analyze_text(text)
+                if not detected: detected = [{"topic": None, "sentiment": None, "score": None}]
+
+                for d in detected:
+                    all_results.append({
+                        "transcript_id": row['transcript_id'],
+                        "paragraph_number": row['paragraph_number'],
+                        "speaker": row['speaker'],
+                        "qa_session_id": current_session_id,
+                        "qa_session_label": current_analyst,
+                        "interaction_type": interaction_type,
+                        "role": role_label,
+                        "topic": d['topic'],
+                        "sentiment_label": d['sentiment'],
+                        "sentiment_score": d['score']
+                    })
+
+            if all_results:
+                res_df = pd.DataFrame(all_results)
+                job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+                client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
+                logger.info(f"   Completed enrichment. Uploaded {len(res_df)} rows to {BQ_DEST_TABLE}")
+                total_processed += len(df)
+            else:
+                logger.info("   No topics detected in this batch.")
+                total_processed += len(df)
+                
+            # Exit if in testing mode after first batch
+            if PRODUCTION_TESTING:
+                logger.info("Production testing complete. Set 'PRODUCTION_MODE=true' env var for full run.")
+                break
     except Exception as e:
         logger.error(f"FATAL ERROR in pipeline: {e}", exc_info=True)
 
