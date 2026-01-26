@@ -271,10 +271,12 @@ def analyze_batch(texts):
     # 2. Batch Sentiment Inference
     if sentiment_queue:
         logger.info(f"      Running batch sentiment analysis for {len(sentiment_queue)} topic pairs...")
-        # Prepare inputs for the pipeline
-        inputs = [{"text": item["text"], "text_pair": item["text_pair"]} for item in sentiment_queue]
-        # Run model (Pipeline handles batching internally if we pass a list)
-        sent_results = sentiment_analyzer(inputs, top_k=None, batch_size=8)
+        # Prepare inputs as parallel lists for better pipeline batch handling
+        texts_input = [item["text"] for item in sentiment_queue]
+        pairs_input = [item["text_pair"] for item in sentiment_queue]
+        
+        # Run model (Passing parallel lists is the standard way for batching pairs)
+        sent_results = sentiment_analyzer(texts_input, text_pair=pairs_input, top_k=None, batch_size=8)
         
         for i, res in enumerate(sent_results):
             # Sort scores to get the top label
@@ -315,7 +317,10 @@ def process_pipeline():
             """
             
             logger.info(f"Executing query: {query}")
-            df = client.query(query).to_dataframe()
+            # Use .result() to wait for job completion before converting to dataframe
+            query_job = client.query(query)
+            df = query_job.result().to_dataframe()
+            logger.info(f"Successfully fetched {len(df)} rows from BigQuery.")
             
             if df.empty:
                 if total_processed == 0:
