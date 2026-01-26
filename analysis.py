@@ -271,12 +271,14 @@ def analyze_batch(texts):
     # 2. Batch Sentiment Inference
     if sentiment_queue:
         logger.info(f"      Running batch sentiment analysis for {len(sentiment_queue)} topic pairs...")
+        start_time = time.time()
         # Prepare inputs as parallel lists for better pipeline batch handling
         texts_input = [item["text"] for item in sentiment_queue]
         pairs_input = [item["text_pair"] for item in sentiment_queue]
         
         # Run model (Passing parallel lists is the standard way for batching pairs)
-        sent_results = sentiment_analyzer(texts_input, text_pair=pairs_input, top_k=None, batch_size=8)
+        sent_results = sentiment_analyzer(texts_input, text_pair=pairs_input, top_k=None, batch_size=4)
+        logger.info(f"      Finished sentiment analysis in {time.time() - start_time:.2f}s")
         
         for i, res in enumerate(sent_results):
             # Sort scores to get the top label
@@ -342,9 +344,15 @@ def process_pipeline():
             truncated_texts = [t[:512] for t in texts]
 
             # 1. Batch Classification
-            logger.info(f"   Running batch classification for {len(df)} segments...")
-            int_results = interaction_classifier(truncated_texts, batch_size=8)
-            role_results = role_classifier(truncated_texts, batch_size=8)
+            logger.info(f"   Running batch interaction classification for {len(df)} segments...")
+            start_time = time.time()
+            int_results = interaction_classifier(truncated_texts, batch_size=4)
+            logger.info(f"   Finished interaction classification in {time.time() - start_time:.2f}s")
+
+            logger.info(f"   Running batch role classification for {len(df)} segments...")
+            start_time = time.time()
+            role_results = role_classifier(truncated_texts, batch_size=4)
+            logger.info(f"   Finished role classification in {time.time() - start_time:.2f}s")
 
             # 2. Batch Topic & Sentiment Analysis
             logger.info(f"   Running batch topic/sentiment analysis...")
