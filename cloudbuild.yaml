@@ -1,8 +1,14 @@
 steps:
   # Step 0: Download models from GCS to the local workspace
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gsutil'
-    args: ['-m', 'cp', '-r', 'gs://earnings-analysis-models/models/*', './models/']
+    entrypoint: 'bash'
+    args: 
+      - '-c'
+      - |
+        mkdir -p models
+        gsutil -m cp -r gs://earnings-analysis-models/models/* ./models/
+        echo "Check models directory structure:"
+        ls -R models
 
   # Step 1: Build the Docker image
   # The Dockerfile 'COPY . /app' will now include the ./models/ folder we just downloaded
