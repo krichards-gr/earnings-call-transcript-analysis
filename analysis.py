@@ -8,7 +8,25 @@ import os
 import sys
 import time
 import re
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from generate_topics import generate_topics_json
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    """Minimal server to satisfy Cloud Run health checks."""
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"OK")
+    def log_message(self, format, *args):
+        return # Silence logs
+
+def start_health_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    print(f"Health check server listening on port {port}...")
+    server.serve_forever()
 
 """
 analysis.py
@@ -197,6 +215,24 @@ def analyze_text(text):
 # =================================================================================================
 
 def process_pipeline():
+    # 0. Start Health Check Server (for Cloud Run Services)
+    server_thread = threading.Thread(target=start_health_server, daemon=True)
+    server_thread.start()
+
+    # 1. Verify Models Exist (Fail fast if build is hollow)
+    required_paths = [INTERACTION_MODEL_PATH, ROLE_MODEL_PATH, EMBEDDING_MODEL_PATH, SENTIMENT_MODEL_PATH]
+    missing = [p for p in required_paths if not os.path.exists(p)]
+    if missing:
+        print("\n" + "!"*60)
+        print("CRITICAL ERROR: The following model directories are missing!")
+        for p in missing:
+            print(f" - {p}")
+        print("This usually means models weren't downloaded during the build.")
+        print("Ensure you switched your Cloud Build trigger to 'cloudbuild.yaml'.")
+        print("!"*60 + "\n")
+        sys.exit(1)
+
+    print("Models verified on disk. Starting pipeline...")
     client = bigquery.Client(project=BQ_PROJECT_ID)
     
     total_processed = 0
