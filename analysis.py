@@ -212,43 +212,80 @@ def rejoin_fragments(df):
 # CORE ANALYSIS
 # =================================================================================================
 
-def analyze_text(text):
-    """Analyzes text for topics and sentiment."""
-    doc = nlp(text)
-    matches = matcher(doc)
-    found_topics = set()
-    if matches:
-        for match_id, start, end in matches:
-            found_topics.add(nlp.vocab.strings[match_id])
-        results = []
-        for topic in found_topics:
-            sentiment = sentiment_analyzer(text, text_pair=topic, top_k=None)
-            sentiment.sort(key=lambda x: x['score'], reverse=True)
-            results.append({"topic": topic, "sentiment": sentiment[0]['label'], "score": sentiment[0]['score']})
-        return results
-
-    if anchor_embeddings is None:
+def analyze_batch(texts):
+    """
+    Optimized batch analysis for topics and sentiment.
+    Returns a list of result lists (one per input text).
+    """
+    if not texts:
         return []
 
-    query_embedding = embedder.encode(text, convert_to_tensor=True)
-    cos_scores = util.cos_sim(query_embedding, anchor_embeddings)[0]
-    results = []
-    for idx, score in enumerate(cos_scores):
-        if score.item() >= SIMILARITY_THRESHOLD:
-            results.append({"topic": anchor_metadata[idx][0], "score": score.item()})
-    results.sort(key=lambda x: x['score'], reverse=True)
+    # 1. Topic Detection (Vectorized)
+    # This is already fast as it uses matrix multiplication
+    query_embeddings = embedder.encode(texts, convert_to_tensor=True)
+    all_scores = util.cos_sim(query_embeddings, anchor_embeddings) # Matrix of [len(texts), len(anchors)]
     
-    unique = {}
-    for r in results:
-        if r['topic'] not in unique: unique[r['topic']] = r
-    top_3 = list(unique.values())[:3]
+    # Pre-filter topics for each text
+    results_by_text = []
+    sentiment_queue = [] # Pairs of (text, topic_label) for later batch inference
     
-    final = []
-    for r in top_3:
-        sentiment = sentiment_analyzer(text, text_pair=r['topic'], top_k=None)
-        sentiment.sort(key=lambda x: x['score'], reverse=True)
-        final.append({"topic": r['topic'], "sentiment": sentiment[0]['label'], "score": sentiment[0]['score']})
-    return final
+    for i, text in enumerate(texts):
+        # First, try spaCy Matcher (Exact Match)
+        doc = nlp(text)
+        matches = matcher(doc)
+        found_topics = set()
+        if matches:
+            for match_id, start, end in matches:
+                found_topics.add(nlp.vocab.strings[match_id])
+            
+            text_results = []
+            for topic in found_topics:
+                text_results.append({"topic": topic, "idx": i})
+                sentiment_queue.append({"text": text, "text_pair": topic, "text_idx": i, "topic_idx": len(text_results)-1})
+            results_by_text.append(text_results)
+            continue
+
+        # Second, fallback to Vector Similarity
+        if anchor_embeddings is None:
+            results_by_text.append([])
+            continue
+
+        cos_scores = all_scores[i]
+        text_results = []
+        for idx, score in enumerate(cos_scores):
+            if score.item() >= SIMILARITY_THRESHOLD:
+                text_results.append({"topic": anchor_metadata[idx][0], "score": score.item(), "idx": i})
+        
+        # Sort and take Top 3
+        text_results.sort(key=lambda x: x['score'], reverse=True)
+        unique = {}
+        for r in text_results:
+            if r['topic'] not in unique: unique[r['topic']] = r
+        top_topics = list(unique.values())[:3]
+        
+        for r in top_topics:
+            sentiment_queue.append({"text": text, "text_pair": r['topic'], "text_idx": i, "topic_idx": top_topics.index(r)})
+        
+        results_by_text.append(top_topics)
+
+    # 2. Batch Sentiment Inference
+    if sentiment_queue:
+        logger.info(f"      Running batch sentiment analysis for {len(sentiment_queue)} topic pairs...")
+        # Prepare inputs for the pipeline
+        inputs = [{"text": item["text"], "text_pair": item["text_pair"]} for item in sentiment_queue]
+        # Run model (Pipeline handles batching internally if we pass a list)
+        sent_results = sentiment_analyzer(inputs, top_k=None, batch_size=8)
+        
+        for i, res in enumerate(sent_results):
+            # Sort scores to get the top label
+            res.sort(key=lambda x: x['score'], reverse=True)
+            meta = sentiment_queue[i]
+            # Update the original entry in results_by_text
+            target = results_by_text[meta["text_idx"]][meta["topic_idx"]]
+            target["sentiment"] = res[0]['label']
+            target["sentiment_score"] = res[0]['score']
+
+    return results_by_text
 
 # =================================================================================================
 # MAIN PIPELINE
@@ -295,20 +332,34 @@ def process_pipeline():
             df = rejoin_fragments(df)
             logger.info(f"   (After rejoining: {len(df)} segments)")
 
+            texts = df['content'].astype(str).tolist()
+            # Truncate for classifiers to avoid position embedding errors
+            truncated_texts = [t[:512] for t in texts]
+
+            # 1. Batch Classification
+            logger.info(f"   Running batch classification for {len(df)} segments...")
+            int_results = interaction_classifier(truncated_texts, batch_size=8)
+            role_results = role_classifier(truncated_texts, batch_size=8)
+
+            # 2. Batch Topic & Sentiment Analysis
+            logger.info(f"   Running batch topic/sentiment analysis...")
+            enrichment_results = analyze_batch(texts)
+
+            # 3. Assemble and Checkpoint Upload
             all_results = []
-            
-            # For each batch, we need to know the 'current' session state.
             current_session_id = 0
             current_analyst = "None"
             intro_regex = re.compile(r"(?:question comes from|from the line of|from)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from)", re.IGNORECASE)
 
-            for _, row in df.iterrows():
-                text = str(row['content'])
-                # Classification
-                int_res = interaction_classifier(text[:512])[0]['label']
-                role_res = role_classifier(text[:512])[0]['label']
+            # Checkpoint variables
+            CHECKPOINT_SIZE = 10 
+            
+            for i, (_, row) in enumerate(df.iterrows()):
+                int_res = int_results[i]['label']
+                role_res = role_results[i]['label']
                 interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
                 role_label = ROLE_ID_MAP.get(role_res, role_res)
+                text = str(row['content'])
 
                 # Session tracking
                 if role_label == "Operator" and ("next question" in text.lower() or "question comes" in text.lower()):
@@ -316,8 +367,9 @@ def process_pipeline():
                     match = intro_regex.search(text)
                     current_analyst = match.group(1).strip() if match else "Unknown Analyst"
 
-                detected = analyze_text(text)
-                if not detected: detected = [{"topic": None, "sentiment": None, "score": None}]
+                detected = enrichment_results[i]
+                if not detected: 
+                    detected = [{"topic": None, "sentiment": None, "sentiment_score": None}]
 
                 for d in detected:
                     all_results.append({
@@ -328,21 +380,22 @@ def process_pipeline():
                         "qa_session_label": current_analyst,
                         "interaction_type": interaction_type,
                         "role": role_label,
-                        "topic": d['topic'],
-                        "sentiment_label": d['sentiment'],
-                        "sentiment_score": d['score']
+                        "topic": d.get('topic'),
+                        "sentiment_label": d.get('sentiment'),
+                        "sentiment_score": d.get('sentiment_score')
                     })
 
-            if all_results:
-                res_df = pd.DataFrame(all_results)
-                job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-                client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
-                logger.info(f"   Completed enrichment. Uploaded {len(res_df)} rows to {BQ_DEST_TABLE}")
-                total_processed += len(df)
-            else:
-                logger.info("   No topics detected in this batch.")
-                total_processed += len(df)
-                
+                # Checkpoint Upload
+                if (i + 1) % CHECKPOINT_SIZE == 0 or (i + 1) == len(df):
+                    if all_results:
+                        res_df = pd.DataFrame(all_results)
+                        job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+                        client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
+                        logger.info(f"   [Checkpoint] Uploaded {len(res_df)} enrichment rows (Segment {i+1}/{len(df)})")
+                        all_results = [] # Clear for next checkpoint
+
+            total_processed += len(df)
+            
             # Exit if in testing mode after first batch
             if PRODUCTION_TESTING:
                 logger.info("Production testing complete. Set 'PRODUCTION_MODE=true' env var for full run.")
