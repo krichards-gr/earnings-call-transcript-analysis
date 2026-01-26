@@ -238,6 +238,7 @@ def process_pipeline():
     total_processed = 0
     
     while True:
+        print(f"Checking for new data to process in {BQ_SOURCE_TABLE}...")
         # Determine query limit based on testing mode
         current_limit = 20 if PRODUCTION_TESTING else BATCH_SIZE
         

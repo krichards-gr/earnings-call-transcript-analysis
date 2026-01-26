@@ -1,6 +1,9 @@
 # Use a python base image
 FROM python:3.11-slim
 
+# Enable unbuffered logging
+ENV PYTHONUNBUFFERED=1
+
 # Install system dependencies (build-essential for spacy/transformers if needed)
 RUN apt-get update && apt-get install -y \
     build-essential \
