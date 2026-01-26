@@ -9,23 +9,56 @@ import sys
 import time
 import re
 import threading
+import logging
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from generate_topics import generate_topics_json
 
-class HealthCheckHandler(BaseHTTPRequestHandler):
-    """Minimal server to satisfy Cloud Run health checks."""
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/plain")
-        self.end_headers()
-        self.wfile.write(b"OK")
-    def log_message(self, format, *args):
-        return # Silence logs
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
+logger = logging.getLogger(__name__)
 
-def start_health_server():
+class AnalysisServerHandler(BaseHTTPRequestHandler):
+    """Server to handle health checks and trigger the analysis pipeline."""
+    def do_GET(self):
+        if self.path == '/':
+            # Health check endpoint
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"OK")
+        elif self.path == '/run':
+            # Trigger analysis endpoint
+            logger.info("Manual trigger received via /run")
+            try:
+                # Run pipeline in a separate thread to avoid blocking the response 
+                # (Cloud Run has a timeout, but for small batches this is fine)
+                threading.Thread(target=process_pipeline).start()
+                
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                self.wfile.write(b"Pipeline triggered. Check logs for progress.")
+            except Exception as e:
+                logger.error(f"Error triggering pipeline: {e}")
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(f"Error: {e}".encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def log_message(self, format, *args):
+        # Redirect http.server logs to our logger
+        logger.info("%s - - [%s] %s" % (self.address_string(), self.log_date_time_string(), format%args))
+
+def run_server():
     port = int(os.environ.get("PORT", 8080))
-    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
-    print(f"Health check server listening on port {port}...")
+    server = HTTPServer(("0.0.0.0", port), AnalysisServerHandler)
+    logger.info(f"Analysis server listening on port {port}...")
     server.serve_forever()
 
 """
@@ -75,13 +108,20 @@ ROLE_ID_MAP = {
 }
 
 # BigQuery Configuration
-BATCH_SIZE = 500
-PRODUCTION_TESTING = True # Set to True to process only a small batch for verification
+BATCH_SIZE = int(os.environ.get("BATCH_SIZE", 500))
+# Default to production-like behavior unless explicitly told otherwise in env
+PRODUCTION_TESTING = os.environ.get("PRODUCTION_MODE", "false").lower() != "true"
+
 BQ_PROJECT_ID = "sri-benchmarking-databases"
 BQ_DATASET = "pressure_monitoring"
 BQ_SOURCE_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_content"
 BQ_METADATA_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_metadata"
 BQ_DEST_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_enriched"
+
+if PRODUCTION_TESTING:
+    logger.info("RUNNING IN PRODUCTION TESTING MODE (Limited batches)")
+else:
+    logger.info("RUNNING IN FULL PRODUCTION MODE")
 
 # =================================================================================================
 # MODEL LOADING
@@ -214,57 +254,42 @@ def analyze_text(text):
 # MAIN PIPELINE
 # =================================================================================================
 
-def process_pipeline():
-    # 0. Start Health Check Server (for Cloud Run Services)
-    server_thread = threading.Thread(target=start_health_server, daemon=True)
-    server_thread.start()
-
-    # 1. Verify Models Exist (Fail fast if build is hollow)
-    required_paths = [INTERACTION_MODEL_PATH, ROLE_MODEL_PATH, EMBEDDING_MODEL_PATH, SENTIMENT_MODEL_PATH]
-    missing = [p for p in required_paths if not os.path.exists(p)]
-    if missing:
-        print("\n" + "!"*60)
-        print("CRITICAL ERROR: The following model directories are missing!")
-        for p in missing:
-            print(f" - {p}")
-        print("This usually means models weren't downloaded during the build.")
-        print("Ensure you switched your Cloud Build trigger to 'cloudbuild.yaml'.")
-        print("!"*60 + "\n")
-        sys.exit(1)
-
-    print("Models verified on disk. Starting pipeline...")
+    logger.info("Models verified on disk. Starting pipeline logic...")
     client = bigquery.Client(project=BQ_PROJECT_ID)
     
     total_processed = 0
     
-    while True:
-        print(f"Checking for new data to process in {BQ_SOURCE_TABLE}...")
-        # Determine query limit based on testing mode
-        current_limit = 20 if PRODUCTION_TESTING else BATCH_SIZE
-        
-        # Idempotent Query: Process only rows not already in destination
-        query = f"""
-            SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content
-            FROM `{BQ_SOURCE_TABLE}` t
-            LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
-            ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
-            WHERE e.transcript_id IS NULL
-            ORDER BY t.transcript_id, t.paragraph_number
-            LIMIT {current_limit}
-        """
-        
-        df = client.query(query).to_dataframe()
-        if df.empty:
-            if total_processed == 0:
-                print("No new data to process.")
+    try:
+        while True:
+            logger.info(f"Checking for new data to process in {BQ_SOURCE_TABLE}...")
+            # Determine query limit based on testing mode
+            current_limit = 20 if PRODUCTION_TESTING else BATCH_SIZE
+            
+            # Idempotent Query: Process only rows not already in destination
+            query = f"""
+                SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content
+                FROM `{BQ_SOURCE_TABLE}` t
+                LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
+                ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
+                WHERE e.transcript_id IS NULL
+                ORDER BY t.transcript_id, t.paragraph_number
+                LIMIT {current_limit}
+            """
+            
+            logger.info(f"Executing query: {query}")
+            df = client.query(query).to_dataframe()
+            
+            if df.empty:
+                if total_processed == 0:
+                    logger.info("No new data to process. All records in source seem to exist in destination.")
+                else:
+                    logger.info(f"Finished processing all new data. Total segments: {total_processed}")
+                break
+            
+            if PRODUCTION_TESTING:
+                logger.info(f"--- PRODUCTION TESTING MODE: Processing {len(df)} segments ---")
             else:
-                print(f"Finished processing all new data. Total segments: {total_processed}")
-            break
-        
-        if PRODUCTION_TESTING:
-            print(f"\n--- PRODUCTION TESTING MODE: Processing {len(df)} segments ---")
-        else:
-            print(f"\n--- Processing batch of {len(df)} segments (Total so far: {total_processed}) ---")
+                logger.info(f"--- Processing batch of {len(df)} segments (Total so far: {total_processed}) ---")
         
         df = rejoin_fragments(df)
         print(f"   (After rejoining: {len(df)} segments)")
@@ -310,21 +335,22 @@ def process_pipeline():
                     "sentiment_score": d['score']
                 })
 
-        # Write each batch to BigQuery
         if all_results:
             res_df = pd.DataFrame(all_results)
             job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
             client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
-            print(f"   Completed enrichment. Uploaded {len(res_df)} rows.")
+            logger.info(f"   Completed enrichment. Uploaded {len(res_df)} rows to {BQ_DEST_TABLE}")
             total_processed += len(df)
         else:
-            print("   No topics detected.")
+            logger.info("   No topics detected in this batch.")
             total_processed += len(df)
             
         # Exit if in testing mode after first batch
         if PRODUCTION_TESTING:
-            print("\nProduction testing complete. Toggle 'PRODUCTION_TESTING = False' for full run.")
+            logger.info("Production testing complete. Set 'PRODUCTION_MODE=true' env var for full run.")
             break
+    except Exception as e:
+        logger.error(f"FATAL ERROR in pipeline: {e}", exc_info=True)
 
 if __name__ == "__main__":
-    process_pipeline()
+    run_server()
