@@ -84,9 +84,9 @@ def load_model_safely(model_path, model_type="embedding"):
     print(f"Loading {model_type} model from {model_path}")
     try:
         if model_type == "embedding":
-            return SentenceTransformer(model_path, local_files_only=True)
+            return SentenceTransformer(model_path)
         else:
-            return pipeline("text-classification", model=model_path, local_files_only=True)
+            return pipeline("text-classification", model=model_path)
     except Exception as e:
         print(f"CRITICAL ERROR loading {model_type} model: {e}")
         sys.exit(1)
@@ -245,8 +245,8 @@ def analyze_batch(texts):
         
         try:
             for i in range(0, len(texts_input), batch_size):
-                batch_texts = texts_input[i:i+batch_size]
-                batch_pairs = pairs_input[i:i+batch_size]
+                batch_texts = [str(t) for t in texts_input[i:i+batch_size]]
+                batch_pairs = [str(p) for p in pairs_input[i:i+batch_size]]
                 
                 inputs = sentiment_analyzer.tokenizer(
                     batch_texts, 
