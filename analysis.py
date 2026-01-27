@@ -1,14 +1,18 @@
+import os
+
+# DISABLING TOKENIZERS PARALLELISM TO PREVENT DEADLOCKS IN CLOUD RUN
+# This is critical for avoiding hangs when using transformers in a threaded/multiprocess environment
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 import json
 import spacy
 from sentence_transformers import SentenceTransformer, util
 from transformers import pipeline
 import pandas as pd
 from google.cloud import bigquery
-import os
 import sys
 import time
 import re
-import threading
 import logging
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from generate_topics import generate_topics_json
@@ -34,16 +38,19 @@ class AnalysisServerHandler(BaseHTTPRequestHandler):
             # Trigger analysis endpoint
             logger.info("Manual trigger received via /run")
             try:
-                # Run pipeline in a separate thread to avoid blocking the response 
-                # (Cloud Run has a timeout, but for small batches this is fine)
-                threading.Thread(target=process_pipeline).start()
+                # Run synchronously to ensure Cloud Run keeps CPU allocated
+                # Using threading.Thread() creates background work that gets throttled
+                # immediately after the response is sent unless "CPU always allocated"
+                # is enabled. Synchronous processing is safer for batch jobs.
+                logger.info("Starting pipeline synchronously...")
+                process_pipeline()
                 
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain")
                 self.end_headers()
-                self.wfile.write(b"Pipeline triggered. Check logs for progress.")
+                self.wfile.write(b"Pipeline execution complete. Check logs for details.")
             except Exception as e:
-                logger.error(f"Error triggering pipeline: {e}")
+                logger.error(f"Error executing pipeline: {e}")
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(f"Error: {e}".encode())

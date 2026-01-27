@@ -9,3 +9,4 @@ pandas
 google-cloud-bigquery
 db-dtypes
 google-cloud-storage
+google-cloud-bigquery-storage
