@@ -30,11 +30,12 @@ It is synchronized with the production logic (analysis.py) but configured for lo
 # CONFIGURATION & SETUP
 # =================================================================================================
 
-# Automatically regenerate topics.json from topic_definitions.csv
-generate_topics_json()
+# Automatically regenerate test_topics.json from updated_issue_config_inputs.csv
+from generate_test_topics import generate_test_topics_json
+generate_test_topics_json()
 
 current_dir = os.getcwd() 
-TOPICS_FILE = os.path.join(current_dir, 'topics.json')
+TOPICS_FILE = os.path.join(current_dir, 'test_topics.json')
 
 # Threshold for vector similarity (0 to 1). 
 SIMILARITY_THRESHOLD = 0.7
@@ -111,6 +112,8 @@ def load_topics(filepath):
     return data.get('topics', [])
 
 topics_data = load_topics(TOPICS_FILE)
+# Create a map for quick exclusion lookups
+EXCLUSIONS_MAP = {t['label']: t.get('exclusions', []) for t in topics_data}
 
 # Prepare spaCy Matcher
 from spacy.matcher import Matcher
@@ -181,6 +184,12 @@ def analyze_batch(texts):
             
             text_results = []
             for topic in found_topics:
+                # Check for exclusionary terms
+                exclusions = EXCLUSIONS_MAP.get(topic, [])
+                if any(ext.lower() in text.lower() for ext in exclusions):
+                    print(f"      [EXCLUSION] Dropping topic '{topic}' due to exclusionary term match.")
+                    continue
+                    
                 text_results.append({"topic": topic, "idx": i})
                 sentiment_queue.append({"text": text, "text_pair": topic, "text_idx": i, "topic_idx": len(text_results)-1})
             results_by_text.append(text_results)
@@ -195,8 +204,15 @@ def analyze_batch(texts):
         text_results = []
         for idx, score in enumerate(cos_scores):
             if score.item() >= SIMILARITY_THRESHOLD:
+                topic = anchor_metadata[idx][0]
+                # Check for exclusionary terms
+                exclusions = EXCLUSIONS_MAP.get(topic, [])
+                if any(ext.lower() in text.lower() for ext in exclusions):
+                    # We don't print here to avoid flooding logs for vector matches
+                    continue
+                    
                 text_results.append({
-                    "topic": anchor_metadata[idx][0], 
+                    "topic": topic, 
                     "score": score.item(), 
                     "idx": i,
                     "matched_anchor": anchor_metadata[idx][1]
