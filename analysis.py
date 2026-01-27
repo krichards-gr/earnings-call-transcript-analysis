@@ -14,8 +14,10 @@ import sys
 import time
 import re
 import logging
+import torch
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from generate_topics import generate_topics_json
+
 
 # Configure logging
 logging.basicConfig(
@@ -283,18 +285,54 @@ def analyze_batch(texts):
         texts_input = [item["text"] for item in sentiment_queue]
         pairs_input = [item["text_pair"] for item in sentiment_queue]
         
-        # Run model (Passing parallel lists is the standard way for batching pairs)
-        sent_results = sentiment_analyzer(texts_input, text_pair=pairs_input, top_k=None, batch_size=4)
-        logger.info(f"      Finished sentiment analysis in {time.time() - start_time:.2f}s")
+        # Custom batch processing to handle text pairs correctly
+        # (Pipeline's text_pair argument doesn't handle batches of pairs intuitively)
+        batch_size = 4
+        sent_results_flat = []
         
-        for i, res in enumerate(sent_results):
-            # Sort scores to get the top label
-            res.sort(key=lambda x: x['score'], reverse=True)
-            meta = sentiment_queue[i]
-            # Update the original entry in results_by_text
-            target = results_by_text[meta["text_idx"]][meta["topic_idx"]]
-            target["sentiment"] = res[0]['label']
-            target["sentiment_score"] = res[0]['score']
+        try:
+            for i in range(0, len(texts_input), batch_size):
+                batch_texts = texts_input[i:i+batch_size]
+                batch_pairs = pairs_input[i:i+batch_size]
+                
+                # Tokenize batch of pairs
+                inputs = sentiment_analyzer.tokenizer(
+                    batch_texts, 
+                    text_pair=batch_pairs, 
+                    padding=True, 
+                    truncation=True, 
+                    return_tensors="pt"
+                )
+                
+                # Move inputs to same device as model
+                device = sentiment_analyzer.model.device
+                inputs = {k: v.to(device) for k, v in inputs.items()}
+                
+                # Inference
+                with torch.no_grad():
+                    outputs = sentiment_analyzer.model(**inputs)
+                    probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+                
+                # Process results
+                id2label = sentiment_analyzer.model.config.id2label
+                for j in range(len(batch_texts)):
+                    # Get top prediction (max score)
+                    score, label_idx = torch.max(probs[j], dim=0)
+                    label = id2label[label_idx.item()]
+                    sent_results_flat.append({"label": label, "score": score.item()})
+
+            logger.info(f"      Finished sentiment analysis in {time.time() - start_time:.2f}s")
+            
+            for i, res in enumerate(sent_results_flat):
+                meta = sentiment_queue[i]
+                target = results_by_text[meta["text_idx"]][meta["topic_idx"]]
+                target["sentiment"] = res['label']
+                target["sentiment_score"] = res['score']
+                
+        except Exception as e:
+            logger.error(f"Error during sentiment batch processing: {e}")
+            # Fallback or skip
+            pass
 
     return results_by_text
 
