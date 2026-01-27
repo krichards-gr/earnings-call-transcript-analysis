@@ -370,14 +370,37 @@ def run_local_analysis():
         interaction_type = INTERACTION_ID_MAP.get(raw_interaction, raw_interaction)
         role_label = ROLE_ID_MAP.get(raw_role, raw_role)
         
-        # Session Tracking Logic
-        # If Operator is introducing someone, start new session
-        if role_label == "Operator" and ("next question" in text.lower() or "question comes" in text.lower()):
+        # Session tracking logic
+        # Session tracking regexes
+        SESSION_START_PATTERNS = [
+            r"next question (?:comes|is coming)",
+            r"next we (?:have|will go to)",
+            r"question (?:comes|is coming) from",
+            r"your first question (?:comes|is coming)",
+            r"move to the line of",
+            r"go to the line of",
+            r"from the line of",
+            r"comes? from the line of"
+        ]
+        session_start_regex = re.compile("|".join(SESSION_START_PATTERNS), re.IGNORECASE)
+        
+        # Analyst extraction regex
+        intro_regex = re.compile(
+            r"(?:line of|comes from|is from|from|at)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from|at|is coming)", 
+            re.IGNORECASE
+        )
+
+        lower_text = text.lower()
+        is_operator = role_label == "Operator"
+        has_session_start_keyword = session_start_regex.search(lower_text)
+        is_transition_text = any(k in lower_text for k in ["question", "line of", "analyst"])
+
+        if (is_operator and is_transition_text) or has_session_start_keyword:
             current_session_id += 1
             match = intro_regex.search(text)
             if match:
                 current_analyst = match.group(1).strip()
-            else:
+            elif is_operator and "question" in lower_text:
                 current_analyst = "Unknown Analyst"
             print(f"   [SESSION] New Session {current_session_id}: {current_analyst}")
         

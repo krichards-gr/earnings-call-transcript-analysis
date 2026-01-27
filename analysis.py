@@ -345,6 +345,8 @@ def process_pipeline():
     client = bigquery.Client(project=BQ_PROJECT_ID)
     
     total_processed = 0
+    current_session_id = 0
+    current_analyst = "None"
     
     try:
         while True:
@@ -405,9 +407,25 @@ def process_pipeline():
 
             # 3. Assemble and Checkpoint Upload
             all_results = []
-            current_session_id = 0
-            current_analyst = "None"
-            intro_regex = re.compile(r"(?:question comes from|from the line of|from)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from)", re.IGNORECASE)
+            # Session tracking regexes
+            SESSION_START_PATTERNS = [
+                r"next question (?:comes|is coming)",
+                r"next we (?:have|will go to)",
+                r"question (?:comes|is coming) from",
+                r"your first question (?:comes|is coming)",
+                r"move to the line of",
+                r"go to the line of",
+                r"from the line of",
+                r"comes? from the line of"
+            ]
+            session_start_regex = re.compile("|".join(SESSION_START_PATTERNS), re.IGNORECASE)
+            
+            # Analyst extraction regex
+            # Optimized to match common "Operator" phrasing
+            intro_regex = re.compile(
+                r"(?:line of|comes from|is from|from|at)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from|at|is coming)", 
+                re.IGNORECASE
+            )
 
             # Checkpoint variables
             CHECKPOINT_SIZE = 10 
@@ -419,11 +437,26 @@ def process_pipeline():
                 role_label = ROLE_ID_MAP.get(role_res, role_res)
                 text = str(row['content'])
 
-                # Session tracking
-                if role_label == "Operator" and ("next question" in text.lower() or "question comes" in text.lower()):
+                # Session tracking:
+                # We trigger a new session if:
+                # 1. Role is Operator (strong role signal) AND we see any Q&A keyword
+                # 2. OR if we see a very strong "next question" pattern (strong text signal) regardless of role
+                lower_text = text.lower()
+                is_operator = role_label == "Operator"
+                has_session_start_keyword = session_start_regex.search(lower_text)
+                
+                # Broad keywords for operator when they don't match the specific start patterns
+                is_transition_text = any(k in lower_text for k in ["question", "line of", "analyst"])
+
+                if (is_operator and is_transition_text) or has_session_start_keyword:
                     current_session_id += 1
                     match = intro_regex.search(text)
-                    current_analyst = match.group(1).strip() if match else "Unknown Analyst"
+                    if match:
+                        current_analyst = match.group(1).strip()
+                    elif is_operator and "question" in lower_text:
+                        # Fallback if regex fails but we know it's a question transition
+                        current_analyst = "Unknown Analyst"
+                    # else: keep current_analyst from previous turn or leave as is if it's the operator again
 
                 detected = enrichment_results[i]
                 if not detected: 
