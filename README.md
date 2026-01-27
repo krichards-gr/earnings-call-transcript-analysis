@@ -10,13 +10,14 @@ This tool performs deep analysis on earnings call transcripts by identifying top
 *   **Aspect-Based Sentiment Analysis (ABSA)**:
     *   Uses `yangheng/deberta-v3-base-absa-v1.1` to determine sentiment toward detected topics.
 *   **Speaker & Role Classification**:
-    *   **Role**: Classifies speakers as **Analyst**, **Executive**, **Operator**, or **Admin** using the local `role_class_v1` model.
-    *   **Interaction Type**: Classifies segments as **Admin**, **Answer**, or **Question** using the `eng_type_class_v1` model.
-*   **Q&A Clustering**:
-    *   Automatically groups questions and their corresponding answers into "Sessions" based on Operator introductions.
+    *   **Role**: Classifies speakers as **Analyst**, **Executive**, **Operator**, or **Admin**.
+    *   **Interaction Type**: Classifies segments as **Admin**, **Answer**, or **Question**.
+*   **Q&A Clustering (Robust)**:
+    *   Automatically groups questions and their corresponding answers into "Sessions" using a resilient regex-based detection system that handles varied operator phrasing and classification noise.
+*   **Optimized Batch Processing**:
+    *   Both local and cloud pipelines use vectorized batch inference for classification and sentiment analysis, significantly improving performance.
 *   **Data Integrity**:
     *   **Fragment Rejoining**: Automatically rejoins segments split by line breaks to ensure models process complete statements.
-    *   **Performance Monitoring**: Prints inference time per classification in the console.
 
 ## Usage
 
@@ -28,56 +29,45 @@ Run the script to process data from BigQuery and save results locally:
 python local_analysis.py
 ```
 
-**Workflow Configuration**:
-- `PRODUCTION_TESTING`: Set to `True` (default) to process only 20 segments for verification. Set to `False` for the full run.
-- `WRITE_TO_BQ`: Set to `True` to upload results to the cloud.
-- `INCLUDE_CONTENT`: Set to `True` to include the original text in the output for verification.
+**Testing**:
+Run the automated test script to verify local functionality:
+```bash
+python test_local_pipeline.py
+```
 
-## Deployment (Cloud Run)
+### Production Deployment (Cloud Run)
 
-### Model Storage (Automatic)
-The `Dockerfile` is configured to automatically download and bake all external models into the image during the build process. This includes:
-- `en_core_web_sm` (spaCy)
-- `all-MiniLM-L6-v2` (SentenceTransformer)
-- `deberta-v3-base-absa-v1.1` (Sentiment)
-- Local classification models (`eng_type_class_v1`, `role_class_v1`)
+The production pipeline (`analysis.py`) is designed for Cloud Run and includes a health check and an execution trigger.
 
-This ensures zero runtime latency and removes the need for internet access during execution on Cloud Run.
+**Triggering Execution**:
+Send a GET request to the `/run` endpoint:
+```bash
+curl https://[YOUR-SERVICE-URL]/run
+```
 
-### Topic Regeneration
-If you modify `topic_definitions.csv`, the script will automatically regenerate `topics.json` on the next run.
+**Testing**:
+Run the automated test script to verify cloud connectivity and execution:
+```bash
+python test_cloud_pipeline.py [YOUR-SERVICE-URL]
+```
 
-### Production Output Schema (`earnings_call_transcript_enriched`)
+## Configuration
 
-The focused production table contains:
+- `BATCH_SIZE`: Number of segments to process in one BigQuery cycle (default: 500).
+- `PRODUCTION_MODE`: Set to `true` for full run, `false` for limited testing batches.
+- `WRITE_TO_BQ`: (Local only) Enable/disable writing results back to BigQuery.
+- `INCLUDE_CONTENT`: Include original text in the output for easier manual verification.
 
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `transcript_id` | STRING | Unique ID for the transcript. |
-| `paragraph_number` | INTEGER | Original paragraph/segment number. |
-| `speaker` | STRING | Name of the speaker. |
-| `qa_session_id` | INTEGER | ID grouping a specific analyst exchange. |
-| `qa_session_label` | STRING | Name of the analyst in the exchange. |
-| `interaction_type` | STRING | Admin, Question, or Answer. |
-| `role` | STRING | Analyst, Executive, Operator, or Admin. |
-| `topic` | STRING | The detected topic label. |
-| `sentiment_label` | STRING | Positive, Negative, or Neutral. |
-| `sentiment_score` | FLOAT | Confidence score for the sentiment. |
+## Project Structure
 
-### Local/Debug Output Schema (`earnings_call_transcript_enriched_local`)
-
-The comprehensive local table includes all production fields plus:
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `all_scores` | STRING | Full sentiment probability breakdown. |
-| `similarity_score` | FLOAT | Score for vector-based topic matches. |
-| `matched_anchor` | STRING | The anchor term matched via vector similarity. |
-| `content` | STRING | The original segment text (if enabled). |
-| `report_date` | DATE | Date of the earnings call. |
-| `symbol` | STRING | Ticker symbol. |
+- `analysis.py`: Main production entry point for Cloud Run.
+- `local_analysis.py`: Synchronized local version for testing and development.
+- `download_models.py`: Utility to bake models into the Docker image.
+- `generate_topics.py`: Utility to transform `topic_definitions.csv` into `topics.json`.
+- `test_*.py`: Automated testing scripts for local and cloud pipelines.
 
 ## Installation
 
 1.  **Dependencies**: `pip install -r requirements.txt`
 2.  **spaCy**: `python -m spacy download en_core_web_sm`
+3.  **Models**: Run `python download_models.py` to ensure local availability.
