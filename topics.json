@@ -1878,6 +1878,15 @@
         "theft",
         "worker safety"
       ]
+    },
+    {
+      "label": "Climate Change",
+      "patterns": [],
+      "anchors": [],
+      "exclusions": [
+        "financial results",
+        "plastic surgery"
+      ]
     }
   ]
 }

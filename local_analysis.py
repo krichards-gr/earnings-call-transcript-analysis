@@ -30,12 +30,11 @@ It is synchronized with the production logic (analysis.py) but configured for lo
 # CONFIGURATION & SETUP
 # =================================================================================================
 
-# Automatically regenerate test_topics.json from updated_issue_config_inputs.csv
-from generate_test_topics import generate_test_topics_json
-generate_test_topics_json()
+# Automatically regenerate topics.json from topic_definitions.csv
+generate_topics_json()
 
 current_dir = os.getcwd() 
-TOPICS_FILE = os.path.join(current_dir, 'test_topics.json')
+TOPICS_FILE = os.path.join(current_dir, 'topics.json')
 
 # Threshold for vector similarity (0 to 1). 
 SIMILARITY_THRESHOLD = 0.7

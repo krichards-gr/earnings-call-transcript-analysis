@@ -1,5 +1,0 @@
-pandas
-spacy
-sentence-transformers
-torch
-transformers

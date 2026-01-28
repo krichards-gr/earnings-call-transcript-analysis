@@ -28,11 +28,13 @@ def generate_topics_json(csv_path='topic_definitions.csv', json_path='topics.jso
         if term_type == 'anchor term':
             topics_dict[topic_label]["anchors"].append(term)
         elif term_type == 'pattern':
-            # Tokenize the term for spaCy patterns
-            # We use simple whitespace split for now, mirroring the extraction logic
             tokens = term.split()
             pattern = [{"LOWER": t.lower()} for t in tokens]
             topics_dict[topic_label]["patterns"].append(pattern)
+        elif term_type == 'exclusionary term':
+            if "exclusions" not in topics_dict[topic_label]:
+                topics_dict[topic_label]["exclusions"] = []
+            topics_dict[topic_label]["exclusions"].append(term.lower())
             
     output_data = {
         "topics": list(topics_dict.values())

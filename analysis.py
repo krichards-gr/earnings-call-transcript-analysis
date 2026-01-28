@@ -176,6 +176,8 @@ def load_topics(filepath):
     return data.get('topics', [])
 
 topics_data = load_topics(TOPICS_FILE)
+# Create a map for quick exclusion lookups
+EXCLUSIONS_MAP = {t['label']: t.get('exclusions', []) for t in topics_data}
 
 # Prepare spaCy Matcher
 from spacy.matcher import Matcher
@@ -249,6 +251,12 @@ def analyze_batch(texts):
             
             text_results = []
             for topic in found_topics:
+                # Check for exclusionary terms
+                exclusions = EXCLUSIONS_MAP.get(topic, [])
+                if any(ext.lower() in text.lower() for ext in exclusions):
+                    logger.info(f"      [EXCLUSION] Dropping topic '{topic}' due to exclusionary term match.")
+                    continue
+                    
                 text_results.append({"topic": topic, "idx": i})
                 sentiment_queue.append({"text": text, "text_pair": topic, "text_idx": i, "topic_idx": len(text_results)-1})
             results_by_text.append(text_results)
@@ -263,7 +271,13 @@ def analyze_batch(texts):
         text_results = []
         for idx, score in enumerate(cos_scores):
             if score.item() >= SIMILARITY_THRESHOLD:
-                text_results.append({"topic": anchor_metadata[idx][0], "score": score.item(), "idx": i})
+                topic = anchor_metadata[idx][0]
+                # Check for exclusionary terms
+                exclusions = EXCLUSIONS_MAP.get(topic, [])
+                if any(ext.lower() in text.lower() for ext in exclusions):
+                    continue
+                    
+                text_results.append({"topic": topic, "score": score.item(), "idx": i})
         
         # Sort and take Top 3
         text_results.sort(key=lambda x: x['score'], reverse=True)
