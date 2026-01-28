@@ -361,6 +361,7 @@ def process_pipeline():
     total_processed = 0
     current_session_id = 0
     current_analyst = "None"
+    last_transcript_id = None
     
     try:
         while True:
@@ -445,6 +446,12 @@ def process_pipeline():
             CHECKPOINT_SIZE = 10 
             
             for i, (_, row) in enumerate(df.iterrows()):
+                # Reset session tracking if we've moved to a new transcript
+                if last_transcript_id is not None and row['transcript_id'] != last_transcript_id:
+                    current_session_id = 0
+                    current_analyst = "None"
+                last_transcript_id = row['transcript_id']
+
                 int_res = int_results[i]['label']
                 role_res = role_results[i]['label']
                 interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
