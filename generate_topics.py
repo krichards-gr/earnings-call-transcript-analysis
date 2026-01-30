@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import os
 
-def generate_topics_json(csv_path='topic_definitions.csv', json_path='topics.json'):
+def generate_topics_json(csv_path='updated_issue_config_inputs.csv', json_path='topics.json'):
     print(f"Generating {json_path} from {csv_path}...")
     
     if not os.path.exists(csv_path):
