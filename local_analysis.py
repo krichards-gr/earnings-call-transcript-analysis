@@ -167,7 +167,7 @@ def analyze_batch(texts):
         return []
 
     query_embeddings = embedder.encode(texts, convert_to_tensor=True)
-    all_scores = util.cos_sim(query_embeddings, anchor_embeddings)
+    all_scores = util.cos_sim(query_embeddings, anchor_embeddings) if anchor_embeddings is not None else None
     
     results_by_text = []
     sentiment_queue = []

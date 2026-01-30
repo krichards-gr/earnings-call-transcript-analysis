@@ -8,7 +8,7 @@ SENTIMENT_MODEL_PATH = os.path.join(current_dir, "models", "deberta-v3-base-absa
 print(f"Loading model from {SENTIMENT_MODEL_PATH}...")
 try:
     # Test loading with local_files_only
-    sentiment_analyzer = pipeline("text-classification", model=SENTIMENT_MODEL_PATH, local_files_only=True)
+    sentiment_analyzer = pipeline("text-classification", model=SENTIMENT_MODEL_PATH)
     print("Model loaded successfully.")
     
     tokenizer = sentiment_analyzer.tokenizer

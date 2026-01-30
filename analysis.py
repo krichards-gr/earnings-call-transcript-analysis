@@ -148,9 +148,9 @@ def load_model_safely(model_path, model_type="embedding"):
     print(f"Loading {model_type} model from {model_path}")
     try:
         if model_type == "embedding":
-            return SentenceTransformer(model_path, local_files_only=True)
+            return SentenceTransformer(model_path)
         else:
-            return pipeline("text-classification", model=model_path, local_files_only=True)
+            return pipeline("text-classification", model=model_path)
     except Exception as e:
         print(f"CRITICAL ERROR loading {model_type} model: {e}")
         sys.exit(1)
@@ -234,7 +234,7 @@ def analyze_batch(texts):
     # 1. Topic Detection (Vectorized)
     # This is already fast as it uses matrix multiplication
     query_embeddings = embedder.encode(texts, convert_to_tensor=True)
-    all_scores = util.cos_sim(query_embeddings, anchor_embeddings) # Matrix of [len(texts), len(anchors)]
+    all_scores = util.cos_sim(query_embeddings, anchor_embeddings) if anchor_embeddings is not None else None
     
     # Pre-filter topics for each text
     results_by_text = []
