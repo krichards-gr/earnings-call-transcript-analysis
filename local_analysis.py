@@ -112,7 +112,10 @@ def load_topics(filepath):
 
 topics_data = load_topics(TOPICS_FILE)
 # Create a map for quick exclusion lookups
+# Create a map for quick exclusion lookups
 EXCLUSIONS_MAP = {t['label']: t.get('exclusions', []) for t in topics_data}
+# Create a map for issue area lookups
+ISSUE_AREA_MAP = {t['label']: t.get('issue_area', 'Unknown') for t in topics_data}
 
 # Prepare spaCy Matcher
 from spacy.matcher import Matcher
@@ -409,7 +412,11 @@ def run_local_analysis():
                 "qa_session_label": current_analyst,
                 "interaction_type": interaction_type,
                 "role": role_label,
+                "interaction_type": interaction_type,
+                "role": role_label,
                 "topic": d.get('topic'),
+                "issue_area": ISSUE_AREA_MAP.get(d.get('topic'), "Unknown"),
+                "issue_subtopic": d.get('topic'),
                 "sentiment_label": d.get('sentiment'),
                 "sentiment_score": d.get('sentiment_score'),
                 "all_scores": d.get('all_scores'),

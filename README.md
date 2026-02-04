@@ -1,12 +1,13 @@
 # Earnings Call Transcript Analysis
 
-This tool performs deep analysis on earnings call transcripts by identifying topics, assessing sentiment, and classifying speaker roles and interaction types. It also clusters question-and-answer sequences for better traceability.
+This tool performs deep analysis on earnings call transcripts by identifying topics, assessing sentiment, and classifying speaker roles and interaction types. It also clusters question-and-answer sequences for better traceability. It now includes enhanced metadata mapping for **Issue Areas** and **Subtopics**.
 
 ## Features
 
 *   **Topic Detection**:
     *   **Exact Match**: Uses spaCy match patterns to find specific keywords.
     *   **Vector Similarity**: Uses `sentence-transformers` (`all-MiniLM-L6-v2`) for semantic matching.
+    *   **Metadata Enrichment**: Automatically maps detected topics to their broader **Issue Area** and **Subtopic** based on the configuration.
 *   **Aspect-Based Sentiment Analysis (ABSA)**:
     *   Uses `yangheng/deberta-v3-base-absa-v1.1` to determine sentiment toward detected topics.
 *   **Speaker & Role Classification**:
@@ -63,7 +64,7 @@ python test_cloud_pipeline.py [YOUR-SERVICE-URL]
 - `analysis.py`: Main production entry point for Cloud Run.
 - `local_analysis.py`: Synchronized local version for testing and development.
 - `download_models.py`: Utility to bake models into the Docker image.
-- `generate_topics.py`: Utility to transform `topic_definitions.csv` into `topics.json`.
+- `generate_topics.py`: Utility to transform raw CSV inputs and generate `topics.json`.
 - `test_*.py`: Automated testing scripts for local and cloud pipelines.
 
 ## Installation

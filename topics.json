@@ -2,6 +2,7 @@
   "topics": [
     {
       "label": "Climate Change",
+      "issue_area": "Climate Change & Sustainability",
       "patterns": [
         [
           {
@@ -13,7 +14,17 @@
         ],
         [
           {
+            "LOWER": "#climatechange"
+          }
+        ],
+        [
+          {
             "LOWER": "sustainability"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sustainability"
           }
         ],
         [
@@ -26,12 +37,30 @@
         ],
         [
           {
+            "LOWER": "#carbon"
+          },
+          {
+            "LOWER": "offsets"
+          }
+        ],
+        [
+          {
             "LOWER": "esg"
           }
         ],
         [
           {
+            "LOWER": "#esg"
+          }
+        ],
+        [
+          {
             "LOWER": "anti-esg"
+          }
+        ],
+        [
+          {
+            "LOWER": "#anti-esg"
           }
         ],
         [
@@ -44,6 +73,11 @@
         ],
         [
           {
+            "LOWER": "#antiesg"
+          }
+        ],
+        [
+          {
             "LOWER": "fudiciary"
           },
           {
@@ -52,7 +86,17 @@
         ],
         [
           {
+            "LOWER": "#fudiciaryduty"
+          }
+        ],
+        [
+          {
             "LOWER": "divestment"
+          }
+        ],
+        [
+          {
+            "LOWER": "#divestment"
           }
         ],
         [
@@ -65,7 +109,20 @@
         ],
         [
           {
+            "LOWER": "#netzero"
+          }
+        ],
+        [
+          {
             "LOWER": "carbon"
+          },
+          {
+            "LOWER": "neutral"
+          }
+        ],
+        [
+          {
+            "LOWER": "#carbon"
           },
           {
             "LOWER": "neutral"
@@ -77,6 +134,11 @@
           },
           {
             "LOWER": "emissions"
+          }
+        ],
+        [
+          {
+            "LOWER": "#carbonemissions"
           }
         ],
         [
@@ -122,10 +184,15 @@
           }
         ]
       ],
-      "anchors": []
+      "anchors": [],
+      "exclusions": [
+        "surgery",
+        "#surgery"
+      ]
     },
     {
       "label": "Energy Sources",
+      "issue_area": "Climate Change & Sustainability",
       "patterns": [
         [
           {
@@ -133,6 +200,11 @@
           },
           {
             "LOWER": "energy"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cleanenergy"
           }
         ],
         [
@@ -153,17 +225,32 @@
         ],
         [
           {
+            "LOWER": "#fossilfuel"
+          }
+        ],
+        [
+          {
             "LOWER": "big"
+          },
+          {
+            "LOWER": "oil"
+          }
+        ],
+        [
+          {
+            "LOWER": "#big"
           },
           {
             "LOWER": "oil"
           }
         ]
       ],
-      "anchors": []
+      "anchors": [],
+      "exclusions": []
     },
     {
       "label": "ESG",
+      "issue_area": "Climate Change & Sustainability",
       "patterns": [
         [
           {
@@ -172,12 +259,27 @@
         ],
         [
           {
+            "LOWER": "#esg"
+          }
+        ],
+        [
+          {
             "LOWER": "esg"
           }
         ],
         [
           {
+            "LOWER": "#esg"
+          }
+        ],
+        [
+          {
             "LOWER": "anti-esg"
+          }
+        ],
+        [
+          {
+            "LOWER": "#anti-esg"
           }
         ],
         [
@@ -198,7 +300,17 @@
         ],
         [
           {
+            "LOWER": "#antiesg"
+          }
+        ],
+        [
+          {
             "LOWER": "csddd"
+          }
+        ],
+        [
+          {
+            "LOWER": "#csddd"
           }
         ],
         [
@@ -211,17 +323,29 @@
         ],
         [
           {
+            "LOWER": "#secclimate"
+          }
+        ],
+        [
+          {
             "LOWER": "sustainability"
           },
           {
             "LOWER": "disclosure"
           }
+        ],
+        [
+          {
+            "LOWER": "#sustainabilitydisclosure"
+          }
         ]
       ],
-      "anchors": []
+      "anchors": [],
+      "exclusions": []
     },
     {
       "label": "Natural Disasters",
+      "issue_area": "Climate Change & Sustainability",
       "patterns": [
         [
           {
@@ -233,10 +357,20 @@
         ],
         [
           {
+            "LOWER": "#naturaldisaster"
+          }
+        ],
+        [
+          {
             "LOWER": "natural"
           },
           {
             "LOWER": "disasters"
+          }
+        ],
+        [
+          {
+            "LOWER": "#naturaldisasters"
           }
         ],
         [
@@ -329,10 +463,12 @@
           }
         ]
       ],
-      "anchors": []
+      "anchors": [],
+      "exclusions": []
     },
     {
       "label": "Net Zero",
+      "issue_area": "Climate Change & Sustainability",
       "patterns": [
         [
           {
@@ -340,6 +476,11 @@
           },
           {
             "LOWER": "zero"
+          }
+        ],
+        [
+          {
+            "LOWER": "#netzero"
           }
         ],
         [
@@ -352,7 +493,17 @@
         ],
         [
           {
+            "LOWER": "#emissionsreduction"
+          }
+        ],
+        [
+          {
             "LOWER": "sbti"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sbti"
           }
         ],
         [
@@ -367,14 +518,21 @@
           }
         ]
       ],
-      "anchors": []
+      "anchors": [],
+      "exclusions": []
     },
     {
       "label": "Plastic",
+      "issue_area": "Climate Change & Sustainability",
       "patterns": [
         [
           {
             "LOWER": "plastic"
+          }
+        ],
+        [
+          {
+            "LOWER": "#plastic"
           }
         ],
         [
@@ -387,7 +545,17 @@
         ],
         [
           {
+            "LOWER": "#plasticwaste"
+          }
+        ],
+        [
+          {
             "LOWER": "recycle"
+          }
+        ],
+        [
+          {
+            "LOWER": "#recycle"
           }
         ],
         [
@@ -413,7 +581,22 @@
         ],
         [
           {
+            "LOWER": "#sustainablepackaging"
+          }
+        ],
+        [
+          {
+            "LOWER": "#pfas"
+          }
+        ],
+        [
+          {
             "LOWER": "pfas"
+          }
+        ],
+        [
+          {
+            "LOWER": "#foreverchemicals"
           }
         ],
         [
@@ -426,14 +609,738 @@
         ],
         [
           {
+            "LOWER": "#foreverchemical"
+          }
+        ],
+        [
+          {
             "LOWER": "forever"
           },
           {
             "LOWER": "chemical"
           }
+        ],
+        [
+          {
+            "LOWER": "reusable"
+          },
+          {
+            "LOWER": "packaging"
+          }
+        ],
+        [
+          {
+            "LOWER": "recycled"
+          },
+          {
+            "LOWER": "packaging"
+          }
+        ],
+        [
+          {
+            "LOWER": "plastic"
+          },
+          {
+            "LOWER": "pollution"
+          },
+          {
+            "LOWER": "crisis"
+          }
+        ],
+        [
+          {
+            "LOWER": "circular"
+          },
+          {
+            "LOWER": "economy"
+          }
+        ],
+        [
+          {
+            "LOWER": "compostable"
+          },
+          {
+            "LOWER": "packaging"
+          }
+        ],
+        [
+          {
+            "LOWER": "plastic"
+          },
+          {
+            "LOWER": "treaty"
+          }
+        ],
+        [
+          {
+            "LOWER": "global"
+          },
+          {
+            "LOWER": "plastic"
+          },
+          {
+            "LOWER": "treaty"
+          }
+        ],
+        [
+          {
+            "LOWER": "#plasticpollutioncrisis"
+          }
+        ],
+        [
+          {
+            "LOWER": "#recycledpackaging"
+          }
+        ],
+        [
+          {
+            "LOWER": "#reusablepackaging"
+          }
+        ],
+        [
+          {
+            "LOWER": "plastic"
+          },
+          {
+            "LOWER": "reduction"
+          }
+        ],
+        [
+          {
+            "LOWER": "plastic"
+          },
+          {
+            "LOWER": "crisis"
+          }
+        ],
+        [
+          {
+            "LOWER": "#plasticrisis"
+          }
+        ],
+        [
+          {
+            "LOWER": "recyclable"
+          },
+          {
+            "LOWER": "packaging"
+          }
+        ],
+        [
+          {
+            "LOWER": "#recyclablepackaging"
+          }
+        ],
+        [
+          {
+            "LOWER": "ethylene"
+          },
+          {
+            "LOWER": "oxide"
+          }
+        ],
+        [
+          {
+            "LOWER": "pfoa"
+          }
+        ],
+        [
+          {
+            "LOWER": "#pfoa"
+          }
         ]
       ],
-      "anchors": []
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Sustainability",
+      "issue_area": "Climate Change & Sustainability",
+      "patterns": [
+        [
+          {
+            "LOWER": "sustainable"
+          },
+          {
+            "LOWER": "agriculture"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sustainableagriculture"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sustainableag"
+          }
+        ],
+        [
+          {
+            "LOWER": "sustainable"
+          },
+          {
+            "LOWER": "farming"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sustainablefarming"
+          }
+        ],
+        [
+          {
+            "LOWER": "water"
+          },
+          {
+            "LOWER": "stewardship"
+          }
+        ],
+        [
+          {
+            "LOWER": "#waterstewardship"
+          }
+        ],
+        [
+          {
+            "LOWER": "water"
+          },
+          {
+            "LOWER": "conservation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#water"
+          },
+          {
+            "LOWER": "conservation"
+          }
+        ],
+        [
+          {
+            "LOWER": "water"
+          },
+          {
+            "LOWER": "waste"
+          }
+        ],
+        [
+          {
+            "LOWER": "#waterconsumption"
+          }
+        ],
+        [
+          {
+            "LOWER": "water"
+          },
+          {
+            "LOWER": "consumption"
+          }
+        ],
+        [
+          {
+            "LOWER": "water"
+          },
+          {
+            "LOWER": "scarcity"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporate"
+          },
+          {
+            "LOWER": "water"
+          },
+          {
+            "LOWER": "stewardship"
+          }
+        ],
+        [
+          {
+            "LOWER": "water"
+          },
+          {
+            "LOWER": "risk"
+          }
+        ],
+        [
+          {
+            "LOWER": "water"
+          },
+          {
+            "LOWER": "stress"
+          }
+        ],
+        [
+          {
+            "LOWER": "deforestation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#deforestation"
+          }
+        ],
+        [
+          {
+            "LOWER": "cocoa"
+          },
+          {
+            "LOWER": "and"
+          },
+          {
+            "LOWER": "forests"
+          },
+          {
+            "LOWER": "initiative"
+          }
+        ],
+        [
+          {
+            "LOWER": "cocoa-related"
+          },
+          {
+            "LOWER": "deforestation"
+          }
+        ],
+        [
+          {
+            "LOWER": "cocoa"
+          },
+          {
+            "LOWER": "&"
+          },
+          {
+            "LOWER": "forests"
+          },
+          {
+            "LOWER": "initiative"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cocoa-relateddeforestation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cocoaandforests"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporate"
+          },
+          {
+            "LOWER": "responsibility"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "AI Equity",
+      "issue_area": "AI",
+      "patterns": [
+        [
+          {
+            "LOWER": "hatespeech"
+          }
+        ],
+        [
+          {
+            "LOWER": "#hatespeech"
+          }
+        ],
+        [
+          {
+            "LOWER": "online"
+          },
+          {
+            "LOWER": "harassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "#onlineharassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "racist"
+          },
+          {
+            "LOWER": "slurs"
+          }
+        ],
+        [
+          {
+            "LOWER": "#racistslurs"
+          }
+        ],
+        [
+          {
+            "LOWER": "ai"
+          },
+          {
+            "LOWER": "bias"
+          }
+        ],
+        [
+          {
+            "LOWER": "#aibias"
+          }
+        ],
+        [
+          {
+            "LOWER": "biased"
+          },
+          {
+            "LOWER": "alogrithms"
+          }
+        ],
+        [
+          {
+            "LOWER": "#biasedalgorithms"
+          }
+        ],
+        [
+          {
+            "LOWER": "facial"
+          },
+          {
+            "LOWER": "recognition"
+          }
+        ],
+        [
+          {
+            "LOWER": "#facialrecognition"
+          }
+        ],
+        [
+          {
+            "LOWER": "predictive"
+          },
+          {
+            "LOWER": "policing"
+          }
+        ],
+        [
+          {
+            "LOWER": "#predictivepolicing"
+          }
+        ],
+        [
+          {
+            "LOWER": "biometric"
+          },
+          {
+            "LOWER": "data"
+          }
+        ],
+        [
+          {
+            "LOWER": "#biometricdata"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "AI Liability",
+      "issue_area": "AI",
+      "patterns": [
+        [
+          {
+            "LOWER": "section"
+          },
+          {
+            "LOWER": "230"
+          }
+        ],
+        [
+          {
+            "LOWER": "#section230"
+          }
+        ],
+        [
+          {
+            "LOWER": "cybercrimes"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cybercrimes"
+          }
+        ],
+        [
+          {
+            "LOWER": "algorithmic"
+          },
+          {
+            "LOWER": "decisions"
+          }
+        ],
+        [
+          {
+            "LOWER": "#algorithmicdecisions"
+          }
+        ],
+        [
+          {
+            "LOWER": "notice-and-choice"
+          }
+        ],
+        [
+          {
+            "LOWER": "#noticeandchoice"
+          }
+        ],
+        [
+          {
+            "LOWER": "opt-out"
+          }
+        ],
+        [
+          {
+            "LOWER": "#opt-out"
+          }
+        ],
+        [
+          {
+            "LOWER": "gdpr"
+          }
+        ],
+        [
+          {
+            "LOWER": "#gdpr"
+          }
+        ],
+        [
+          {
+            "LOWER": "liability"
+          }
+        ],
+        [
+          {
+            "LOWER": "#liability"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "AI Misinformation",
+      "issue_area": "AI",
+      "patterns": [
+        [
+          {
+            "LOWER": "misinformation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#misinformation"
+          }
+        ],
+        [
+          {
+            "LOWER": "disinformation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#disinformation"
+          }
+        ],
+        [
+          {
+            "LOWER": "hallucinations"
+          }
+        ],
+        [
+          {
+            "LOWER": "#hallucinations"
+          }
+        ],
+        [
+          {
+            "LOWER": "deepfakes"
+          }
+        ],
+        [
+          {
+            "LOWER": "#deepfakes"
+          }
+        ],
+        [
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "censorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "#politicalcensorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "real"
+          },
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "ads"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "#realpoliticaladsact"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "AI Privacy",
+      "issue_area": "AI",
+      "patterns": [
+        [
+          {
+            "LOWER": "tracking"
+          }
+        ],
+        [
+          {
+            "LOWER": "#tracking"
+          }
+        ],
+        [
+          {
+            "LOWER": "geolocation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#geolocation"
+          }
+        ],
+        [
+          {
+            "LOWER": "data"
+          },
+          {
+            "LOWER": "collection"
+          }
+        ],
+        [
+          {
+            "LOWER": "#datacollection"
+          }
+        ],
+        [
+          {
+            "LOWER": "adtech"
+          }
+        ],
+        [
+          {
+            "LOWER": "#adtech"
+          }
+        ],
+        [
+          {
+            "LOWER": "kids"
+          },
+          {
+            "LOWER": "online"
+          }
+        ],
+        [
+          {
+            "LOWER": "#kidsonline"
+          }
+        ],
+        [
+          {
+            "LOWER": "mass"
+          },
+          {
+            "LOWER": "surveillance"
+          }
+        ],
+        [
+          {
+            "LOWER": "#masssurveillance"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "AI Workforce",
+      "issue_area": "AI",
+      "patterns": [
+        [
+          {
+            "LOWER": "tech"
+          },
+          {
+            "LOWER": "layoffs"
+          }
+        ],
+        [
+          {
+            "LOWER": "#techlayoffs"
+          }
+        ],
+        [
+          {
+            "LOWER": "automate"
+          }
+        ],
+        [
+          {
+            "LOWER": "#automate"
+          }
+        ],
+        [
+          {
+            "LOWER": "workforce"
+          }
+        ],
+        [
+          {
+            "LOWER": "#workforce"
+          }
+        ],
+        [
+          {
+            "LOWER": "upskilling"
+          }
+        ],
+        [
+          {
+            "LOWER": "#upskilling"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
     }
   ]
 }

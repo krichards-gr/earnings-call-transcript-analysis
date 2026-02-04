@@ -40,7 +40,7 @@ def test_local_pipeline():
         print(f"Total results generated: {len(df)}")
         
         # Check for key columns
-        required_cols = ['transcript_id', 'topic', 'sentiment_label', 'qa_session_id']
+        required_cols = ['transcript_id', 'topic', 'sentiment_label', 'qa_session_id', 'issue_area', 'issue_subtopic']
         missing = [c for c in required_cols if c not in df.columns]
         if not missing:
             print("All required columns present.")

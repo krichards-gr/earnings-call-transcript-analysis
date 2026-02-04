@@ -1,110 +1,191 @@
-topic,term,type
-Climate Change,climate change,pattern
-Climate Change,sustainability,pattern
-Climate Change,carbon offsets,pattern
-Climate Change,ESG,pattern
-Climate Change,anti-ESG,pattern
-Climate Change,anti ESG,pattern
-Climate Change,fudiciary duty,pattern
-Climate Change,divestment,pattern
-Climate Change,net zero,pattern
-Climate Change,carbon neutral,pattern
-Climate Change,carbon emissions,pattern
-Climate Change,CSDDD,pattern
-Climate Change,CSD3,pattern
-Climate Change,EUDR,pattern
-Climate Change,EU climate reporting,pattern
-Climate Change,nuclear energy,pattern
-Climate Change,offshore drilling,pattern
-Energy Sources,clean energy,pattern
-Energy Sources,fossil fuels,pattern
-Energy Sources,fossil fuel,pattern
-Energy Sources,big oil,pattern
-ESG,ESG,pattern
-ESG,esg,pattern
-ESG,anti-ESG,pattern
-ESG,climate AND woke,pattern
-ESG,antiESG,pattern
-ESG,CSDDD,pattern
-ESG,SEC Climate,pattern
-ESG,sustainability disclosure,pattern
-Natural Disasters,natural disaster,pattern
-Natural Disasters,natural disasters,pattern
-Natural Disasters,home insurance AND climate change,pattern
-Natural Disasters,home insurance AND hurricane,pattern
-Natural Disasters,flood insurance AND climate change,pattern
-Natural Disasters,flood insurance,pattern
-Natural Disasters,insurance coverage,pattern
-Natural Disasters,insurance AND climate,pattern
-Natural Disasters,flood insurance AND hurricane,pattern
-Net Zero,net zero,pattern
-Net Zero,emissions reduction,pattern
-Net Zero,SBTi,pattern
-Net Zero,emissions AND verification,pattern
-Plastic,plastic,pattern
-Plastic,plastic waste,pattern
-Plastic,recycle,pattern
-Plastic,recycling,pattern
-Plastic,recycling infrastructure,pattern
-Plastic,sustainable packaging,pattern
-Plastic,PFAS,pattern
-Plastic,forever chemicals,pattern
-Plastic,forever chemical,pattern
-Plastic,reusable packaging,pattern
-Plastic,recycled packaging,pattern
-Plastic,plastic pollution crisis,pattern
-Plastic,circular economy,pattern
-Plastic,compostable packaging,pattern
-Plastic,plastic treaty,pattern
-Plastic,global plastic treaty,pattern
-Plastic,plastic reduction,pattern
-Plastic,plastic crisis,pattern
-Plastic,recyclable packaging,pattern
-Plastic,ethylene oxide,pattern
-Plastic,PFOA,pattern
-Sustainability,sustainable agriculture,pattern
-Sustainability,sustainable farming,pattern
-Sustainability,water stewardship,pattern
-Sustainability,water conservation,pattern
-Sustainability,water waste,pattern
-Sustainability,water consumption,pattern
-Sustainability,water scarcity,pattern
-Sustainability,corporate water stewardship,pattern
-Sustainability,water risk,pattern
-Sustainability,water stress,pattern
-Sustainability,deforestation,pattern
-Sustainability,cocoa and forests initiative,pattern
-Sustainability,cocoa-related deforestation,pattern
-Sustainability,cocoa & forests initiative,pattern
-Sustainability,corporate responsibility,pattern
-AI Equity,hatespeech,pattern
-AI Equity,online harassment,pattern
-AI Equity,racist slurs,pattern
-AI Equity,AI bias,pattern
-AI Equity,biased alogrithms,pattern
-AI Equity,facial recognition,pattern
-AI Equity,predictive policing,pattern
-AI Equity,biometric data,pattern
-AI Liability,Section 230,pattern
-AI Liability,cybercrimes,pattern
-AI Liability,algorithmic decisions,pattern
-AI Liability,notice-and-choice,pattern
-AI Liability,opt-out,pattern
-AI Liability,GDPR,pattern
-AI Liability,Liability,pattern
-AI Misinformation,misinformation,pattern
-AI Misinformation,disinformation,pattern
-AI Misinformation,hallucinations,pattern
-AI Misinformation,deepfakes,pattern
-AI Misinformation,political censorship,pattern
-AI Misinformation,REAL Political Ads Act,pattern
-AI Privacy,tracking,pattern
-AI Privacy,geolocation,pattern
-AI Privacy,data collection,pattern
-AI Privacy,adtech,pattern
-AI Privacy,kids online,pattern
-AI Privacy,mass surveillance,pattern
-AI Workforce,tech layoffs,pattern
-AI Workforce,automate,pattern
-AI Workforce,workforce,pattern
-AI Workforce,upskilling,pattern
+issue_area,issue_subtopic,topic,term,type
+Climate Change & Sustainability,Climate Change,Climate Change,climate change,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#climatechange,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,sustainability,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#sustainability,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,carbon offsets,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#carbon offsets,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,ESG,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#ESG,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,anti-ESG,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#anti-ESG,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,anti ESG,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#antiESG,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,fudiciary duty,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#fudiciaryduty,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,divestment,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#divestment,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,net zero,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#netzero,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,carbon neutral,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#carbon neutral,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,carbon emissions,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,#carbonemissions,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,CSDDD,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,CSD3,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,EUDR,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,EU climate reporting,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,nuclear energy,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,offshore drilling,pattern
+Climate Change & Sustainability,Climate Change,Climate Change,surgery,exclusionary term
+Climate Change & Sustainability,Climate Change,Climate Change,#surgery,exclusionary term
+Climate Change & Sustainability,Energy Sources,Energy Sources,clean energy,pattern
+Climate Change & Sustainability,Energy Sources,Energy Sources,#cleanenergy,pattern
+Climate Change & Sustainability,Energy Sources,Energy Sources,fossil fuels,pattern
+Climate Change & Sustainability,Energy Sources,Energy Sources,fossil fuel,pattern
+Climate Change & Sustainability,Energy Sources,Energy Sources,#fossilfuel,pattern
+Climate Change & Sustainability,Energy Sources,Energy Sources,big oil,pattern
+Climate Change & Sustainability,Energy Sources,Energy Sources,#big oil,pattern
+Climate Change & Sustainability,ESG,ESG,ESG,pattern
+Climate Change & Sustainability,ESG,ESG,#ESG,pattern
+Climate Change & Sustainability,ESG,ESG,esg,pattern
+Climate Change & Sustainability,ESG,ESG,#esg,pattern
+Climate Change & Sustainability,ESG,ESG,anti-ESG,pattern
+Climate Change & Sustainability,ESG,ESG,#anti-ESG,pattern
+Climate Change & Sustainability,ESG,ESG,climate AND woke,pattern
+Climate Change & Sustainability,ESG,ESG,antiESG,pattern
+Climate Change & Sustainability,ESG,ESG,#antiESG,pattern
+Climate Change & Sustainability,ESG,ESG,CSDDD,pattern
+Climate Change & Sustainability,ESG,ESG,#CSDDD,pattern
+Climate Change & Sustainability,ESG,ESG,SEC Climate,pattern
+Climate Change & Sustainability,ESG,ESG,#SECClimate,pattern
+Climate Change & Sustainability,ESG,ESG,sustainability disclosure,pattern
+Climate Change & Sustainability,ESG,ESG,#sustainabilitydisclosure,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,natural disaster,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,#naturaldisaster,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,natural disasters,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,#naturaldisasters,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,home insurance AND climate change,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,home insurance AND hurricane,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,flood insurance AND climate change,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,flood insurance,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,insurance coverage,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,insurance AND climate,pattern
+Climate Change & Sustainability,Natural Disasters,Natural Disasters,flood insurance AND hurricane,pattern
+Climate Change & Sustainability,Net Zero,Net Zero,net zero,pattern
+Climate Change & Sustainability,Net Zero,Net Zero,#netzero,pattern
+Climate Change & Sustainability,Net Zero,Net Zero,emissions reduction,pattern
+Climate Change & Sustainability,Net Zero,Net Zero,#emissionsreduction,pattern
+Climate Change & Sustainability,Net Zero,Net Zero,SBTi,pattern
+Climate Change & Sustainability,Net Zero,Net Zero,#SBTi,pattern
+Climate Change & Sustainability,Net Zero,Net Zero,emissions AND verification,pattern
+Climate Change & Sustainability,Plastic,Plastic,plastic,pattern
+Climate Change & Sustainability,Plastic,Plastic,#plastic,pattern
+Climate Change & Sustainability,Plastic,Plastic,plastic waste,pattern
+Climate Change & Sustainability,Plastic,Plastic,#plasticwaste,pattern
+Climate Change & Sustainability,Plastic,Plastic,recycle,pattern
+Climate Change & Sustainability,Plastic,Plastic,#recycle,pattern
+Climate Change & Sustainability,Plastic,Plastic,recycling,pattern
+Climate Change & Sustainability,Plastic,Plastic,recycling infrastructure,pattern
+Climate Change & Sustainability,Plastic,Plastic,sustainable packaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,#sustainablepackaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,#PFAS,pattern
+Climate Change & Sustainability,Plastic,Plastic,PFAS,pattern
+Climate Change & Sustainability,Plastic,Plastic,#foreverchemicals,pattern
+Climate Change & Sustainability,Plastic,Plastic,forever chemicals,pattern
+Climate Change & Sustainability,Plastic,Plastic,#foreverchemical,pattern
+Climate Change & Sustainability,Plastic,Plastic,forever chemical,pattern
+Climate Change & Sustainability,Plastic,Plastic,reusable packaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,recycled packaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,plastic pollution crisis,pattern
+Climate Change & Sustainability,Plastic,Plastic,circular economy,pattern
+Climate Change & Sustainability,Plastic,Plastic,compostable packaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,plastic treaty,pattern
+Climate Change & Sustainability,Plastic,Plastic,global plastic treaty,pattern
+Climate Change & Sustainability,Plastic,Plastic,#plasticpollutioncrisis,pattern
+Climate Change & Sustainability,Plastic,Plastic,#recycledpackaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,#reusablepackaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,plastic reduction,pattern
+Climate Change & Sustainability,Plastic,Plastic,plastic crisis,pattern
+Climate Change & Sustainability,Plastic,Plastic,#plasticrisis,pattern
+Climate Change & Sustainability,Plastic,Plastic,recyclable packaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,#recyclablepackaging,pattern
+Climate Change & Sustainability,Plastic,Plastic,ethylene oxide,pattern
+Climate Change & Sustainability,Plastic,Plastic,PFOA,pattern
+Climate Change & Sustainability,Plastic,Plastic,#PFOA,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,sustainable agriculture,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#sustainableagriculture,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#sustainableag,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,sustainable farming,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#sustainablefarming,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,water stewardship,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#waterstewardship,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,water conservation,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#water conservation,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,water waste,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#waterconsumption,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,water consumption,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,water scarcity,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,corporate water stewardship,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,water risk,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,water stress,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,deforestation,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#deforestation,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,cocoa and forests initiative,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,cocoa-related deforestation,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,cocoa & forests initiative,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#cocoa-relateddeforestation,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,#cocoaandforests,pattern
+Climate Change & Sustainability,Sustainability,Sustainability,corporate responsibility,pattern
+AI,AI Equity,AI Equity,hatespeech,pattern
+AI,AI Equity,AI Equity,#hatespeech,pattern
+AI,AI Equity,AI Equity,online harassment,pattern
+AI,AI Equity,AI Equity,#onlineharassment,pattern
+AI,AI Equity,AI Equity,racist slurs,pattern
+AI,AI Equity,AI Equity,#racistslurs,pattern
+AI,AI Equity,AI Equity,AI bias,pattern
+AI,AI Equity,AI Equity,#AIbias,pattern
+AI,AI Equity,AI Equity,biased alogrithms,pattern
+AI,AI Equity,AI Equity,#biasedalgorithms,pattern
+AI,AI Equity,AI Equity,facial recognition,pattern
+AI,AI Equity,AI Equity,#facialrecognition,pattern
+AI,AI Equity,AI Equity,predictive policing,pattern
+AI,AI Equity,AI Equity,#predictivepolicing,pattern
+AI,AI Equity,AI Equity,biometric data,pattern
+AI,AI Equity,AI Equity,#biometricdata,pattern
+AI,AI Liability,AI Liability,Section 230,pattern
+AI,AI Liability,AI Liability,#section230,pattern
+AI,AI Liability,AI Liability,cybercrimes,pattern
+AI,AI Liability,AI Liability,#cybercrimes,pattern
+AI,AI Liability,AI Liability,algorithmic decisions,pattern
+AI,AI Liability,AI Liability,#algorithmicdecisions,pattern
+AI,AI Liability,AI Liability,notice-and-choice,pattern
+AI,AI Liability,AI Liability,#noticeandchoice,pattern
+AI,AI Liability,AI Liability,opt-out,pattern
+AI,AI Liability,AI Liability,#opt-out,pattern
+AI,AI Liability,AI Liability,GDPR,pattern
+AI,AI Liability,AI Liability,#GDPR,pattern
+AI,AI Liability,AI Liability,Liability,pattern
+AI,AI Liability,AI Liability,#liability,pattern
+AI,AI Misinformation,AI Misinformation,misinformation,pattern
+AI,AI Misinformation,AI Misinformation,#misinformation,pattern
+AI,AI Misinformation,AI Misinformation,disinformation,pattern
+AI,AI Misinformation,AI Misinformation,#disinformation,pattern
+AI,AI Misinformation,AI Misinformation,hallucinations,pattern
+AI,AI Misinformation,AI Misinformation,#hallucinations,pattern
+AI,AI Misinformation,AI Misinformation,deepfakes,pattern
+AI,AI Misinformation,AI Misinformation,#deepfakes,pattern
+AI,AI Misinformation,AI Misinformation,political censorship,pattern
+AI,AI Misinformation,AI Misinformation,#politicalcensorship,pattern
+AI,AI Misinformation,AI Misinformation,REAL Political Ads Act,pattern
+AI,AI Misinformation,AI Misinformation,#REALPoliticalAdsAct,pattern
+AI,AI Privacy,AI Privacy,tracking,pattern
+AI,AI Privacy,AI Privacy,#tracking,pattern
+AI,AI Privacy,AI Privacy,geolocation,pattern
+AI,AI Privacy,AI Privacy,#geolocation,pattern
+AI,AI Privacy,AI Privacy,data collection,pattern
+AI,AI Privacy,AI Privacy,#datacollection,pattern
+AI,AI Privacy,AI Privacy,adtech,pattern
+AI,AI Privacy,AI Privacy,#adtech,pattern
+AI,AI Privacy,AI Privacy,kids online,pattern
+AI,AI Privacy,AI Privacy,#kidsonline,pattern
+AI,AI Privacy,AI Privacy,mass surveillance,pattern
+AI,AI Privacy,AI Privacy,#masssurveillance,pattern
+AI,AI Workforce,AI Workforce,tech layoffs,pattern
+AI,AI Workforce,AI Workforce,#techlayoffs,pattern
+AI,AI Workforce,AI Workforce,automate,pattern
+AI,AI Workforce,AI Workforce,#automate,pattern
+AI,AI Workforce,AI Workforce,workforce,pattern
+AI,AI Workforce,AI Workforce,#workforce,pattern
+AI,AI Workforce,AI Workforce,upskilling,pattern
+AI,AI Workforce,AI Workforce,#upskilling,pattern

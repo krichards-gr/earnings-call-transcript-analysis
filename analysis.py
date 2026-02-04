@@ -177,7 +177,10 @@ def load_topics(filepath):
 
 topics_data = load_topics(TOPICS_FILE)
 # Create a map for quick exclusion lookups
+# Create a map for quick exclusion lookups
 EXCLUSIONS_MAP = {t['label']: t.get('exclusions', []) for t in topics_data}
+# Create a map for issue area lookups
+ISSUE_AREA_MAP = {t['label']: t.get('issue_area', 'Unknown') for t in topics_data}
 
 # Prepare spaCy Matcher
 from spacy.matcher import Matcher
@@ -492,7 +495,10 @@ def process_pipeline():
                         "qa_session_label": current_analyst,
                         "interaction_type": interaction_type,
                         "role": role_label,
+                        "role": role_label,
                         "topic": d.get('topic'),
+                        "issue_area": ISSUE_AREA_MAP.get(d.get('topic'), "Unknown"),
+                        "issue_subtopic": d.get('topic'),
                         "sentiment_label": d.get('sentiment'),
                         "sentiment_score": d.get('sentiment_score')
                     })
@@ -501,7 +507,10 @@ def process_pipeline():
                 if (i + 1) % CHECKPOINT_SIZE == 0 or (i + 1) == len(df):
                     if all_results:
                         res_df = pd.DataFrame(all_results)
-                        job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+                        job_config = bigquery.LoadJobConfig(
+                            write_disposition="WRITE_APPEND",
+                            schema_update_options=[bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION]
+                        )
                         client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
                         logger.info(f"   [Checkpoint] Uploaded {len(res_df)} enrichment rows (Segment {i+1}/{len(df)})")
                         all_results = [] # Clear for next checkpoint
