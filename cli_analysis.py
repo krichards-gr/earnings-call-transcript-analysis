@@ -308,7 +308,7 @@ def analyze_batch(texts):
 # CLOUD EXECUTION
 # =================================================================================================
 
-def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, limit=None, mode='test'):
+def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, limit=None, mode='test', output_path=None):
     """
     Send analysis request to Cloud Run and download CSV results.
 
@@ -360,11 +360,16 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
 
         if response.status_code == 200:
             # Save CSV to file
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_dir = os.path.join(os.getcwd(), 'outputs')
-            os.makedirs(output_dir, exist_ok=True)
-
-            output_path = os.path.join(output_dir, f'cloud_analysis_results_{timestamp}.csv')
+            if not output_path:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_dir = os.path.join(os.getcwd(), 'outputs')
+                os.makedirs(output_dir, exist_ok=True)
+                output_path = os.path.join(output_dir, f'cloud_analysis_results_{timestamp}.csv')
+            else:
+                # Ensure directory exists for custom path
+                output_dir = os.path.dirname(output_path)
+                if output_dir:
+                    os.makedirs(output_dir, exist_ok=True)
 
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(response.text)
@@ -373,26 +378,26 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
             df = pd.read_csv(output_path)
             row_count = len(df)
 
-            print(f"\n✓ Cloud analysis complete!")
+            print(f"\n[SUCCESS] Cloud analysis complete!")
             print(f"  Results saved to: {output_path}")
             print(f"  Total records: {row_count}")
 
             return output_path
         else:
-            print(f"✗ Cloud request failed with status {response.status_code}")
+            print(f"[ERROR] Cloud request failed with status {response.status_code}")
             print(f"  Response: {response.text}")
             return None
 
     except requests.exceptions.Timeout:
-        print(f"✗ Request timed out after 10 minutes")
+        print(f"[ERROR] Request timed out after 10 minutes")
         print(f"  Try reducing the limit or using a smaller date range")
         return None
     except requests.exceptions.ConnectionError:
-        print(f"✗ Could not connect to {cloud_url}")
+        print(f"[ERROR] Could not connect to {cloud_url}")
         print(f"  Check that the URL is correct and the service is running")
         return None
     except Exception as e:
-        print(f"✗ Error during cloud request: {e}")
+        print(f"[ERROR] Error during cloud request: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -401,7 +406,7 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
 # LOCAL ANALYSIS
 # =================================================================================================
 
-def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to_bq=False, include_content=True):
+def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to_bq=False, include_content=True, output_path=None):
     """
     Run the analysis pipeline with specified parameters.
 
@@ -574,13 +579,20 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to
     # 4. Save Results
     if all_results:
         results_df = pd.DataFrame(all_results)
-        output_dir = os.path.join(current_dir, 'outputs')
-        os.makedirs(output_dir, exist_ok=True)
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = os.path.join(output_dir, f'cli_analysis_results_{timestamp}.csv')
+        if not output_path:
+            output_dir = os.path.join(current_dir, 'outputs')
+            os.makedirs(output_dir, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_path = os.path.join(output_dir, f'cli_analysis_results_{timestamp}.csv')
+        else:
+            # Ensure directory exists for custom path
+            output_dir = os.path.dirname(output_path)
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
+
         results_df.to_csv(output_path, index=False)
-        print(f"\n✓ Analysis complete!")
+        print(f"\n[SUCCESS] Analysis complete!")
         print(f"  Results saved to: {output_path}")
         print(f"  Total records: {len(results_df)}")
 
@@ -592,7 +604,7 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to
             )
             job = client.load_table_from_dataframe(results_df, BQ_DEST_TABLE, job_config=job_config)
             job.result()
-            print(f"  ✓ Successfully wrote {len(results_df)} rows to BigQuery")
+            print(f"  [SUCCESS] Wrote {len(results_df)} rows to BigQuery")
     else:
         print("\nNo results found.")
 
@@ -643,6 +655,8 @@ Examples:
                        help='Custom limit for number of records to process')
 
     # Output
+    parser.add_argument('--output', '-o', type=str,
+                       help='Output file path (default: outputs/cli_analysis_results_TIMESTAMP.csv)')
     parser.add_argument('--write-to-bq', action='store_true',
                        help='Write results to BigQuery in addition to local CSV')
     parser.add_argument('--no-content', action='store_true',
@@ -699,7 +713,8 @@ Examples:
             start_date=start_date,
             end_date=end_date,
             limit=limit,
-            mode=mode
+            mode=mode,
+            output_path=args.output
         )
     else:
         # Local execution
@@ -709,7 +724,8 @@ Examples:
             end_date=end_date,
             limit=limit,
             write_to_bq=args.write_to_bq,
-            include_content=not args.no_content
+            include_content=not args.no_content,
+            output_path=args.output
         )
 
 if __name__ == "__main__":
