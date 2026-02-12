@@ -3,6 +3,7 @@
     {
       "label": "Climate Change",
       "issue_area": "Climate Change & Sustainability",
+      "issue_subtopic": "Climate Change",
       "patterns": [
         [
           {
@@ -193,6 +194,7 @@
     {
       "label": "Energy Sources",
       "issue_area": "Climate Change & Sustainability",
+      "issue_subtopic": "Energy Sources",
       "patterns": [
         [
           {
@@ -251,6 +253,7 @@
     {
       "label": "ESG",
       "issue_area": "Climate Change & Sustainability",
+      "issue_subtopic": "ESG",
       "patterns": [
         [
           {
@@ -346,6 +349,7 @@
     {
       "label": "Natural Disasters",
       "issue_area": "Climate Change & Sustainability",
+      "issue_subtopic": "Natural Disasters",
       "patterns": [
         [
           {
@@ -469,6 +473,7 @@
     {
       "label": "Net Zero",
       "issue_area": "Climate Change & Sustainability",
+      "issue_subtopic": "Net Zero",
       "patterns": [
         [
           {
@@ -524,6 +529,7 @@
     {
       "label": "Plastic",
       "issue_area": "Climate Change & Sustainability",
+      "issue_subtopic": "Plastic",
       "patterns": [
         [
           {
@@ -756,6 +762,7 @@
     {
       "label": "Sustainability",
       "issue_area": "Climate Change & Sustainability",
+      "issue_subtopic": "Sustainability",
       "patterns": [
         [
           {
@@ -944,6 +951,7 @@
     {
       "label": "AI Equity",
       "issue_area": "AI",
+      "issue_subtopic": "AI Equity",
       "patterns": [
         [
           {
@@ -1053,6 +1061,7 @@
     {
       "label": "AI Liability",
       "issue_area": "AI",
+      "issue_subtopic": "AI Liability",
       "patterns": [
         [
           {
@@ -1137,6 +1146,7 @@
     {
       "label": "AI Misinformation",
       "issue_area": "AI",
+      "issue_subtopic": "AI Misinformation",
       "patterns": [
         [
           {
@@ -1217,6 +1227,7 @@
     {
       "label": "AI Privacy",
       "issue_area": "AI",
+      "issue_subtopic": "AI Privacy",
       "patterns": [
         [
           {
@@ -1294,6 +1305,7 @@
     {
       "label": "AI Workforce",
       "issue_area": "AI",
+      "issue_subtopic": "AI Workforce",
       "patterns": [
         [
           {

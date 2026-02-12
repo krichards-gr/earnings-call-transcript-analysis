@@ -37,17 +37,26 @@ class AnalysisServerHandler(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/plain")
             self.end_headers()
             self.wfile.write(b"OK")
-        elif self.path == '/run':
+        elif self.path.startswith('/run'):
             # Trigger analysis endpoint
             logger.info("Manual trigger received via /run")
             try:
-                # Run synchronously to ensure Cloud Run keeps CPU allocated
-                # Using threading.Thread() creates background work that gets throttled
-                # immediately after the response is sent unless "CPU always allocated"
-                # is enabled. Synchronous processing is safer for batch jobs.
-                logger.info("Starting pipeline synchronously...")
-                process_pipeline()
-                
+                # Parse query parameters
+                from urllib.parse import urlparse, parse_qs
+                parsed = urlparse(self.path)
+                params = parse_qs(parsed.query)
+
+                config = {
+                    'companies': params.get('companies', [None])[0],
+                    'start_date': params.get('start_date', [None])[0],
+                    'end_date': params.get('end_date', [None])[0],
+                    'limit': params.get('limit', [None])[0],
+                    'mode': params.get('mode', ['test'])[0]
+                }
+
+                logger.info(f"Starting pipeline with config: {config}")
+                process_pipeline(config)
+
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain")
                 self.end_headers()
@@ -57,6 +66,53 @@ class AnalysisServerHandler(BaseHTTPRequestHandler):
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(f"Error: {e}".encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_POST(self):
+        """Handle POST requests for pipeline execution with JSON payload."""
+        if self.path == '/run':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(content_length)
+
+                if body:
+                    config = json.loads(body.decode('utf-8'))
+                else:
+                    config = {}
+
+                logger.info(f"POST trigger received with config: {config}")
+
+                # Check if client wants CSV response
+                return_csv = config.get('return_csv', False)
+
+                if return_csv:
+                    # Execute pipeline and return CSV data
+                    csv_data = process_pipeline(config, return_data=True)
+
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/csv")
+                    self.send_header("Content-Disposition", "attachment; filename=analysis_results.csv")
+                    self.end_headers()
+                    self.wfile.write(csv_data.encode('utf-8'))
+                else:
+                    # Standard execution - write to BigQuery
+                    process_pipeline(config)
+
+                    self.send_response(200)
+                    self.send_header("Content-type", "application/json")
+                    self.end_headers()
+                    response = {"status": "success", "message": "Pipeline execution complete"}
+                    self.wfile.write(json.dumps(response).encode())
+
+            except Exception as e:
+                logger.error(f"Error executing pipeline: {e}", exc_info=True)
+                self.send_response(500)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                response = {"status": "error", "message": str(e)}
+                self.wfile.write(json.dumps(response).encode())
         else:
             self.send_response(404)
             self.end_headers()
@@ -135,11 +191,24 @@ BQ_DATASET = "pressure_monitoring"
 BQ_SOURCE_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_content"
 BQ_METADATA_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_metadata"
 BQ_DEST_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_enriched"
+TICKERS_FILE = os.path.join(current_dir, 'tickers.csv')
 
 if PRODUCTION_TESTING:
     logger.info("RUNNING IN PRODUCTION TESTING MODE (Limited batches)")
 else:
     logger.info("RUNNING IN FULL PRODUCTION MODE")
+
+def load_tickers():
+    """Load company tickers from tickers.csv"""
+    if os.path.exists(TICKERS_FILE):
+        df = pd.read_csv(TICKERS_FILE)
+        # Remove any empty rows
+        df = df.dropna(subset=['symbol'])
+        df = df[df['symbol'].str.strip() != '']
+        return df['symbol'].tolist()
+    else:
+        logger.warning(f"Tickers file not found at {TICKERS_FILE}, returning empty list")
+        return []
 
 # =================================================================================================
 # MODEL LOADING
@@ -335,31 +404,116 @@ def analyze_batch(texts):
 # MAIN PIPELINE
 # =================================================================================================
 
-def process_pipeline():
-    logger.info("Models verified on disk. Starting pipeline logic...")
+def process_pipeline(config=None, return_data=False):
+    """
+    Run the analysis pipeline with optional configuration.
+
+    Args:
+        config: Dict with optional keys:
+            - companies: Comma-separated string of company symbols, or None for tickers list
+            - start_date: Start date (YYYY-MM-DD) or None
+            - end_date: End date (YYYY-MM-DD) or None
+            - limit: Max records to process, or None
+            - mode: 'test' (50 records) or 'full' (all records)
+        return_data: If True, return CSV string instead of writing to BigQuery
+
+    Returns:
+        CSV string if return_data=True, otherwise None
+    """
+    config = config or {}
+    logger.info(f"Models verified on disk. Starting pipeline logic with config: {config}")
+
+    # Storage for all results if returning data
+    all_accumulated_results = []
+
     client = bigquery.Client(project=BQ_PROJECT_ID)
-    
+
+    # Parse configuration
+    companies_param = config.get('companies')
+    if companies_param:
+        companies = [s.strip() for s in companies_param.split(',')]
+        logger.info(f"Using provided companies: {companies}")
+    else:
+        companies = load_tickers()
+        logger.info(f"Using tickers list: {len(companies)} total")
+
+    start_date = config.get('start_date')
+    end_date = config.get('end_date')
+    mode = config.get('mode', 'test')
+    custom_limit = config.get('limit')
+
+    if custom_limit:
+        limit = int(custom_limit)
+    elif mode == 'test':
+        limit = 50
+    elif PRODUCTION_TESTING:
+        limit = 20
+    else:
+        limit = BATCH_SIZE
+
+    logger.info(f"Analysis parameters:")
+    logger.info(f"  Companies: {len(companies)}")
+    logger.info(f"  Date range: {start_date or 'All'} to {end_date or 'All'}")
+    logger.info(f"  Mode: {mode}")
+    logger.info(f"  Limit: {limit}")
+
     total_processed = 0
     current_session_id = 0
     current_analyst = "None"
     last_transcript_id = None
-    
+
     try:
         while True:
             logger.info(f"Checking for new data to process in {BQ_SOURCE_TABLE}...")
-            # Determine query limit based on testing mode
-            current_limit = 20 if PRODUCTION_TESTING else BATCH_SIZE
-            
-            # Idempotent Query: Process only rows not already in destination
-            query = f"""
-                SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content
-                FROM `{BQ_SOURCE_TABLE}` t
-                LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
-                ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
-                WHERE e.transcript_id IS NULL
-                ORDER BY t.transcript_id, t.paragraph_number
-                LIMIT {current_limit}
-            """
+
+            # Build WHERE clause
+            where_clauses = []
+
+            # Company filter
+            if companies:
+                companies_str = "', '".join(companies)
+                where_clauses.append(f"m.symbol IN ('{companies_str}')")
+
+            # Date filters
+            if start_date:
+                where_clauses.append(f"m.report_date >= '{start_date}'")
+            if end_date:
+                where_clauses.append(f"m.report_date <= '{end_date}'")
+
+            # Combine WHERE clauses
+            if where_clauses:
+                where_clause = " AND ".join(where_clauses)
+                where_filter = f"AND {where_clause}"
+            else:
+                where_filter = ""
+
+            # Build query - include all metadata columns
+            if return_data:
+                # When returning CSV, don't check for existing records
+                query = f"""
+                    SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
+                           m.* EXCEPT(transcript_id)
+                    FROM `{BQ_SOURCE_TABLE}` t
+                    JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                    WHERE 1=1
+                    {where_filter}
+                    ORDER BY t.transcript_id, t.paragraph_number
+                    LIMIT {limit}
+                """
+            else:
+                # Idempotent Query: Process only rows not already in destination
+                query = f"""
+                    SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
+                           m.* EXCEPT(transcript_id)
+                    FROM `{BQ_SOURCE_TABLE}` t
+                    JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                    LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
+                    ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
+                    WHERE e.transcript_id IS NULL
+                    {where_filter}
+                    ORDER BY t.transcript_id, t.paragraph_number
+                    LIMIT {limit}
+                """
             
             logger.info(f"Executing query: {query}")
             # Use .result() to wait for job completion before converting to dataframe
@@ -465,7 +619,7 @@ def process_pipeline():
                     detected = [{"topic": None, "sentiment": None, "sentiment_score": None}]
 
                 for d in detected:
-                    all_results.append({
+                    res_row = {
                         "transcript_id": row['transcript_id'],
                         "paragraph_number": row['paragraph_number'],
                         "speaker": row['speaker'],
@@ -477,29 +631,61 @@ def process_pipeline():
                         "issue_area": ISSUE_AREA_MAP.get(d.get('topic'), "Unknown"),
                         "issue_subtopic": d.get('topic'),
                         "sentiment_label": d.get('sentiment'),
-                        "sentiment_score": d.get('sentiment_score')
-                    })
+                        "sentiment_score": d.get('sentiment_score'),
+                        "content": text
+                    }
 
-                # Checkpoint Upload
+                    # Add all metadata columns from BigQuery
+                    for col in df.columns:
+                        if col not in ['transcript_id', 'paragraph_number', 'speaker', 'content']:
+                            res_row[col] = row[col]
+
+                    all_results.append(res_row)
+
+                # Checkpoint Upload or accumulation
                 if (i + 1) % CHECKPOINT_SIZE == 0 or (i + 1) == len(df):
                     if all_results:
-                        res_df = pd.DataFrame(all_results)
-                        job_config = bigquery.LoadJobConfig(
-                            write_disposition="WRITE_APPEND",
-                            schema_update_options=[bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION]
-                        )
-                        client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
-                        logger.info(f"   [Checkpoint] Uploaded {len(res_df)} enrichment rows (Segment {i+1}/{len(df)})")
+                        if return_data:
+                            # Accumulate results for CSV return
+                            all_accumulated_results.extend(all_results)
+                            logger.info(f"   [Accumulate] Processed {len(all_results)} enrichment rows (Segment {i+1}/{len(df)})")
+                        else:
+                            # Upload to BigQuery
+                            res_df = pd.DataFrame(all_results)
+                            job_config = bigquery.LoadJobConfig(
+                                write_disposition="WRITE_APPEND",
+                                schema_update_options=[bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION]
+                            )
+                            client.load_table_from_dataframe(res_df, BQ_DEST_TABLE, job_config=job_config).result()
+                            logger.info(f"   [Checkpoint] Uploaded {len(res_df)} enrichment rows (Segment {i+1}/{len(df)})")
                         all_results = [] # Clear for next checkpoint
 
             total_processed += len(df)
-            
-            # Exit if in testing mode after first batch
-            if PRODUCTION_TESTING:
-                logger.info("Production testing complete. Set 'PRODUCTION_MODE=true' env var for full run.")
+
+            # Exit conditions
+            if mode == 'test' or PRODUCTION_TESTING:
+                logger.info(f"Test mode complete. Processed {total_processed} records.")
                 break
+
+            # For full mode, continue processing batches until no data left
+            # This allows processing large datasets in manageable chunks
+
     except Exception as e:
         logger.error(f"FATAL ERROR in pipeline: {e}", exc_info=True)
+        if return_data:
+            raise  # Re-raise for proper error handling in API response
+
+    logger.info(f"Pipeline execution complete. Total records processed: {total_processed}")
+
+    # Return CSV data if requested
+    if return_data:
+        if all_accumulated_results:
+            results_df = pd.DataFrame(all_accumulated_results)
+            csv_data = results_df.to_csv(index=False)
+            logger.info(f"Returning CSV with {len(results_df)} rows")
+            return csv_data
+        else:
+            return "No results found\n"
 
 if __name__ == "__main__":
     run_server()
