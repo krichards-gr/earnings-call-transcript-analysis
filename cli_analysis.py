@@ -181,6 +181,43 @@ def format_time(seconds):
         secs = int(seconds % 60)
         return f"{hours}h {minutes}m {secs}s"
 
+def ensure_complete_transcripts(df):
+    """
+    Ensure only complete transcripts are returned.
+    If the dataframe cuts off mid-transcript, remove the incomplete one.
+
+    Args:
+        df: DataFrame with transcript data
+
+    Returns:
+        DataFrame with only complete transcripts
+    """
+    if df.empty:
+        return df
+
+    # Get unique transcript IDs in order of appearance
+    transcript_ids = df['transcript_id'].unique()
+
+    # Check if the last transcript is complete by counting paragraphs
+    # A transcript is considered complete if we have all sequential paragraphs
+    complete_transcript_ids = []
+
+    for tid in transcript_ids:
+        transcript_df = df[df['transcript_id'] == tid]
+        paragraphs = sorted(transcript_df['paragraph_number'].unique())
+
+        # Check if paragraphs are sequential from 1 (or 0)
+        expected_paragraphs = list(range(paragraphs[0], paragraphs[0] + len(paragraphs)))
+
+        if paragraphs == expected_paragraphs:
+            complete_transcript_ids.append(tid)
+        else:
+            # This transcript is incomplete, don't include it
+            print(f"   Excluding incomplete transcript: {tid} (has {len(paragraphs)} non-sequential paragraphs)")
+
+    # Return only complete transcripts
+    return df[df['transcript_id'].isin(complete_transcript_ids)]
+
 def rejoin_fragments(df):
     """Rejoins segments split by line breaks."""
     if df.empty:
@@ -329,7 +366,8 @@ def analyze_batch(texts):
 # CLOUD EXECUTION
 # =================================================================================================
 
-def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, limit=None, mode='test', output_path=None):
+def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, limit=None, latest=None,
+                      earliest=None, mode='test', output_path=None):
     """
     Send analysis request to Cloud Run and download CSV results.
 
@@ -338,7 +376,9 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
         companies: List of company symbols
         start_date: Start date (YYYY-MM-DD)
         end_date: End date (YYYY-MM-DD)
-        limit: Maximum number of records
+        limit: Maximum number of records (complete transcripts only)
+        latest: Number of latest transcripts to pull
+        earliest: Number of earliest transcripts to pull
         mode: 'test' or 'full'
 
     Returns:
@@ -346,14 +386,15 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
     """
     start_time = time.time()
 
+    mode_desc = f"Latest {latest} transcripts" if latest else f"Earliest {earliest} transcripts" if earliest else f"Limit: {limit or 'Default'}"
+
     print(f"\n{'='*80}")
     print(f"CLOUD ANALYSIS REQUEST")
     print(f"{'='*80}")
     print(f"Cloud URL: {cloud_url}")
     print(f"Companies: {len(companies)} ({', '.join(companies[:5])}{'...' if len(companies) > 5 else ''})")
     print(f"Date Range: {start_date or 'All'} to {end_date or 'All'}")
-    print(f"Mode: {mode}")
-    print(f"Limit: {limit or 'Default'}")
+    print(f"Mode: {mode_desc}")
     print(f"{'='*80}\n")
 
     # Build request payload
@@ -369,6 +410,10 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
         payload['end_date'] = end_date
     if limit:
         payload['limit'] = limit
+    if latest:
+        payload['latest'] = latest
+    if earliest:
+        payload['earliest'] = earliest
 
     print(f"Sending request to {cloud_url}/run...")
     print(f"Payload: {json.dumps(payload, indent=2)}\n")
@@ -482,7 +527,8 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
 # LOCAL ANALYSIS
 # =================================================================================================
 
-def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to_bq=False, include_content=True, output_path=None):
+def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=None, earliest=None,
+                 write_to_bq=False, include_content=True, output_path=None):
     """
     Run the analysis pipeline with specified parameters.
 
@@ -490,24 +536,28 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to
         companies: List of company symbols to analyze
         start_date: Start date (YYYY-MM-DD) or None for no start filter
         end_date: End date (YYYY-MM-DD) or None for no end filter
-        limit: Maximum number of records to process, or None for all
+        limit: Maximum number of records to process, or None for all (complete transcripts only)
+        latest: Number of latest transcripts to pull (overrides limit)
+        earliest: Number of earliest transcripts to pull (overrides limit)
         write_to_bq: Whether to write results to BigQuery
         include_content: Whether to include transcript content in output
     """
     start_time = time.time()
+
+    mode_desc = f"Latest {latest} transcripts" if latest else f"Earliest {earliest} transcripts" if earliest else f"Limit: {limit or 'No limit'}"
 
     print(f"\n{'='*80}")
     print(f"STARTING ANALYSIS")
     print(f"{'='*80}")
     print(f"Companies: {len(companies)} ({', '.join(companies[:5])}{'...' if len(companies) > 5 else ''})")
     print(f"Date Range: {start_date or 'All'} to {end_date or 'All'}")
-    print(f"Limit: {limit or 'No limit'}")
+    print(f"Mode: {mode_desc}")
     print(f"Write to BigQuery: {write_to_bq}")
     print(f"{'='*80}\n")
 
     client = bigquery.Client(project=BQ_PROJECT_ID)
 
-    # Build query
+    # Build query based on mode
     where_clauses = []
 
     # Company filter
@@ -522,22 +572,67 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to
 
     where_clause = " AND ".join(where_clauses)
 
-    query = f"""
-        SELECT
-            t.transcript_id,
-            t.paragraph_number,
-            t.speaker,
-            t.content,
-            m.* EXCEPT(transcript_id)
-        FROM `{BQ_SOURCE_TABLE}` t
-        JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
-        WHERE {where_clause}
-        ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
-        {f'LIMIT {limit}' if limit else ''}
-    """
+    # Build query based on latest/earliest/limit mode
+    if latest:
+        # Get the latest N transcripts, then pull all content for them
+        query = f"""
+            WITH selected_transcripts AS (
+                SELECT m.transcript_id
+                FROM `{BQ_METADATA_TABLE}` m
+                WHERE {where_clause}
+                ORDER BY m.report_date DESC, m.symbol
+                LIMIT {latest}
+            )
+            SELECT
+                t.transcript_id,
+                t.paragraph_number,
+                t.speaker,
+                t.content,
+                m.* EXCEPT(transcript_id)
+            FROM `{BQ_SOURCE_TABLE}` t
+            JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+            WHERE t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
+            ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
+        """
+    elif earliest:
+        # Get the earliest N transcripts, then pull all content for them
+        query = f"""
+            WITH selected_transcripts AS (
+                SELECT m.transcript_id
+                FROM `{BQ_METADATA_TABLE}` m
+                WHERE {where_clause}
+                ORDER BY m.report_date ASC, m.symbol
+                LIMIT {earliest}
+            )
+            SELECT
+                t.transcript_id,
+                t.paragraph_number,
+                t.speaker,
+                t.content,
+                m.* EXCEPT(transcript_id)
+            FROM `{BQ_SOURCE_TABLE}` t
+            JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+            WHERE t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
+            ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
+        """
+    else:
+        # Standard query with optional limit (will be post-processed for complete transcripts)
+        query = f"""
+            SELECT
+                t.transcript_id,
+                t.paragraph_number,
+                t.speaker,
+                t.content,
+                m.* EXCEPT(transcript_id)
+            FROM `{BQ_SOURCE_TABLE}` t
+            JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+            WHERE {where_clause}
+            ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
+            {f'LIMIT {limit * 2}' if limit else ''}
+        """
 
     print(f"Executing query...")
-    print(f"Query: {query[:200]}...")
+    print(f"Query: {query[:300]}...")
 
     df = client.query(query).to_dataframe()
 
@@ -546,6 +641,11 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to
         return
 
     print(f"Found {len(df)} transcript segments")
+
+    # Ensure only complete transcripts (important when using limit)
+    if not latest and not earliest:
+        df = ensure_complete_transcripts(df)
+        print(f"Ensured complete transcripts: {len(df)} segments from {df['transcript_id'].nunique()} complete transcripts")
 
     df = rejoin_fragments(df)
     print(f"Processing {len(df)} rows after rejoining fragments...")
@@ -734,7 +834,13 @@ Examples:
     parser.add_argument('--test', action='store_true',
                        help='Shorthand for --mode test')
     parser.add_argument('--limit', type=int,
-                       help='Custom limit for number of records to process')
+                       help='Custom limit for number of records to process (will only return complete transcripts)')
+
+    # Transcript selection
+    parser.add_argument('--latest', type=int,
+                       help='Pull the latest N complete transcripts (overrides --limit and --mode)')
+    parser.add_argument('--earliest', type=int,
+                       help='Pull the earliest N complete transcripts (overrides --limit and --mode)')
 
     # Output
     parser.add_argument('--output', '-o', type=str,
@@ -771,18 +877,29 @@ Examples:
         end_date = datetime.now().strftime('%Y-%m-%d')
         start_date = (datetime.now() - timedelta(days=args.days_back)).strftime('%Y-%m-%d')
 
-    # Parse mode/limit
+    # Parse mode/limit/latest/earliest
+    latest = args.latest
+    earliest = args.earliest
+
     if args.test:
         mode = 'test'
     else:
         mode = args.mode
 
-    if args.limit:
+    # Latest and earliest override limit and mode
+    if latest or earliest:
+        limit = None
+    elif args.limit:
         limit = args.limit
     elif mode == 'test':
         limit = 50
     else:
         limit = None
+
+    # Validate that only one of latest/earliest is specified
+    if latest and earliest:
+        print("ERROR: Cannot specify both --latest and --earliest")
+        sys.exit(1)
 
     # Run analysis (cloud or local)
     if args.cloud:
@@ -795,6 +912,8 @@ Examples:
             start_date=start_date,
             end_date=end_date,
             limit=limit,
+            latest=latest,
+            earliest=earliest,
             mode=mode,
             output_path=args.output
         )
@@ -805,6 +924,8 @@ Examples:
             start_date=start_date,
             end_date=end_date,
             limit=limit,
+            latest=latest,
+            earliest=earliest,
             write_to_bq=args.write_to_bq,
             include_content=not args.no_content,
             output_path=args.output

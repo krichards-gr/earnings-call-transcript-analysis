@@ -264,7 +264,7 @@ def rejoin_fragments(df):
     for i in range(1, len(df)):
         next_row = df.iloc[i].to_dict()
         msg = str(current_row['content']).strip()
-        is_fragment = not any(msg.endswith(p) for p in ['.', '?', '!', '"', '“', '”'])
+        is_fragment = not any(msg.endswith(p) for p in ['.', '?', '!', '"', '"', '"'])
         if next_row['transcript_id'] == current_row['transcript_id'] and is_fragment:
             current_row['content'] = msg + " " + str(next_row['content']).strip()
         else:
@@ -272,6 +272,43 @@ def rejoin_fragments(df):
             current_row = next_row
     rejoined_rows.append(current_row)
     return pd.DataFrame(rejoined_rows)
+
+def ensure_complete_transcripts(df):
+    """
+    Ensure only complete transcripts are returned.
+    If the dataframe cuts off mid-transcript, remove the incomplete one.
+
+    Args:
+        df: DataFrame with transcript data
+
+    Returns:
+        DataFrame with only complete transcripts
+    """
+    if df.empty:
+        return df
+
+    # Get unique transcript IDs in order of appearance
+    transcript_ids = df['transcript_id'].unique()
+
+    # Check if the last transcript is complete by counting paragraphs
+    # A transcript is considered complete if we have all sequential paragraphs
+    complete_transcript_ids = []
+
+    for tid in transcript_ids:
+        transcript_df = df[df['transcript_id'] == tid]
+        paragraphs = sorted(transcript_df['paragraph_number'].unique())
+
+        # Check if paragraphs are sequential from 1 (or 0)
+        expected_paragraphs = list(range(paragraphs[0], paragraphs[0] + len(paragraphs)))
+
+        if paragraphs == expected_paragraphs:
+            complete_transcript_ids.append(tid)
+        else:
+            # This transcript is incomplete, don't include it
+            logger.info(f"   Excluding incomplete transcript: {tid} (has {len(paragraphs)} non-sequential paragraphs)")
+
+    # Return only complete transcripts
+    return df[df['transcript_id'].isin(complete_transcript_ids)]
 
 # =================================================================================================
 # CORE ANALYSIS
@@ -417,7 +454,9 @@ def process_pipeline(config=None, return_data=False):
             - companies: Comma-separated string of company symbols, or None for tickers list
             - start_date: Start date (YYYY-MM-DD) or None
             - end_date: End date (YYYY-MM-DD) or None
-            - limit: Max records to process, or None
+            - limit: Max records to process (complete transcripts only), or None
+            - latest: Number of latest transcripts to pull (overrides limit)
+            - earliest: Number of earliest transcripts to pull (overrides limit)
             - mode: 'test' (50 records) or 'full' (all records)
         return_data: If True, return CSV string instead of writing to BigQuery
 
@@ -445,21 +484,30 @@ def process_pipeline(config=None, return_data=False):
     end_date = config.get('end_date')
     mode = config.get('mode', 'test')
     custom_limit = config.get('limit')
+    latest = config.get('latest')
+    earliest = config.get('earliest')
 
-    if custom_limit:
+    # Latest and earliest override limit
+    if latest or earliest:
+        limit = None
+        transcript_mode = f"Latest {latest}" if latest else f"Earliest {earliest}"
+    elif custom_limit:
         limit = int(custom_limit)
+        transcript_mode = f"Limit {limit} (complete transcripts)"
     elif mode == 'test':
         limit = 50
+        transcript_mode = "Test mode (50 records, complete transcripts)"
     elif PRODUCTION_TESTING:
         limit = 20
+        transcript_mode = "Production testing (20 records)"
     else:
         limit = BATCH_SIZE
+        transcript_mode = f"Batch size {BATCH_SIZE}"
 
     logger.info(f"Analysis parameters:")
     logger.info(f"  Companies: {len(companies)}")
     logger.info(f"  Date range: {start_date or 'All'} to {end_date or 'All'}")
-    logger.info(f"  Mode: {mode}")
-    logger.info(f"  Limit: {limit}")
+    logger.info(f"  Mode: {transcript_mode}")
 
     total_processed = 0
     current_session_id = 0
@@ -494,30 +542,109 @@ def process_pipeline(config=None, return_data=False):
             # Build query - include all metadata columns
             if return_data:
                 # When returning CSV, don't check for existing records
-                query = f"""
-                    SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
-                           m.* EXCEPT(transcript_id)
-                    FROM `{BQ_SOURCE_TABLE}` t
-                    JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
-                    WHERE 1=1
-                    {where_filter}
-                    ORDER BY t.transcript_id, t.paragraph_number
-                    LIMIT {limit}
-                """
+                if latest:
+                    # Get latest N transcripts
+                    query = f"""
+                        WITH selected_transcripts AS (
+                            SELECT m.transcript_id
+                            FROM `{BQ_METADATA_TABLE}` m
+                            WHERE 1=1
+                            {where_filter}
+                            ORDER BY m.report_date DESC, m.symbol
+                            LIMIT {latest}
+                        )
+                        SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
+                               m.* EXCEPT(transcript_id)
+                        FROM `{BQ_SOURCE_TABLE}` t
+                        JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        WHERE t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
+                        ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
+                    """
+                elif earliest:
+                    # Get earliest N transcripts
+                    query = f"""
+                        WITH selected_transcripts AS (
+                            SELECT m.transcript_id
+                            FROM `{BQ_METADATA_TABLE}` m
+                            WHERE 1=1
+                            {where_filter}
+                            ORDER BY m.report_date ASC, m.symbol
+                            LIMIT {earliest}
+                        )
+                        SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
+                               m.* EXCEPT(transcript_id)
+                        FROM `{BQ_SOURCE_TABLE}` t
+                        JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        WHERE t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
+                        ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
+                    """
+                else:
+                    # Standard limit query (will be post-processed for complete transcripts)
+                    query = f"""
+                        SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
+                               m.* EXCEPT(transcript_id)
+                        FROM `{BQ_SOURCE_TABLE}` t
+                        JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        WHERE 1=1
+                        {where_filter}
+                        ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
+                        LIMIT {limit * 2 if limit else limit}
+                    """
             else:
                 # Idempotent Query: Process only rows not already in destination
-                query = f"""
-                    SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
-                           m.* EXCEPT(transcript_id)
-                    FROM `{BQ_SOURCE_TABLE}` t
-                    JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
-                    LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
-                    ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
-                    WHERE e.transcript_id IS NULL
-                    {where_filter}
-                    ORDER BY t.transcript_id, t.paragraph_number
-                    LIMIT {limit}
-                """
+                if latest:
+                    query = f"""
+                        WITH selected_transcripts AS (
+                            SELECT m.transcript_id
+                            FROM `{BQ_METADATA_TABLE}` m
+                            WHERE 1=1
+                            {where_filter}
+                            ORDER BY m.report_date DESC, m.symbol
+                            LIMIT {latest}
+                        )
+                        SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
+                               m.* EXCEPT(transcript_id)
+                        FROM `{BQ_SOURCE_TABLE}` t
+                        JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
+                        ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
+                        WHERE e.transcript_id IS NULL
+                        AND t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
+                        ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
+                    """
+                elif earliest:
+                    query = f"""
+                        WITH selected_transcripts AS (
+                            SELECT m.transcript_id
+                            FROM `{BQ_METADATA_TABLE}` m
+                            WHERE 1=1
+                            {where_filter}
+                            ORDER BY m.report_date ASC, m.symbol
+                            LIMIT {earliest}
+                        )
+                        SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
+                               m.* EXCEPT(transcript_id)
+                        FROM `{BQ_SOURCE_TABLE}` t
+                        JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
+                        ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
+                        WHERE e.transcript_id IS NULL
+                        AND t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
+                        ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
+                    """
+                else:
+                    query = f"""
+                        SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
+                               m.* EXCEPT(transcript_id)
+                        FROM `{BQ_SOURCE_TABLE}` t
+                        JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
+                        ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
+                        WHERE e.transcript_id IS NULL
+                        {where_filter}
+                        ORDER BY t.transcript_id, t.paragraph_number
+                        LIMIT {limit}
+                    """
             
             logger.info(f"Executing query: {query}")
             # Use .result() to wait for job completion before converting to dataframe
@@ -536,7 +663,12 @@ def process_pipeline(config=None, return_data=False):
                 logger.info(f"--- PRODUCTION TESTING MODE: Processing {len(df)} segments ---")
             else:
                 logger.info(f"--- Processing batch of {len(df)} segments (Total so far: {total_processed}) ---")
-        
+
+            # Ensure only complete transcripts (important when using limit)
+            if not latest and not earliest:
+                df = ensure_complete_transcripts(df)
+                logger.info(f"   Ensured complete transcripts: {len(df)} segments from {df['transcript_id'].nunique()} complete transcripts")
+
             df = rejoin_fragments(df)
             logger.info(f"   (After rejoining: {len(df)} segments)")
 
