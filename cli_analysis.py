@@ -34,7 +34,7 @@ from google.oauth2 import service_account
 import google.auth
 import spacy
 from sentence_transformers import SentenceTransformer, util
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer
 import torch
 
 from generate_topics import generate_topics_json
@@ -107,6 +107,10 @@ def load_model_safely(model_path, model_type="embedding"):
     try:
         if model_type == "embedding":
             return SentenceTransformer(model_path)
+        elif model_type == "sentiment":
+            # Load tokenizer with regex fix for DeBERTa models
+            tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+            return pipeline("text-classification", model=model_path, tokenizer=tokenizer)
         else:
             return pipeline("text-classification", model=model_path)
     except Exception as e:

@@ -1,7 +1,7 @@
 import json
 import spacy
 from sentence_transformers import SentenceTransformer, util
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer
 import pandas as pd
 from google.cloud import bigquery
 import os
@@ -91,11 +91,15 @@ def load_model_safely(model_path, model_type="embedding"):
     if not os.path.exists(model_path):
         print(f"CRITICAL ERROR: Model path not found: {model_path}")
         sys.exit(1)
-        
+
     print(f"Loading {model_type} model from {model_path}")
     try:
         if model_type == "embedding":
             return SentenceTransformer(model_path)
+        elif model_type == "sentiment":
+            # Load tokenizer with regex fix for DeBERTa models
+            tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+            return pipeline("text-classification", model=model_path, tokenizer=tokenizer)
         else:
             return pipeline("text-classification", model=model_path)
     except Exception as e:

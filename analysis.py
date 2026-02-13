@@ -7,7 +7,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import json
 import spacy
 from sentence_transformers import SentenceTransformer, util
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer
 import pandas as pd
 from google.cloud import bigquery
 import sys
@@ -225,11 +225,15 @@ def load_model_safely(model_path, model_type="embedding"):
         print(f"CRITICAL ERROR: Model path not found: {model_path}")
         print("Ensure models are baked into the Docker image during build.")
         sys.exit(1)
-        
+
     print(f"Loading {model_type} model from {model_path}")
     try:
         if model_type == "embedding":
             return SentenceTransformer(model_path)
+        elif model_type == "sentiment":
+            # Load tokenizer with regex fix for DeBERTa models
+            tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+            return pipeline("text-classification", model=model_path, tokenizer=tokenizer)
         else:
             return pipeline("text-classification", model=model_path)
     except Exception as e:
