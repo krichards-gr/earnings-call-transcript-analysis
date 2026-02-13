@@ -20,9 +20,13 @@ def transform_raw_inputs():
         return False
 
     try:
-        # Read raw inputs
-        # Expecting cols: issue_area, issue_subtopic, pattern, exclusionary_term, anchor_phrases
-        df = pd.read_csv(RAW_INPUTS_FILE)
+        # Read raw inputs with proper encoding handling
+        # Try UTF-8 first, fallback to latin-1 for special characters
+        try:
+            df = pd.read_csv(RAW_INPUTS_FILE, encoding='utf-8')
+        except UnicodeDecodeError:
+            print("UTF-8 decoding failed, trying latin-1 encoding...")
+            df = pd.read_csv(RAW_INPUTS_FILE, encoding='latin-1')
         
         # Clean up any potential empty columns from trailing commas
         df = df.dropna(how='all', axis=1)

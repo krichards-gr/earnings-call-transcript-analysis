@@ -2,7 +2,7 @@
   "topics": [
     {
       "label": "Climate Change",
-      "issue_area": "Climate Change & Sustainability",
+      "issue_area": "Climate Change & ESG",
       "issue_subtopic": "Climate Change",
       "patterns": [
         [
@@ -193,7 +193,7 @@
     },
     {
       "label": "Energy Sources",
-      "issue_area": "Climate Change & Sustainability",
+      "issue_area": "Climate Change & ESG",
       "issue_subtopic": "Energy Sources",
       "patterns": [
         [
@@ -252,7 +252,7 @@
     },
     {
       "label": "ESG",
-      "issue_area": "Climate Change & Sustainability",
+      "issue_area": "Climate Change & ESG",
       "issue_subtopic": "ESG",
       "patterns": [
         [
@@ -348,7 +348,7 @@
     },
     {
       "label": "Natural Disasters",
-      "issue_area": "Climate Change & Sustainability",
+      "issue_area": "Climate Change & ESG",
       "issue_subtopic": "Natural Disasters",
       "patterns": [
         [
@@ -472,7 +472,7 @@
     },
     {
       "label": "Net Zero",
-      "issue_area": "Climate Change & Sustainability",
+      "issue_area": "Climate Change & ESG",
       "issue_subtopic": "Net Zero",
       "patterns": [
         [
@@ -528,7 +528,7 @@
     },
     {
       "label": "Plastic",
-      "issue_area": "Climate Change & Sustainability",
+      "issue_area": "Climate Change & ESG",
       "issue_subtopic": "Plastic",
       "patterns": [
         [
@@ -761,7 +761,7 @@
     },
     {
       "label": "Sustainability",
-      "issue_area": "Climate Change & Sustainability",
+      "issue_area": "Climate Change & ESG",
       "issue_subtopic": "Sustainability",
       "patterns": [
         [
@@ -1348,6 +1348,5512 @@
         [
           {
             "LOWER": "#upskilling"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Cocoa",
+      "issue_area": "Sustainability",
+      "issue_subtopic": "Cocoa",
+      "patterns": [
+        [
+          {
+            "LOWER": "cocoa"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cocoa"
+          }
+        ],
+        [
+          {
+            "LOWER": "chocolate"
+          }
+        ],
+        [
+          {
+            "LOWER": "#chocolate"
+          }
+        ],
+        [
+          {
+            "LOWER": "chocolate"
+          },
+          {
+            "LOWER": "products"
+          }
+        ],
+        [
+          {
+            "LOWER": "cocoa"
+          },
+          {
+            "LOWER": "products"
+          }
+        ],
+        [
+          {
+            "LOWER": "sustainable"
+          },
+          {
+            "LOWER": "cocoa"
+          }
+        ],
+        [
+          {
+            "LOWER": "cocoa"
+          },
+          {
+            "LOWER": "sustainability"
+          }
+        ],
+        [
+          {
+            "LOWER": "c\u00f4te"
+          },
+          {
+            "LOWER": "d\u0092ivoire"
+          }
+        ],
+        [
+          {
+            "LOWER": "ghana"
+          }
+        ],
+        [
+          {
+            "LOWER": "#ghana"
+          }
+        ],
+        [
+          {
+            "LOWER": "traceability"
+          }
+        ],
+        [
+          {
+            "LOWER": "#traceability"
+          }
+        ],
+        [
+          {
+            "LOWER": "responsible"
+          },
+          {
+            "LOWER": "sourcing"
+          }
+        ],
+        [
+          {
+            "LOWER": "cocoa"
+          },
+          {
+            "LOWER": "sourcing"
+          }
+        ],
+        [
+          {
+            "LOWER": "supply"
+          },
+          {
+            "LOWER": "chain"
+          },
+          {
+            "LOWER": "traceability"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporation"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporations"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporate"
+          },
+          {
+            "LOWER": "responsibility"
+          }
+        ],
+        [
+          {
+            "LOWER": "#corporation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#corporations"
+          }
+        ],
+        [
+          {
+            "LOWER": "#chocolateproducts"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cocoaproducts"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sustainablecocoa"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cocoasustainability"
+          }
+        ],
+        [
+          {
+            "LOWER": "#c\u00f4ted\u0092ivoire"
+          }
+        ],
+        [
+          {
+            "LOWER": "#responsiblesourcing"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cocoasourcing"
+          }
+        ],
+        [
+          {
+            "LOWER": "#supplychaintraceability"
+          }
+        ],
+        [
+          {
+            "LOWER": "#corporateresponsibility"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Supply Chain",
+      "issue_area": "Sustainability",
+      "issue_subtopic": "Supply Chain",
+      "patterns": [
+        [
+          {
+            "LOWER": "supply"
+          },
+          {
+            "LOWER": "chain"
+          }
+        ],
+        [
+          {
+            "LOWER": "cocoa"
+          },
+          {
+            "LOWER": "supply"
+          },
+          {
+            "LOWER": "chain"
+          }
+        ],
+        [
+          {
+            "LOWER": "c\u00f4te"
+          },
+          {
+            "LOWER": "d\u0092ivoire"
+          }
+        ],
+        [
+          {
+            "LOWER": "#ghana"
+          }
+        ],
+        [
+          {
+            "LOWER": "ghana"
+          }
+        ],
+        [
+          {
+            "LOWER": "supply"
+          },
+          {
+            "LOWER": "chain"
+          },
+          {
+            "LOWER": "traceability"
+          }
+        ],
+        [
+          {
+            "LOWER": "#supply"
+          },
+          {
+            "LOWER": "chain"
+          },
+          {
+            "LOWER": "traceability"
+          }
+        ],
+        [
+          {
+            "LOWER": "supplier"
+          },
+          {
+            "LOWER": "sustainability"
+          }
+        ],
+        [
+          {
+            "LOWER": "cocoa"
+          },
+          {
+            "LOWER": "due"
+          },
+          {
+            "LOWER": "diligence"
+          }
+        ],
+        [
+          {
+            "LOWER": "child"
+          },
+          {
+            "LOWER": "labor"
+          }
+        ],
+        [
+          {
+            "LOWER": "forced"
+          },
+          {
+            "LOWER": "labor"
+          }
+        ],
+        [
+          {
+            "LOWER": "human"
+          },
+          {
+            "LOWER": "trafficking"
+          }
+        ],
+        [
+          {
+            "LOWER": "freedom"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "association"
+          }
+        ],
+        [
+          {
+            "LOWER": "collective"
+          },
+          {
+            "LOWER": "bargaining"
+          }
+        ],
+        [
+          {
+            "LOWER": "non-discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "#non-discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "harassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "#harassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "wages"
+          }
+        ],
+        [
+          {
+            "LOWER": "#wages"
+          }
+        ],
+        [
+          {
+            "LOWER": "working"
+          },
+          {
+            "LOWER": "hours"
+          }
+        ],
+        [
+          {
+            "LOWER": "worker"
+          },
+          {
+            "LOWER": "health"
+          },
+          {
+            "LOWER": "and"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ],
+        [
+          {
+            "LOWER": "food"
+          },
+          {
+            "LOWER": "safety"
+          },
+          {
+            "LOWER": "and"
+          },
+          {
+            "LOWER": "quality"
+          }
+        ],
+        [
+          {
+            "LOWER": "food"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ],
+        [
+          {
+            "LOWER": "food"
+          },
+          {
+            "LOWER": "quality"
+          }
+        ],
+        [
+          {
+            "LOWER": "worker"
+          },
+          {
+            "LOWER": "health"
+          }
+        ],
+        [
+          {
+            "LOWER": "worker"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ],
+        [
+          {
+            "LOWER": "worker"
+          },
+          {
+            "LOWER": "benefits"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporations"
+          }
+        ],
+        [
+          {
+            "LOWER": "#corporations"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#corporation"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporate"
+          },
+          {
+            "LOWER": "responsibility"
+          }
+        ],
+        [
+          {
+            "LOWER": "#supplychain"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cocoasupplychain"
+          }
+        ],
+        [
+          {
+            "LOWER": "#c\u00f4ted\u0092ivoire"
+          }
+        ],
+        [
+          {
+            "LOWER": "#supplychaintraceability"
+          }
+        ],
+        [
+          {
+            "LOWER": "#suppliersustainability"
+          }
+        ],
+        [
+          {
+            "LOWER": "#cocoaduediligence"
+          }
+        ],
+        [
+          {
+            "LOWER": "#grievancemechanisms"
+          }
+        ],
+        [
+          {
+            "LOWER": "#childlabor"
+          }
+        ],
+        [
+          {
+            "LOWER": "#forcedlabor"
+          }
+        ],
+        [
+          {
+            "LOWER": "#humantrafficking"
+          }
+        ],
+        [
+          {
+            "LOWER": "#freedomofassociation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#collectivebargaining"
+          }
+        ],
+        [
+          {
+            "LOWER": "#workinghours"
+          }
+        ],
+        [
+          {
+            "LOWER": "#workerhealthandsafety"
+          }
+        ],
+        [
+          {
+            "LOWER": "#foodsafetyandquality"
+          }
+        ],
+        [
+          {
+            "LOWER": "#foodsafety"
+          }
+        ],
+        [
+          {
+            "LOWER": "#foodquality"
+          }
+        ],
+        [
+          {
+            "LOWER": "#workerhealth"
+          }
+        ],
+        [
+          {
+            "LOWER": "#workersafety"
+          }
+        ],
+        [
+          {
+            "LOWER": "#workerbenefits"
+          }
+        ],
+        [
+          {
+            "LOWER": "#corporateresponsibility"
+          }
+        ],
+        [
+          {
+            "LOWER": "grievance"
+          },
+          {
+            "LOWER": "mechanisms"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Anti-Corporate Populism",
+      "issue_area": "Crime & Safety",
+      "issue_subtopic": "Anti-Corporate Populism",
+      "patterns": [
+        [
+          {
+            "LOWER": "boycott"
+          }
+        ],
+        [
+          {
+            "LOWER": "protest"
+          }
+        ],
+        [
+          {
+            "LOWER": "looter"
+          }
+        ],
+        [
+          {
+            "LOWER": "looting"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Criminal Justice Reform",
+      "issue_area": "Crime & Safety",
+      "issue_subtopic": "Criminal Justice Reform",
+      "patterns": [
+        [
+          {
+            "LOWER": "criminal"
+          },
+          {
+            "LOWER": "justice"
+          },
+          {
+            "LOWER": "reform"
+          }
+        ],
+        [
+          {
+            "LOWER": "no"
+          },
+          {
+            "LOWER": "knock"
+          },
+          {
+            "LOWER": "warrant"
+          }
+        ],
+        [
+          {
+            "LOWER": "black"
+          },
+          {
+            "LOWER": "lives"
+          },
+          {
+            "LOWER": "matter"
+          }
+        ],
+        [
+          {
+            "LOWER": "criminal"
+          },
+          {
+            "LOWER": "justice"
+          }
+        ],
+        [
+          {
+            "LOWER": "police"
+          },
+          {
+            "LOWER": "brutality"
+          }
+        ],
+        [
+          {
+            "LOWER": "cop"
+          },
+          {
+            "LOWER": "city"
+          }
+        ],
+        [
+          {
+            "LOWER": "public"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Gun Violence",
+      "issue_area": "Crime & Safety",
+      "issue_subtopic": "Gun Violence",
+      "patterns": [
+        [
+          {
+            "LOWER": "gun"
+          },
+          {
+            "LOWER": "control"
+          }
+        ],
+        [
+          {
+            "LOWER": "gun"
+          },
+          {
+            "LOWER": "violence"
+          }
+        ],
+        [
+          {
+            "LOWER": "gun"
+          },
+          {
+            "LOWER": "buybacks"
+          }
+        ],
+        [
+          {
+            "LOWER": "weapon"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "2nd"
+          },
+          {
+            "LOWER": "amendment"
+          }
+        ],
+        [
+          {
+            "LOWER": "2nd"
+          },
+          {
+            "LOWER": "amendment"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "second"
+          },
+          {
+            "LOWER": "amendment"
+          }
+        ],
+        [
+          {
+            "LOWER": "mass"
+          },
+          {
+            "LOWER": "shooting"
+          }
+        ],
+        [
+          {
+            "LOWER": "school"
+          },
+          {
+            "LOWER": "shooting"
+          }
+        ],
+        [
+          {
+            "LOWER": "gun"
+          },
+          {
+            "LOWER": "restrictions"
+          }
+        ],
+        [
+          {
+            "LOWER": "gun"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "gun"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Political Violence",
+      "issue_area": "Crime & Safety",
+      "issue_subtopic": "Political Violence",
+      "patterns": [
+        [
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "violence"
+          }
+        ],
+        [
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "extermism"
+          }
+        ],
+        [
+          {
+            "LOWER": "extremism"
+          }
+        ],
+        [
+          {
+            "LOWER": "right-wing"
+          },
+          {
+            "LOWER": "extremism"
+          }
+        ],
+        [
+          {
+            "LOWER": "left-wing"
+          },
+          {
+            "LOWER": "extremism"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Retail Theft",
+      "issue_area": "Crime & Safety",
+      "issue_subtopic": "Retail Theft",
+      "patterns": [
+        [
+          {
+            "LOWER": "retail"
+          },
+          {
+            "LOWER": "theft"
+          }
+        ],
+        [
+          {
+            "LOWER": "employee"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ],
+        [
+          {
+            "LOWER": "store"
+          },
+          {
+            "LOWER": "safety"
+          }
+        ],
+        [
+          {
+            "LOWER": "violent"
+          },
+          {
+            "LOWER": "retail"
+          },
+          {
+            "LOWER": "theft"
+          }
+        ],
+        [
+          {
+            "LOWER": "shoplifting"
+          }
+        ],
+        [
+          {
+            "LOWER": "shrinkage"
+          }
+        ],
+        [
+          {
+            "LOWER": "retail"
+          },
+          {
+            "LOWER": "theft"
+          },
+          {
+            "LOWER": "legislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "corca"
+          }
+        ],
+        [
+          {
+            "LOWER": "store"
+          },
+          {
+            "LOWER": "security"
+          }
+        ],
+        [
+          {
+            "LOWER": "organized"
+          },
+          {
+            "LOWER": "retail"
+          },
+          {
+            "LOWER": "theft"
+          }
+        ],
+        [
+          {
+            "LOWER": "retail"
+          },
+          {
+            "LOWER": "crime"
+          }
+        ],
+        [
+          {
+            "LOWER": "return"
+          },
+          {
+            "LOWER": "fraud"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Childcare Access",
+      "issue_area": "Gender Equity",
+      "issue_subtopic": "Childcare Access",
+      "patterns": [
+        [
+          {
+            "LOWER": "paid"
+          },
+          {
+            "LOWER": "leave"
+          },
+          {
+            "LOWER": "benefits"
+          }
+        ],
+        [
+          {
+            "LOWER": "maternity"
+          },
+          {
+            "LOWER": "leave"
+          }
+        ],
+        [
+          {
+            "LOWER": "childcare"
+          },
+          {
+            "LOWER": "access"
+          },
+          {
+            "LOWER": "for"
+          },
+          {
+            "LOWER": "workers"
+          }
+        ],
+        [
+          {
+            "LOWER": "caregivers"
+          },
+          {
+            "LOWER": "leaving"
+          },
+          {
+            "LOWER": "the"
+          },
+          {
+            "LOWER": "workforce"
+          }
+        ],
+        [
+          {
+            "LOWER": "caregivers"
+          },
+          {
+            "LOWER": "quitting"
+          },
+          {
+            "LOWER": "jobs"
+          }
+        ],
+        [
+          {
+            "LOWER": "paid"
+          },
+          {
+            "LOWER": "maternal"
+          },
+          {
+            "LOWER": "leave"
+          }
+        ],
+        [
+          {
+            "LOWER": "paid"
+          },
+          {
+            "LOWER": "paternal"
+          },
+          {
+            "LOWER": "leave"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Pay Equity",
+      "issue_area": "Gender Equity",
+      "issue_subtopic": "Pay Equity",
+      "patterns": [
+        [
+          {
+            "LOWER": "pay"
+          },
+          {
+            "LOWER": "equity"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "pay"
+          },
+          {
+            "LOWER": "gap"
+          }
+        ],
+        [
+          {
+            "LOWER": "pay"
+          },
+          {
+            "LOWER": "transparency"
+          }
+        ],
+        [
+          {
+            "LOWER": "women"
+          },
+          {
+            "LOWER": "compensation"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "wage"
+          },
+          {
+            "LOWER": "gap"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "RTO",
+      "issue_area": "Gender Equity",
+      "issue_subtopic": "RTO",
+      "patterns": [
+        [
+          {
+            "LOWER": "return-to-office"
+          },
+          {
+            "LOWER": "mandates"
+          }
+        ],
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "flexibility"
+          }
+        ],
+        [
+          {
+            "LOWER": "rto"
+          },
+          {
+            "LOWER": "policy"
+          }
+        ],
+        [
+          {
+            "LOWER": "rto"
+          },
+          {
+            "LOWER": "mandate"
+          }
+        ],
+        [
+          {
+            "LOWER": "return"
+          },
+          {
+            "LOWER": "to"
+          },
+          {
+            "LOWER": "office"
+          }
+        ],
+        [
+          {
+            "LOWER": "work"
+          },
+          {
+            "LOWER": "from"
+          },
+          {
+            "LOWER": "home"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Sexual Harassment",
+      "issue_area": "Gender Equity",
+      "issue_subtopic": "Sexual Harassment",
+      "patterns": [
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "harassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "sexual"
+          },
+          {
+            "LOWER": "harassment"
+          },
+          {
+            "LOWER": "in"
+          },
+          {
+            "LOWER": "the"
+          },
+          {
+            "LOWER": "workplace"
+          }
+        ],
+        [
+          {
+            "LOWER": "sex"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": [
+        "diddy",
+        "blake lively",
+        "justin baldoni"
+      ]
+    },
+    {
+      "label": "Workforce Demographics",
+      "issue_area": "Gender Equity",
+      "issue_subtopic": "Workforce Demographics",
+      "patterns": [
+        [
+          {
+            "LOWER": "women"
+          },
+          {
+            "LOWER": "leaving"
+          },
+          {
+            "LOWER": "the"
+          },
+          {
+            "LOWER": "workforce"
+          }
+        ],
+        [
+          {
+            "LOWER": "women"
+          },
+          {
+            "LOWER": "in"
+          },
+          {
+            "LOWER": "the"
+          },
+          {
+            "LOWER": "workforce"
+          }
+        ],
+        [
+          {
+            "LOWER": "women"
+          },
+          {
+            "LOWER": "employees"
+          },
+          {
+            "LOWER": "leaving"
+          }
+        ],
+        [
+          {
+            "LOWER": "female"
+          },
+          {
+            "LOWER": "employees"
+          },
+          {
+            "LOWER": "leaving"
+          }
+        ],
+        [
+          {
+            "LOWER": "women"
+          },
+          {
+            "LOWER": "quitting"
+          },
+          {
+            "LOWER": "jobs"
+          }
+        ],
+        [
+          {
+            "LOWER": "mothers"
+          },
+          {
+            "LOWER": "leaving"
+          },
+          {
+            "LOWER": "the"
+          },
+          {
+            "LOWER": "workforce"
+          }
+        ],
+        [
+          {
+            "LOWER": "mothers"
+          },
+          {
+            "LOWER": "quitting"
+          },
+          {
+            "LOWER": "jobs"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Discrimination",
+      "issue_area": "LGBTQ+ Equality",
+      "issue_subtopic": "Discrimination",
+      "patterns": [
+        [
+          {
+            "LOWER": "hate"
+          },
+          {
+            "LOWER": "crime"
+          }
+        ],
+        [
+          {
+            "LOWER": "slur"
+          }
+        ],
+        [
+          {
+            "LOWER": "title"
+          },
+          {
+            "LOWER": "ix"
+          }
+        ],
+        [
+          {
+            "LOWER": "title"
+          },
+          {
+            "LOWER": "nine"
+          }
+        ],
+        [
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "eeoc"
+          }
+        ],
+        [
+          {
+            "LOWER": "andrea"
+          },
+          {
+            "LOWER": "lucas"
+          }
+        ],
+        [
+          {
+            "LOWER": "homophobia"
+          }
+        ],
+        [
+          {
+            "LOWER": "homophobic"
+          }
+        ],
+        [
+          {
+            "LOWER": "transphobic"
+          }
+        ],
+        [
+          {
+            "LOWER": "transphobia"
+          }
+        ],
+        [
+          {
+            "LOWER": "homophobe"
+          }
+        ],
+        [
+          {
+            "LOWER": "transphobe"
+          }
+        ],
+        [
+          {
+            "LOWER": "equal"
+          },
+          {
+            "LOWER": "employment"
+          }
+        ],
+        [
+          {
+            "LOWER": "bostock"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "exemption"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti-gay"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti"
+          },
+          {
+            "LOWER": "gay"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "General",
+      "issue_area": "LGBTQ+ Equality",
+      "issue_subtopic": "General",
+      "patterns": [
+        [
+          {
+            "LOWER": "#homophobia"
+          }
+        ],
+        [
+          {
+            "LOWER": "homophobia"
+          }
+        ],
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "month"
+          }
+        ],
+        [
+          {
+            "LOWER": "#pridemonth"
+          }
+        ],
+        [
+          {
+            "LOWER": "rainbow"
+          },
+          {
+            "LOWER": "washing"
+          }
+        ],
+        [
+          {
+            "LOWER": "#rainbowwashing"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "equality"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqequality"
+          }
+        ],
+        [
+          {
+            "LOWER": "marriage"
+          },
+          {
+            "LOWER": "equality"
+          }
+        ],
+        [
+          {
+            "LOWER": "#marriageequality"
+          }
+        ],
+        [
+          {
+            "LOWER": "dragshow"
+          },
+          {
+            "LOWER": "bans"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dragshowbans"
+          }
+        ],
+        [
+          {
+            "LOWER": "drag"
+          },
+          {
+            "LOWER": "show"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dragshowban"
+          }
+        ],
+        [
+          {
+            "LOWER": "bathroombill"
+          }
+        ],
+        [
+          {
+            "LOWER": "#bathroombill"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "affirming"
+          },
+          {
+            "LOWER": "care"
+          }
+        ],
+        [
+          {
+            "LOWER": "#genderaffirmingcare"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "affirming"
+          },
+          {
+            "LOWER": "care"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#genderaffirmingcareban"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "state"
+          },
+          {
+            "LOWER": "legislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqstatelegislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "antitrans"
+          },
+          {
+            "LOWER": "legislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antitranslegislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "pronoun"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#pronounban"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "book"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqbookban"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "education"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqeducationban"
+          }
+        ],
+        [
+          {
+            "LOWER": "sexual"
+          },
+          {
+            "LOWER": "orientation"
+          },
+          {
+            "LOWER": "education"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sexualorientationeducation"
+          }
+        ],
+        [
+          {
+            "LOWER": "sexual"
+          },
+          {
+            "LOWER": "censorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sexualcensorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "woke"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqwoke"
+          }
+        ],
+        [
+          {
+            "LOWER": "rfma"
+          }
+        ],
+        [
+          {
+            "LOWER": "#rfma"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antitrans"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti"
+          },
+          {
+            "LOWER": "trans"
+          }
+        ],
+        [
+          {
+            "LOWER": "transgender"
+          },
+          {
+            "LOWER": "bans"
+          }
+        ],
+        [
+          {
+            "LOWER": "#transgenderbans"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "dysphoria"
+          }
+        ],
+        [
+          {
+            "LOWER": "#genderdysphoria"
+          }
+        ],
+        [
+          {
+            "LOWER": "detransition"
+          }
+        ],
+        [
+          {
+            "LOWER": "#detransition"
+          }
+        ],
+        [
+          {
+            "LOWER": "drag"
+          },
+          {
+            "LOWER": "bans"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dragbans"
+          }
+        ],
+        [
+          {
+            "LOWER": "racial"
+          },
+          {
+            "LOWER": "equity"
+          }
+        ],
+        [
+          {
+            "LOWER": "#racialequity"
+          }
+        ],
+        [
+          {
+            "LOWER": "black"
+          },
+          {
+            "LOWER": "lives"
+          },
+          {
+            "LOWER": "matter"
+          }
+        ],
+        [
+          {
+            "LOWER": "#blacklivesmatter"
+          }
+        ],
+        [
+          {
+            "LOWER": "blm"
+          }
+        ],
+        [
+          {
+            "LOWER": "#blm"
+          }
+        ],
+        [
+          {
+            "LOWER": "dei"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dei"
+          }
+        ],
+        [
+          {
+            "LOWER": "diversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "#diversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "critical"
+          },
+          {
+            "LOWER": "race"
+          },
+          {
+            "LOWER": "theory"
+          }
+        ],
+        [
+          {
+            "LOWER": "#criticalracetheory"
+          }
+        ],
+        [
+          {
+            "LOWER": "crt"
+          }
+        ],
+        [
+          {
+            "LOWER": "#crt"
+          }
+        ],
+        [
+          {
+            "LOWER": "racial"
+          },
+          {
+            "LOWER": "justice"
+          }
+        ],
+        [
+          {
+            "LOWER": "inclusion"
+          }
+        ],
+        [
+          {
+            "LOWER": "belonging"
+          }
+        ],
+        [
+          {
+            "LOWER": "inclusive"
+          },
+          {
+            "LOWER": "environment"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionrights"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortion"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionaccess"
+          }
+        ],
+        [
+          {
+            "LOWER": "roe"
+          },
+          {
+            "LOWER": "v"
+          },
+          {
+            "LOWER": "wade"
+          }
+        ],
+        [
+          {
+            "LOWER": "#roevwade"
+          }
+        ],
+        [
+          {
+            "LOWER": "roe"
+          },
+          {
+            "LOWER": "vs"
+          },
+          {
+            "LOWER": "wade"
+          }
+        ],
+        [
+          {
+            "LOWER": "#roevswade"
+          }
+        ],
+        [
+          {
+            "LOWER": "dobbs"
+          },
+          {
+            "LOWER": "v"
+          },
+          {
+            "LOWER": "jackson"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dobbsvjackson"
+          }
+        ],
+        [
+          {
+            "LOWER": "#contraceptionaccess"
+          }
+        ],
+        [
+          {
+            "LOWER": "contraception"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "mifepristone"
+          }
+        ],
+        [
+          {
+            "LOWER": "#mifepristone"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "medication"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionmedication"
+          }
+        ],
+        [
+          {
+            "LOWER": "reproductive"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "#reproductiverights"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "pill"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionpill"
+          }
+        ],
+        [
+          {
+            "LOWER": "dobbs"
+          },
+          {
+            "LOWER": "decision"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dobbsdecision"
+          }
+        ],
+        [
+          {
+            "LOWER": "ivf"
+          }
+        ],
+        [
+          {
+            "LOWER": "misoprostol"
+          }
+        ],
+        [
+          {
+            "LOWER": "#misoprostol"
+          }
+        ],
+        [
+          {
+            "LOWER": "fetal"
+          },
+          {
+            "LOWER": "personhood"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionisahumanright"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionishealthcare"
+          }
+        ],
+        [
+          {
+            "LOWER": "#prochoice"
+          }
+        ],
+        [
+          {
+            "LOWER": "#prolife"
+          }
+        ],
+        [
+          {
+            "LOWER": "#mybodymychoice"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "pills"
+          }
+        ],
+        [
+          {
+            "LOWER": "#marchforlife"
+          }
+        ],
+        [
+          {
+            "LOWER": "pro"
+          },
+          {
+            "LOWER": "choice"
+          }
+        ],
+        [
+          {
+            "LOWER": "reproductive"
+          },
+          {
+            "LOWER": "justice"
+          }
+        ],
+        [
+          {
+            "LOWER": "ivf"
+          },
+          {
+            "LOWER": "access"
+          }
+        ],
+        [
+          {
+            "LOWER": "sexual"
+          },
+          {
+            "LOWER": "health"
+          }
+        ],
+        [
+          {
+            "LOWER": "reproductive"
+          },
+          {
+            "LOWER": "health"
+          }
+        ],
+        [
+          {
+            "LOWER": "oral"
+          },
+          {
+            "LOWER": "contraceptives"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Legislation & Litigation",
+      "issue_area": "LGBTQ+ Equality",
+      "issue_subtopic": "Legislation & Litigation",
+      "patterns": [
+        [
+          {
+            "LOWER": "trans"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "transgender"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "bathroom"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti-discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "identity"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "sexual"
+          },
+          {
+            "LOWER": "orientation"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "obergefell"
+          }
+        ],
+        [
+          {
+            "LOWER": "title"
+          },
+          {
+            "LOWER": "ix"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "exemption"
+          }
+        ],
+        [
+          {
+            "LOWER": "legislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "laws"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender-affirming"
+          },
+          {
+            "LOWER": "care"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "supreme"
+          },
+          {
+            "LOWER": "court"
+          }
+        ],
+        [
+          {
+            "LOWER": "scotus"
+          }
+        ],
+        [
+          {
+            "LOWER": "lawsuit"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "drag"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "wrongful"
+          },
+          {
+            "LOWER": "termination"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "PRIDE",
+      "issue_area": "LGBTQ+ Equality",
+      "issue_subtopic": "PRIDE",
+      "patterns": [
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "month"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq+"
+          },
+          {
+            "LOWER": "pride"
+          }
+        ],
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "campaign"
+          }
+        ],
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "marketing"
+          }
+        ],
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "merchandise"
+          }
+        ],
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "merch"
+          }
+        ],
+        [
+          {
+            "LOWER": "rainbow"
+          },
+          {
+            "LOWER": "washing"
+          }
+        ],
+        [
+          {
+            "LOWER": "pink"
+          },
+          {
+            "LOWER": "washing"
+          }
+        ],
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "parade"
+          }
+        ],
+        [
+          {
+            "LOWER": "sponsorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "sponsor"
+          }
+        ],
+        [
+          {
+            "LOWER": "world"
+          },
+          {
+            "LOWER": "pride"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Target Volatility Calculation",
+      "issue_area": "LGBTQ+ Equality",
+      "issue_subtopic": "Target Volatility Calculation",
+      "patterns": [
+        [
+          {
+            "LOWER": "#lgbtqwokeism"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "woke"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqcorporatewokeism"
+          }
+        ],
+        [
+          {
+            "LOWER": "#tuckfriendly"
+          }
+        ],
+        [
+          {
+            "LOWER": "tuck"
+          },
+          {
+            "LOWER": "friendly"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "wokeism"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "corporate"
+          },
+          {
+            "LOWER": "wokeism"
+          }
+        ],
+        [
+          {
+            "LOWER": "dylan"
+          },
+          {
+            "LOWER": "mulvaney"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dylanmulvaney"
+          }
+        ],
+        [
+          {
+            "LOWER": "target"
+          },
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "collection"
+          }
+        ],
+        [
+          {
+            "LOWER": "#targetpridecollection"
+          }
+        ],
+        [
+          {
+            "LOWER": "rainbow"
+          },
+          {
+            "LOWER": "capitalism"
+          }
+        ],
+        [
+          {
+            "LOWER": "#rainbowcapitalism"
+          }
+        ],
+        [
+          {
+            "LOWER": "youth"
+          },
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "merchandise"
+          }
+        ],
+        [
+          {
+            "LOWER": "#youthlgbtqmerchandise"
+          }
+        ],
+        [
+          {
+            "LOWER": "youthlgbtqclothing"
+          }
+        ],
+        [
+          {
+            "LOWER": "#youthlgbtqclothing"
+          }
+        ],
+        [
+          {
+            "LOWER": "antitrans"
+          },
+          {
+            "LOWER": "activists"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antitransactivists"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dragbans"
+          }
+        ],
+        [
+          {
+            "LOWER": "drag"
+          },
+          {
+            "LOWER": "bans"
+          }
+        ],
+        [
+          {
+            "LOWER": "dragshowbans"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dragshowbans"
+          }
+        ],
+        [
+          {
+            "LOWER": "#homophobia"
+          }
+        ],
+        [
+          {
+            "LOWER": "homophobia"
+          }
+        ],
+        [
+          {
+            "LOWER": "corporate"
+          },
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "advocacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "#corporatelgbtqadvocacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "month"
+          }
+        ],
+        [
+          {
+            "LOWER": "#pridemonth"
+          }
+        ],
+        [
+          {
+            "LOWER": "rainbow"
+          },
+          {
+            "LOWER": "washing"
+          }
+        ],
+        [
+          {
+            "LOWER": "#rainbowwashing"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "equality"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqequality"
+          }
+        ],
+        [
+          {
+            "LOWER": "marriage"
+          },
+          {
+            "LOWER": "equality"
+          }
+        ],
+        [
+          {
+            "LOWER": "#marriageequality"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dragshowban"
+          }
+        ],
+        [
+          {
+            "LOWER": "dragshow"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "bathroom"
+          },
+          {
+            "LOWER": "bill"
+          }
+        ],
+        [
+          {
+            "LOWER": "#bathroombill"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "affirming"
+          },
+          {
+            "LOWER": "care"
+          }
+        ],
+        [
+          {
+            "LOWER": "#genderaffirmingcare"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "affirming"
+          },
+          {
+            "LOWER": "care"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#genderaffirmingcareban"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "state"
+          },
+          {
+            "LOWER": "legislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqstatelegislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "antitranslegislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antitranslegislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "pronoun"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#pronounban"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "book"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqbookban"
+          }
+        ],
+        [
+          {
+            "LOWER": "lgbtq"
+          },
+          {
+            "LOWER": "education"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#lgbtqeducationban"
+          }
+        ],
+        [
+          {
+            "LOWER": "sexual"
+          },
+          {
+            "LOWER": "orientation"
+          },
+          {
+            "LOWER": "education"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sexualorientationeducation"
+          }
+        ],
+        [
+          {
+            "LOWER": "sexual"
+          },
+          {
+            "LOWER": "censorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "#sexualcensorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "rfma"
+          }
+        ],
+        [
+          {
+            "LOWER": "#rfma"
+          }
+        ],
+        [
+          {
+            "LOWER": "antitrans"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antitrans"
+          }
+        ],
+        [
+          {
+            "LOWER": "trans"
+          },
+          {
+            "LOWER": "bans"
+          }
+        ],
+        [
+          {
+            "LOWER": "#transbans"
+          }
+        ],
+        [
+          {
+            "LOWER": "pride"
+          },
+          {
+            "LOWER": "campaigns"
+          }
+        ],
+        [
+          {
+            "LOWER": "#pridecampaigns"
+          }
+        ],
+        [
+          {
+            "LOWER": "boycott"
+          },
+          {
+            "LOWER": "target"
+          }
+        ],
+        [
+          {
+            "LOWER": "#boycotttarget"
+          }
+        ],
+        [
+          {
+            "LOWER": "#boycottbudlight"
+          }
+        ],
+        [
+          {
+            "LOWER": "boycott"
+          },
+          {
+            "LOWER": "budlight"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Transgender Issues",
+      "issue_area": "LGBTQ+ Equality",
+      "issue_subtopic": "Transgender Issues",
+      "patterns": [
+        [
+          {
+            "LOWER": "gender-affirming"
+          },
+          {
+            "LOWER": "care"
+          }
+        ],
+        [
+          {
+            "LOWER": "hormone"
+          },
+          {
+            "LOWER": "treatment"
+          }
+        ],
+        [
+          {
+            "LOWER": "puberty"
+          },
+          {
+            "LOWER": "blockers"
+          }
+        ],
+        [
+          {
+            "LOWER": "transition"
+          },
+          {
+            "LOWER": "surgery"
+          }
+        ],
+        [
+          {
+            "LOWER": "de-transition"
+          },
+          {
+            "LOWER": "surgery"
+          }
+        ],
+        [
+          {
+            "LOWER": "cross-sex"
+          },
+          {
+            "LOWER": "hormones"
+          }
+        ],
+        [
+          {
+            "LOWER": "transgender"
+          }
+        ],
+        [
+          {
+            "LOWER": "sports"
+          },
+          {
+            "LOWER": "participation"
+          }
+        ],
+        [
+          {
+            "LOWER": "naia"
+          }
+        ],
+        [
+          {
+            "LOWER": "ncaa"
+          }
+        ],
+        [
+          {
+            "LOWER": "ioc"
+          }
+        ],
+        [
+          {
+            "LOWER": "athlete"
+          },
+          {
+            "LOWER": "ally"
+          }
+        ],
+        [
+          {
+            "LOWER": "save"
+          },
+          {
+            "LOWER": "women\u0092s"
+          },
+          {
+            "LOWER": "sports"
+          }
+        ],
+        [
+          {
+            "LOWER": "concerned"
+          },
+          {
+            "LOWER": "women"
+          },
+          {
+            "LOWER": "for"
+          },
+          {
+            "LOWER": "america"
+          }
+        ],
+        [
+          {
+            "LOWER": "independent"
+          },
+          {
+            "LOWER": "women's"
+          },
+          {
+            "LOWER": "forum"
+          }
+        ],
+        [
+          {
+            "LOWER": "biological"
+          },
+          {
+            "LOWER": "sex"
+          }
+        ],
+        [
+          {
+            "LOWER": "hormone"
+          },
+          {
+            "LOWER": "therapy"
+          }
+        ],
+        [
+          {
+            "LOWER": "transgender"
+          },
+          {
+            "LOWER": "legislation"
+          }
+        ],
+        [
+          {
+            "LOWER": "trans"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "bathroom"
+          },
+          {
+            "LOWER": "bill"
+          }
+        ],
+        [
+          {
+            "LOWER": "bathroom"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "dysphoria"
+          }
+        ],
+        [
+          {
+            "LOWER": "pronouns"
+          }
+        ],
+        [
+          {
+            "LOWER": "military"
+          },
+          {
+            "LOWER": "policy"
+          }
+        ],
+        [
+          {
+            "LOWER": "passport"
+          }
+        ],
+        [
+          {
+            "LOWER": "protect"
+          },
+          {
+            "LOWER": "children\u0092s"
+          },
+          {
+            "LOWER": "innocence"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti-trans"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti"
+          },
+          {
+            "LOWER": "trans"
+          }
+        ],
+        [
+          {
+            "LOWER": "mtf"
+          }
+        ],
+        [
+          {
+            "LOWER": "ftm"
+          }
+        ],
+        [
+          {
+            "LOWER": "gender"
+          },
+          {
+            "LOWER": "identity"
+          }
+        ],
+        [
+          {
+            "LOWER": "transing"
+          }
+        ],
+        [
+          {
+            "LOWER": "transphobe"
+          }
+        ],
+        [
+          {
+            "LOWER": "transphobic"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Activist Action",
+      "issue_area": "Racial Equity",
+      "issue_subtopic": "Activist Action",
+      "patterns": [
+        [
+          {
+            "LOWER": "woke"
+          }
+        ],
+        [
+          {
+            "LOWER": "allegedly"
+          }
+        ],
+        [
+          {
+            "LOWER": "company"
+          }
+        ],
+        [
+          {
+            "LOWER": "boycott"
+          }
+        ],
+        [
+          {
+            "LOWER": "protest"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Administration Pressure",
+      "issue_area": "Racial Equity",
+      "issue_subtopic": "Administration Pressure",
+      "patterns": [
+        [
+          {
+            "LOWER": "eeoc"
+          }
+        ],
+        [
+          {
+            "LOWER": "#eeoc"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti-discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "doj"
+          }
+        ],
+        [
+          {
+            "LOWER": "federal"
+          },
+          {
+            "LOWER": "probe"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Affirmative Action",
+      "issue_area": "Racial Equity",
+      "issue_subtopic": "Affirmative Action",
+      "patterns": [
+        [
+          {
+            "LOWER": "affirmative"
+          },
+          {
+            "LOWER": "action"
+          }
+        ],
+        [
+          {
+            "LOWER": "#affirmativeaction"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Critical Race Theory",
+      "issue_area": "Racial Equity",
+      "issue_subtopic": "Critical Race Theory",
+      "patterns": [
+        [
+          {
+            "LOWER": "critical"
+          },
+          {
+            "LOWER": "race"
+          },
+          {
+            "LOWER": "theory"
+          }
+        ],
+        [
+          {
+            "LOWER": "#criticalracetheory"
+          }
+        ],
+        [
+          {
+            "LOWER": "crt"
+          }
+        ],
+        [
+          {
+            "LOWER": "#crt"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "DEI",
+      "issue_area": "Racial Equity",
+      "issue_subtopic": "DEI",
+      "patterns": [
+        [
+          {
+            "LOWER": "dei"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dei"
+          }
+        ],
+        [
+          {
+            "LOWER": "diversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "#diversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "mbda"
+          }
+        ],
+        [
+          {
+            "LOWER": "#mbda"
+          }
+        ],
+        [
+          {
+            "LOWER": "jeffrey"
+          },
+          {
+            "LOWER": "nuziard"
+          }
+        ],
+        [
+          {
+            "LOWER": "minority"
+          },
+          {
+            "LOWER": "business"
+          },
+          {
+            "LOWER": "development"
+          },
+          {
+            "LOWER": "agency"
+          }
+        ],
+        [
+          {
+            "LOWER": "title"
+          },
+          {
+            "LOWER": "vii"
+          }
+        ],
+        [
+          {
+            "LOWER": "#titlevii"
+          }
+        ],
+        [
+          {
+            "LOWER": "title"
+          },
+          {
+            "LOWER": "vi"
+          }
+        ],
+        [
+          {
+            "LOWER": "#titlevi"
+          }
+        ],
+        [
+          {
+            "LOWER": "section"
+          },
+          {
+            "LOWER": "1981"
+          }
+        ],
+        [
+          {
+            "LOWER": "#section1981"
+          }
+        ],
+        [
+          {
+            "LOWER": "section"
+          },
+          {
+            "LOWER": "1981"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "the"
+          },
+          {
+            "LOWER": "civil"
+          },
+          {
+            "LOWER": "rights"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "#section1981ofthecivilrightsact"
+          }
+        ],
+        [
+          {
+            "LOWER": "board"
+          },
+          {
+            "LOWER": "diversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "mei"
+          }
+        ],
+        [
+          {
+            "LOWER": "chief"
+          },
+          {
+            "LOWER": "diversity"
+          },
+          {
+            "LOWER": "officer"
+          }
+        ],
+        [
+          {
+            "LOWER": "chief"
+          },
+          {
+            "LOWER": "belonging"
+          },
+          {
+            "LOWER": "officer"
+          }
+        ],
+        [
+          {
+            "LOWER": "inclusive"
+          },
+          {
+            "LOWER": "workplace"
+          }
+        ],
+        [
+          {
+            "LOWER": "inclusive"
+          },
+          {
+            "LOWER": "workforce"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Supplier Diversity",
+      "issue_area": "Racial Equity",
+      "issue_subtopic": "Supplier Diversity",
+      "patterns": [
+        [
+          {
+            "LOWER": "supplier"
+          },
+          {
+            "LOWER": "diversity"
+          }
+        ],
+        [
+          {
+            "LOWER": "minority"
+          },
+          {
+            "LOWER": "suppliers"
+          }
+        ],
+        [
+          {
+            "LOWER": "diverse"
+          },
+          {
+            "LOWER": "suppliers"
+          }
+        ],
+        [
+          {
+            "LOWER": "diverse"
+          },
+          {
+            "LOWER": "supplier"
+          }
+        ],
+        [
+          {
+            "LOWER": "diverse"
+          },
+          {
+            "LOWER": "supply"
+          },
+          {
+            "LOWER": "chains"
+          }
+        ],
+        [
+          {
+            "LOWER": "diverse"
+          },
+          {
+            "LOWER": "supply"
+          },
+          {
+            "LOWER": "chain"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Antisemitism",
+      "issue_area": "Religious & Political Diversity",
+      "issue_subtopic": "Antisemitism",
+      "patterns": [
+        [
+          {
+            "LOWER": "antisemitism"
+          }
+        ],
+        [
+          {
+            "LOWER": "antisemitic"
+          }
+        ],
+        [
+          {
+            "LOWER": "jewish"
+          },
+          {
+            "LOWER": "hate"
+          }
+        ],
+        [
+          {
+            "LOWER": "jewish"
+          },
+          {
+            "LOWER": "targeting"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti-jewish"
+          }
+        ],
+        [
+          {
+            "LOWER": "holocaust"
+          },
+          {
+            "LOWER": "denial"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Political Expression",
+      "issue_area": "Religious & Political Diversity",
+      "issue_subtopic": "Political Expression",
+      "patterns": [
+        [
+          {
+            "LOWER": "corporate"
+          },
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "engagement"
+          },
+          {
+            "LOWER": "policy"
+          }
+        ],
+        [
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "harassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "ideologically"
+          },
+          {
+            "LOWER": "motivated"
+          },
+          {
+            "LOWER": "harassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "viewpoint"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "hostile"
+          },
+          {
+            "LOWER": "work"
+          },
+          {
+            "LOWER": "environment"
+          }
+        ],
+        [
+          {
+            "LOWER": "ideological"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "expression"
+          }
+        ],
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "expression"
+          }
+        ],
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "conduct"
+          }
+        ],
+        [
+          {
+            "LOWER": "dress"
+          },
+          {
+            "LOWER": "code"
+          }
+        ],
+        [
+          {
+            "LOWER": "online"
+          },
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "expression"
+          }
+        ],
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "advocacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "employee"
+          },
+          {
+            "LOWER": "conduct"
+          }
+        ],
+        [
+          {
+            "LOWER": "code"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "conduct"
+          }
+        ],
+        [
+          {
+            "LOWER": "employee"
+          },
+          {
+            "LOWER": "political"
+          },
+          {
+            "LOWER": "post"
+          }
+        ],
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "free"
+          },
+          {
+            "LOWER": "speech"
+          }
+        ],
+        [
+          {
+            "LOWER": "workplace"
+          },
+          {
+            "LOWER": "freedom"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "expression"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Religious Discrimination",
+      "issue_area": "Religious & Political Diversity",
+      "issue_subtopic": "Religious Discrimination",
+      "patterns": [
+        [
+          {
+            "LOWER": "islamaphobia"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "discrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "#religiousdiscrimination"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "harassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "#religiousharassment"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "targeting"
+          }
+        ],
+        [
+          {
+            "LOWER": "#religioustargeting"
+          }
+        ],
+        [
+          {
+            "LOWER": "christian"
+          },
+          {
+            "LOWER": "intolerance"
+          }
+        ],
+        [
+          {
+            "LOWER": "#christianintolerance"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "freedom"
+          }
+        ],
+        [
+          {
+            "LOWER": "#religiousfreedom"
+          }
+        ],
+        [
+          {
+            "LOWER": "#religiousrights"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "rights"
+          }
+        ],
+        [
+          {
+            "LOWER": "#islamaphobia"
+          }
+        ],
+        [
+          {
+            "LOWER": "antisemitism"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antisemitism"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "intolerance"
+          }
+        ],
+        [
+          {
+            "LOWER": "#religiousintolerance"
+          }
+        ],
+        [
+          {
+            "LOWER": "boycott"
+          },
+          {
+            "LOWER": "divestment"
+          },
+          {
+            "LOWER": "sanction"
+          }
+        ],
+        [
+          {
+            "LOWER": "#boycottdivestmentsanction"
+          }
+        ],
+        [
+          {
+            "LOWER": "#bds"
+          }
+        ],
+        [
+          {
+            "LOWER": "bds"
+          }
+        ],
+        [
+          {
+            "LOWER": "antimuslim"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antimuslim"
+          }
+        ],
+        [
+          {
+            "LOWER": "antichristian"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antichristian"
+          }
+        ],
+        [
+          {
+            "LOWER": "antiislam"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antiislam"
+          }
+        ],
+        [
+          {
+            "LOWER": "antisemitic"
+          }
+        ],
+        [
+          {
+            "LOWER": "#antisemitic"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Religious Lawsuits",
+      "issue_area": "Religious & Political Diversity",
+      "issue_subtopic": "Religious Lawsuits",
+      "patterns": [
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "lawsuits"
+          }
+        ],
+        [
+          {
+            "LOWER": "#religiouslawsuits"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "lawsuit"
+          }
+        ],
+        [
+          {
+            "LOWER": "religiouslawsuit"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "cases"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "case"
+          }
+        ],
+        [
+          {
+            "LOWER": "sued"
+          },
+          {
+            "LOWER": "for"
+          },
+          {
+            "LOWER": "religion"
+          }
+        ],
+        [
+          {
+            "LOWER": "sued"
+          },
+          {
+            "LOWER": "for"
+          },
+          {
+            "LOWER": "religious"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "discrimination"
+          },
+          {
+            "LOWER": "case"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "discrimination"
+          },
+          {
+            "LOWER": "suit"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "freedom"
+          }
+        ],
+        [
+          {
+            "LOWER": "religious"
+          },
+          {
+            "LOWER": "discrimination"
+          },
+          {
+            "LOWER": "charge"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Abortion Pills",
+      "issue_area": "Reproductive Rights",
+      "issue_subtopic": "Abortion Pills",
+      "patterns": [
+        [
+          {
+            "LOWER": "#mifepristone"
+          }
+        ],
+        [
+          {
+            "LOWER": "mifperistone"
+          }
+        ],
+        [
+          {
+            "LOWER": "misoprostal"
+          }
+        ],
+        [
+          {
+            "LOWER": "#misoprostal"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "pill"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionpill"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "pills"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionpills"
+          }
+        ],
+        [
+          {
+            "LOWER": "medication"
+          },
+          {
+            "LOWER": "abortion"
+          }
+        ],
+        [
+          {
+            "LOWER": "mail-order"
+          },
+          {
+            "LOWER": "abortion"
+          }
+        ],
+        [
+          {
+            "LOWER": "mail"
+          },
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "pills"
+          }
+        ],
+        [
+          {
+            "LOWER": "out-of-state"
+          },
+          {
+            "LOWER": "abortion"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Employer Abortion Coverage",
+      "issue_area": "Reproductive Rights",
+      "issue_subtopic": "Employer Abortion Coverage",
+      "patterns": [
+        [
+          {
+            "LOWER": "corporate"
+          },
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "coverage"
+          }
+        ],
+        [
+          {
+            "LOWER": "#corporateabortioncoverage"
+          }
+        ],
+        [
+          {
+            "LOWER": "out-of-state"
+          },
+          {
+            "LOWER": "coverage"
+          }
+        ],
+        [
+          {
+            "LOWER": "#outofstatecoverage"
+          }
+        ],
+        [
+          {
+            "LOWER": "employer"
+          },
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "coverage"
+          }
+        ],
+        [
+          {
+            "LOWER": "#employerabortioncoverage"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "coverage"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "insurance"
+          },
+          {
+            "LOWER": "coverage"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "IVF",
+      "issue_area": "Reproductive Rights",
+      "issue_subtopic": "IVF",
+      "patterns": [
+        [
+          {
+            "LOWER": "ivf"
+          }
+        ],
+        [
+          {
+            "LOWER": "in"
+          },
+          {
+            "LOWER": "vitro"
+          },
+          {
+            "LOWER": "fertilization"
+          }
+        ],
+        [
+          {
+            "LOWER": "in"
+          },
+          {
+            "LOWER": "vitro"
+          }
+        ],
+        [
+          {
+            "LOWER": "frozen"
+          },
+          {
+            "LOWER": "embryo"
+          }
+        ],
+        [
+          {
+            "LOWER": "frozen"
+          },
+          {
+            "LOWER": "embryos"
+          }
+        ],
+        [
+          {
+            "LOWER": "trump"
+          },
+          {
+            "LOWER": "ivf"
+          }
+        ],
+        [
+          {
+            "LOWER": "ivf"
+          },
+          {
+            "LOWER": "executive"
+          },
+          {
+            "LOWER": "order"
+          }
+        ],
+        [
+          {
+            "LOWER": "ivf"
+          },
+          {
+            "LOWER": "access"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Legislation",
+      "issue_area": "Reproductive Rights",
+      "issue_subtopic": "Legislation",
+      "patterns": [
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "state"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#abortionstateban"
+          }
+        ],
+        [
+          {
+            "LOWER": "#6weekban"
+          }
+        ],
+        [
+          {
+            "LOWER": "6"
+          },
+          {
+            "LOWER": "week"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "restrict"
+          },
+          {
+            "LOWER": "abortion"
+          }
+        ],
+        [
+          {
+            "LOWER": "#restrictabortion"
+          }
+        ],
+        [
+          {
+            "LOWER": "#contraceptiveban"
+          }
+        ],
+        [
+          {
+            "LOWER": "roe"
+          },
+          {
+            "LOWER": "vs"
+          },
+          {
+            "LOWER": "wade"
+          }
+        ],
+        [
+          {
+            "LOWER": "#roevwade"
+          }
+        ],
+        [
+          {
+            "LOWER": "roe"
+          },
+          {
+            "LOWER": "v"
+          },
+          {
+            "LOWER": "wade"
+          }
+        ],
+        [
+          {
+            "LOWER": "dobbs"
+          },
+          {
+            "LOWER": "vs"
+          },
+          {
+            "LOWER": "jackson"
+          }
+        ],
+        [
+          {
+            "LOWER": "dobbs"
+          },
+          {
+            "LOWER": "v"
+          },
+          {
+            "LOWER": "jackson"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dobbsvjackson"
+          }
+        ],
+        [
+          {
+            "LOWER": "shield"
+          },
+          {
+            "LOWER": "law"
+          }
+        ],
+        [
+          {
+            "LOWER": "near-total"
+          },
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "ban"
+          }
+        ],
+        [
+          {
+            "LOWER": "mifepristone"
+          },
+          {
+            "LOWER": "restrictions"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "bill"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "law"
+          }
+        ],
+        [
+          {
+            "LOWER": "medical"
+          },
+          {
+            "LOWER": "exceptions"
+          },
+          {
+            "LOWER": "to"
+          },
+          {
+            "LOWER": "abortion"
+          }
+        ],
+        [
+          {
+            "LOWER": "emtala"
+          }
+        ],
+        [
+          {
+            "LOWER": "emergency"
+          },
+          {
+            "LOWER": "medicl"
+          },
+          {
+            "LOWER": "treatment"
+          },
+          {
+            "LOWER": "and"
+          },
+          {
+            "LOWER": "labor"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "sheild"
+          },
+          {
+            "LOWER": "law"
+          }
+        ],
+        [
+          {
+            "LOWER": "criminalize"
+          },
+          {
+            "LOWER": "abortion"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Mifepristone",
+      "issue_area": "Reproductive Rights",
+      "issue_subtopic": "Mifepristone",
+      "patterns": [
+        [
+          {
+            "LOWER": "fda"
+          }
+        ],
+        [
+          {
+            "LOWER": "mifepristone"
+          }
+        ],
+        [
+          {
+            "LOWER": "mife"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "pill"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "pills"
+          }
+        ],
+        [
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "medication"
+          }
+        ],
+        [
+          {
+            "LOWER": "fda"
+          },
+          {
+            "LOWER": "approved"
+          }
+        ],
+        [
+          {
+            "LOWER": "generic"
+          },
+          {
+            "LOWER": "abortion"
+          },
+          {
+            "LOWER": "pill"
+          }
+        ],
+        [
+          {
+            "LOWER": "medication"
+          },
+          {
+            "LOWER": "abortion"
+          }
+        ],
+        [
+          {
+            "LOWER": "attacks"
+          },
+          {
+            "LOWER": "on"
+          },
+          {
+            "LOWER": "mifepristone"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "SCOTUS",
+      "issue_area": "Reproductive Rights",
+      "issue_subtopic": "SCOTUS",
+      "patterns": [
+        [
+          {
+            "LOWER": "scotus"
+          }
+        ],
+        [
+          {
+            "LOWER": "supreme"
+          },
+          {
+            "LOWER": "court"
+          }
+        ],
+        [
+          {
+            "LOWER": "emtala"
+          }
+        ],
+        [
+          {
+            "LOWER": "emergency"
+          },
+          {
+            "LOWER": "medical"
+          },
+          {
+            "LOWER": "treatment"
+          },
+          {
+            "LOWER": "and"
+          },
+          {
+            "LOWER": "active"
+          },
+          {
+            "LOWER": "labor"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "defense"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "life"
+          },
+          {
+            "LOWER": "act"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Content Moderation",
+      "issue_area": "Tech",
+      "issue_subtopic": "Content Moderation",
+      "patterns": [
+        [
+          {
+            "LOWER": "content"
+          },
+          {
+            "LOWER": "moderation"
+          }
+        ],
+        [
+          {
+            "LOWER": "disinformation"
+          }
+        ],
+        [
+          {
+            "LOWER": "hate"
+          },
+          {
+            "LOWER": "speech"
+          }
+        ],
+        [
+          {
+            "LOWER": "censor"
+          }
+        ],
+        [
+          {
+            "LOWER": "censorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "#contentmoderation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#disinformation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#hatespeech"
+          }
+        ],
+        [
+          {
+            "LOWER": "#censorship"
+          }
+        ],
+        [
+          {
+            "LOWER": "algorithmic"
+          },
+          {
+            "LOWER": "suppression"
+          }
+        ],
+        [
+          {
+            "LOWER": "deplatforming"
+          }
+        ],
+        [
+          {
+            "LOWER": "section"
+          },
+          {
+            "LOWER": "230"
+          }
+        ],
+        [
+          {
+            "LOWER": "common"
+          },
+          {
+            "LOWER": "decency"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "anti-conservative"
+          },
+          {
+            "LOWER": "bias"
+          }
+        ],
+        [
+          {
+            "LOWER": "autonomous"
+          },
+          {
+            "LOWER": "vehicles"
+          }
+        ],
+        [
+          {
+            "LOWER": "#autonomousvehicles"
+          }
+        ],
+        [
+          {
+            "LOWER": "avs"
+          }
+        ],
+        [
+          {
+            "LOWER": "#avs"
+          }
+        ],
+        [
+          {
+            "LOWER": "minsinformation"
+          }
+        ],
+        [
+          {
+            "LOWER": "#misinformation"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Data Privacy",
+      "issue_area": "Tech",
+      "issue_subtopic": "Data Privacy",
+      "patterns": [
+        [
+          {
+            "LOWER": "data"
+          },
+          {
+            "LOWER": "privacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "#dataprivacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "children\u0092s"
+          },
+          {
+            "LOWER": "online"
+          },
+          {
+            "LOWER": "privacy"
+          },
+          {
+            "LOWER": "protection"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "coppa"
+          }
+        ],
+        [
+          {
+            "LOWER": "parental"
+          },
+          {
+            "LOWER": "consent"
+          }
+        ],
+        [
+          {
+            "LOWER": "digital"
+          },
+          {
+            "LOWER": "privacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "parental"
+          },
+          {
+            "LOWER": "controls"
+          }
+        ],
+        [
+          {
+            "LOWER": "children's"
+          },
+          {
+            "LOWER": "privacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "kid's"
+          },
+          {
+            "LOWER": "privacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "privacy"
+          },
+          {
+            "LOWER": "violations"
+          }
+        ],
+        [
+          {
+            "LOWER": "privacy"
+          },
+          {
+            "LOWER": "protections"
+          }
+        ],
+        [
+          {
+            "LOWER": "online"
+          },
+          {
+            "LOWER": "privacy"
+          }
+        ],
+        [
+          {
+            "LOWER": "#kidsonlinesafetyact"
+          }
+        ],
+        [
+          {
+            "LOWER": "kid's"
+          },
+          {
+            "LOWER": "online"
+          },
+          {
+            "LOWER": "safety"
+          },
+          {
+            "LOWER": "act"
+          }
+        ],
+        [
+          {
+            "LOWER": "kosa"
+          }
+        ],
+        [
+          {
+            "LOWER": "#kosa"
+          }
+        ],
+        [
+          {
+            "LOWER": "age"
+          },
+          {
+            "LOWER": "verification"
+          }
+        ],
+        [
+          {
+            "LOWER": "#ageverification"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "UK",
+      "issue_area": "Tech",
+      "issue_subtopic": "UK",
+      "patterns": [
+        [
+          {
+            "LOWER": "uk"
+          }
+        ],
+        [
+          {
+            "LOWER": "#uk"
+          }
+        ],
+        [
+          {
+            "LOWER": "united"
+          },
+          {
+            "LOWER": "kingdom"
+          }
+        ],
+        [
+          {
+            "LOWER": "united"
+          },
+          {
+            "LOWER": "kingdom"
+          }
+        ],
+        [
+          {
+            "LOWER": "uk"
+          }
+        ],
+        [
+          {
+            "LOWER": "#uk"
+          }
+        ],
+        [
+          {
+            "LOWER": "#unitedkingdom"
+          }
+        ],
+        [
+          {
+            "LOWER": "#unitedkingdom"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Child Labor",
+      "issue_area": "Workers' Rights",
+      "issue_subtopic": "Child Labor",
+      "patterns": [
+        [
+          {
+            "LOWER": "child"
+          },
+          {
+            "LOWER": "labor"
+          }
+        ],
+        [
+          {
+            "LOWER": "migrant"
+          },
+          {
+            "LOWER": "child"
+          },
+          {
+            "LOWER": "labor"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "International Union Activity",
+      "issue_area": "Workers' Rights",
+      "issue_subtopic": "International Union Activity",
+      "patterns": [
+        [
+          {
+            "LOWER": "unison"
+          }
+        ],
+        [
+          {
+            "LOWER": "gmb"
+          }
+        ],
+        [
+          {
+            "LOWER": "union"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "shop"
+          },
+          {
+            "LOWER": "distributive"
+          },
+          {
+            "LOWER": "&"
+          },
+          {
+            "LOWER": "allied"
+          },
+          {
+            "LOWER": "workers"
+          }
+        ],
+        [
+          {
+            "LOWER": "service"
+          },
+          {
+            "LOWER": "employees"
+          },
+          {
+            "LOWER": "international"
+          },
+          {
+            "LOWER": "union"
+          }
+        ],
+        [
+          {
+            "LOWER": "app"
+          },
+          {
+            "LOWER": "drivers"
+          },
+          {
+            "LOWER": "&"
+          },
+          {
+            "LOWER": "couriers"
+          },
+          {
+            "LOWER": "union"
+          }
+        ],
+        [
+          {
+            "LOWER": "industrial"
+          },
+          {
+            "LOWER": "workers"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "the"
+          },
+          {
+            "LOWER": "world"
+          }
+        ],
+        [
+          {
+            "LOWER": "unite"
+          },
+          {
+            "LOWER": "the"
+          },
+          {
+            "LOWER": "union"
+          }
+        ],
+        [
+          {
+            "LOWER": "ig"
+          },
+          {
+            "LOWER": "metal"
+          }
+        ],
+        [
+          {
+            "LOWER": "igm"
+          }
+        ],
+        [
+          {
+            "LOWER": "ig"
+          },
+          {
+            "LOWER": "bergbau"
+          },
+          {
+            "LOWER": "chemie"
+          },
+          {
+            "LOWER": "energie"
+          }
+        ],
+        [
+          {
+            "LOWER": "ig"
+          },
+          {
+            "LOWER": "bce"
+          }
+        ],
+        [
+          {
+            "LOWER": "swedish"
+          },
+          {
+            "LOWER": "union"
+          },
+          {
+            "LOWER": "for"
+          },
+          {
+            "LOWER": "service"
+          },
+          {
+            "LOWER": "&"
+          },
+          {
+            "LOWER": "communication"
+          },
+          {
+            "LOWER": "employees"
+          }
+        ],
+        [
+          {
+            "LOWER": "swedish"
+          },
+          {
+            "LOWER": "transport"
+          },
+          {
+            "LOWER": "workers'"
+          },
+          {
+            "LOWER": "union"
+          }
+        ],
+        [
+          {
+            "LOWER": "swedish"
+          },
+          {
+            "LOWER": "hotel"
+          },
+          {
+            "LOWER": "&"
+          },
+          {
+            "LOWER": "restaurant"
+          },
+          {
+            "LOWER": "workers'"
+          },
+          {
+            "LOWER": "union"
+          }
+        ],
+        [
+          {
+            "LOWER": "if"
+          },
+          {
+            "LOWER": "metal"
+          }
+        ],
+        [
+          {
+            "LOWER": "swedish"
+          },
+          {
+            "LOWER": "food"
+          },
+          {
+            "LOWER": "workers'"
+          },
+          {
+            "LOWER": "union"
+          }
+        ],
+        [
+          {
+            "LOWER": "confederation"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "trade"
+          },
+          {
+            "LOWER": "unions"
+          }
+        ],
+        [
+          {
+            "LOWER": "international"
+          },
+          {
+            "LOWER": "trade"
+          },
+          {
+            "LOWER": "union"
+          },
+          {
+            "LOWER": "confederation"
+          }
+        ],
+        [
+          {
+            "LOWER": "confederation"
+          },
+          {
+            "LOWER": "francaise"
+          },
+          {
+            "LOWER": "democratique"
+          },
+          {
+            "LOWER": "du"
+          },
+          {
+            "LOWER": "travail"
+          }
+        ],
+        [
+          {
+            "LOWER": "cfdt"
+          }
+        ],
+        [
+          {
+            "LOWER": "force"
+          },
+          {
+            "LOWER": "ouvriere"
+          }
+        ],
+        [
+          {
+            "LOWER": "general"
+          },
+          {
+            "LOWER": "confederation"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "greek"
+          },
+          {
+            "LOWER": "workers"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Return to Office (RTO)",
+      "issue_area": "Workers' Rights",
+      "issue_subtopic": "Return to Office (RTO)",
+      "patterns": [
+        [
+          {
+            "LOWER": "return"
+          },
+          {
+            "LOWER": "to"
+          },
+          {
+            "LOWER": "office"
+          }
+        ],
+        [
+          {
+            "LOWER": "rto"
+          }
+        ],
+        [
+          {
+            "LOWER": "work"
+          },
+          {
+            "LOWER": "from"
+          },
+          {
+            "LOWER": "home"
+          }
+        ],
+        [
+          {
+            "LOWER": "wfh"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Unions",
+      "issue_area": "Workers' Rights",
+      "issue_subtopic": "Unions",
+      "patterns": [
+        [
+          {
+            "LOWER": "union"
+          }
+        ],
+        [
+          {
+            "LOWER": "uaw"
+          }
+        ],
+        [
+          {
+            "LOWER": "teamsters"
+          }
+        ],
+        [
+          {
+            "LOWER": "sag"
+          }
+        ],
+        [
+          {
+            "LOWER": "sag-aftra"
+          }
+        ],
+        [
+          {
+            "LOWER": "writers"
+          },
+          {
+            "LOWER": "guild"
+          },
+          {
+            "LOWER": "of"
+          },
+          {
+            "LOWER": "america"
+          },
+          {
+            "LOWER": "leaders"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Worker Rights",
+      "issue_area": "Workers' Rights",
+      "issue_subtopic": "Worker Rights",
+      "patterns": [
+        [
+          {
+            "LOWER": "unionization"
+          }
+        ],
+        [
+          {
+            "LOWER": "unions"
+          }
+        ],
+        [
+          {
+            "LOWER": "#unionization"
+          }
+        ],
+        [
+          {
+            "LOWER": "union"
+          },
+          {
+            "LOWER": "busting"
+          }
+        ],
+        [
+          {
+            "LOWER": "#unionbusting"
+          }
+        ],
+        [
+          {
+            "LOWER": "layoffs"
+          }
+        ],
+        [
+          {
+            "LOWER": "#layoffs"
+          }
+        ],
+        [
+          {
+            "LOWER": "returntooffice"
+          }
+        ],
+        [
+          {
+            "LOWER": "#returntooffice"
+          }
+        ],
+        [
+          {
+            "LOWER": "#childlabor"
+          }
+        ],
+        [
+          {
+            "LOWER": "childlabor"
+          }
+        ],
+        [
+          {
+            "LOWER": "#illegallabor"
+          }
+        ],
+        [
+          {
+            "LOWER": "illegal"
+          },
+          {
+            "LOWER": "labor"
+          }
+        ],
+        [
+          {
+            "LOWER": "collective"
+          },
+          {
+            "LOWER": "action"
+          }
+        ],
+        [
+          {
+            "LOWER": "#collectiveaction"
+          }
+        ],
+        [
+          {
+            "LOWER": "#gigworkers"
+          }
+        ],
+        [
+          {
+            "LOWER": "gigworkers"
+          }
+        ],
+        [
+          {
+            "LOWER": "migrant"
+          },
+          {
+            "LOWER": "labor"
+          }
+        ],
+        [
+          {
+            "LOWER": "#migrantlabor"
+          }
+        ],
+        [
+          {
+            "LOWER": "#childmigrantlabor"
+          }
+        ],
+        [
+          {
+            "LOWER": "child"
+          },
+          {
+            "LOWER": "migrant"
+          },
+          {
+            "LOWER": "labor"
+          }
+        ],
+        [
+          {
+            "LOWER": "layoff"
+          },
+          {
+            "LOWER": "backlash"
+          }
+        ],
+        [
+          {
+            "LOWER": "#layoffbacklash"
+          }
+        ],
+        [
+          {
+            "LOWER": "labor"
+          },
+          {
+            "LOWER": "strike"
+          }
+        ],
+        [
+          {
+            "LOWER": "#laborstrike"
           }
         ]
       ],
