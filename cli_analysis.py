@@ -163,6 +163,20 @@ def load_companies(company_file=None, company_symbols=None):
         print(f"ERROR: Tickers file not found at {TICKERS_FILE}")
         sys.exit(1)
 
+def format_time(seconds):
+    """Format elapsed time in human-readable format."""
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    elif seconds < 3600:
+        minutes = int(seconds // 60)
+        secs = int(seconds % 60)
+        return f"{minutes}m {secs}s"
+    else:
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        return f"{hours}h {minutes}m {secs}s"
+
 def rejoin_fragments(df):
     """Rejoins segments split by line breaks."""
     if df.empty:
@@ -326,6 +340,8 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
     Returns:
         Path to downloaded CSV file
     """
+    start_time = time.time()
+
     print(f"\n{'='*80}")
     print(f"CLOUD ANALYSIS REQUEST")
     print(f"{'='*80}")
@@ -430,9 +446,13 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
             df = pd.read_csv(output_path)
             row_count = len(df)
 
+            elapsed_time = time.time() - start_time
+            time_str = format_time(elapsed_time)
+
             print(f"\n[SUCCESS] Cloud analysis complete!")
             print(f"  Results saved to: {output_path}")
             print(f"  Total records: {row_count}")
+            print(f"  Time taken: {time_str}")
 
             return output_path
         else:
@@ -470,6 +490,8 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to
         write_to_bq: Whether to write results to BigQuery
         include_content: Whether to include transcript content in output
     """
+    start_time = time.time()
+
     print(f"\n{'='*80}")
     print(f"STARTING ANALYSIS")
     print(f"{'='*80}")
@@ -643,9 +665,14 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, write_to
                 os.makedirs(output_dir, exist_ok=True)
 
         results_df.to_csv(output_path, index=False)
+
+        elapsed_time = time.time() - start_time
+        time_str = format_time(elapsed_time)
+
         print(f"\n[SUCCESS] Analysis complete!")
         print(f"  Results saved to: {output_path}")
         print(f"  Total records: {len(results_df)}")
+        print(f"  Time taken: {time_str}")
 
         if write_to_bq:
             print(f"\n  Writing results to BigQuery: {BQ_DEST_TABLE}")
