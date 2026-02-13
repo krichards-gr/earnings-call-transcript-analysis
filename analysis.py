@@ -627,7 +627,6 @@ def process_pipeline(config=None, return_data=False):
                         "qa_session_label": current_analyst,
                         "interaction_type": interaction_type,
                         "role": role_label,
-                        "topic": d.get('topic'),
                         "issue_area": ISSUE_AREA_MAP.get(d.get('topic'), "Unknown"),
                         "issue_subtopic": d.get('topic'),
                         "sentiment_label": d.get('sentiment'),
