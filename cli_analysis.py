@@ -29,6 +29,9 @@ import requests
 from datetime import datetime, timedelta
 import pandas as pd
 from google.cloud import bigquery
+from google.auth.transport.requests import Request
+from google.oauth2 import service_account
+import google.auth
 import spacy
 from sentence_transformers import SentenceTransformer, util
 from transformers import pipeline
@@ -351,10 +354,59 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
     print(f"Payload: {json.dumps(payload, indent=2)}\n")
 
     try:
+        # Get ID token for Cloud Run (required for authenticated Cloud Run services)
+        headers = {'Content-Type': 'application/json'}
+        try:
+            # Try using gcloud CLI to get ID token
+            import subprocess
+            import shutil
+
+            # Find gcloud in PATH
+            gcloud_path = shutil.which('gcloud')
+            if not gcloud_path:
+                # Try common install locations
+                possible_paths = [
+                    os.path.expanduser('~/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd'),
+                    os.path.expanduser('~/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud'),
+                    'C:\\Program Files (x86)\\Google\\Cloud SDK\\google-cloud-sdk\\bin\\gcloud.cmd',
+                    '/usr/local/bin/gcloud',
+                    '/usr/bin/gcloud'
+                ]
+                for path in possible_paths:
+                    if os.path.exists(path):
+                        gcloud_path = path
+                        break
+
+            if gcloud_path:
+                result = subprocess.run(
+                    [gcloud_path, 'auth', 'print-identity-token'],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                    shell=True if sys.platform == 'win32' else False
+                )
+                token = result.stdout.strip()
+                if token:
+                    headers['Authorization'] = f'Bearer {token}'
+                    print("Using authenticated request with gcloud identity token")
+                else:
+                    print("Warning: Could not get identity token from gcloud")
+                    print("Attempting unauthenticated request...")
+            else:
+                print("Warning: gcloud CLI not found in PATH or common locations")
+                print("Attempting unauthenticated request...")
+        except subprocess.CalledProcessError as e:
+            print(f"Warning: gcloud command failed: {e}")
+            print("Attempting unauthenticated request...")
+        except Exception as auth_error:
+            print(f"Warning: Could not get ID token: {auth_error}")
+            print("Attempting unauthenticated request...")
+
         # Send POST request
         response = requests.post(
             f"{cloud_url}/run",
             json=payload,
+            headers=headers,
             timeout=600  # 10 minute timeout for large requests
         )
 
