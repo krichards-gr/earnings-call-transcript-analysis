@@ -472,7 +472,7 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
             f"{cloud_url}/run",
             json=payload,
             headers=headers,
-            timeout=600  # 10 minute timeout for large requests
+            timeout=3600  # 60 minute timeout to match Cloud Run max timeout
         )
 
         if response.status_code == 200:
@@ -510,7 +510,7 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
             return None
 
     except requests.exceptions.Timeout:
-        print(f"[ERROR] Request timed out after 10 minutes")
+        print(f"[ERROR] Request timed out after 60 minutes")
         print(f"  Try reducing the limit or using a smaller date range")
         return None
     except requests.exceptions.ConnectionError:
