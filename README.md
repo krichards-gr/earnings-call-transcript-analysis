@@ -1,328 +1,325 @@
 # Earnings Call Transcript Analysis
 
-This tool performs deep analysis on earnings call transcripts by identifying topics, assessing sentiment, and classifying speaker roles and interaction types. It also clusters question-and-answer sequences for better traceability. It now includes enhanced metadata mapping for **Issue Areas** and **Subtopics**.
+Analyzes earnings call transcripts from BigQuery, detecting topics, assessing sentiment, and classifying speaker roles and interaction types. Outputs enriched CSV files suitable for downstream analysis.
 
-## Features
+---
 
-*   **Topic Detection**:
-    *   **Exact Match**: Uses spaCy match patterns to find specific keywords.
-    *   **Vector Similarity**: Uses `sentence-transformers` (`all-MiniLM-L6-v2`) for semantic matching.
-    *   **Metadata Enrichment**: Automatically maps detected topics to their broader **Issue Area** and **Subtopic** based on the configuration.
-*   **Aspect-Based Sentiment Analysis (ABSA)**:
-    *   Uses `yangheng/deberta-v3-base-absa-v1.1` to determine sentiment toward detected topics.
-*   **Speaker & Role Classification**:
-    *   **Role**: Classifies speakers as **Analyst**, **Executive**, **Operator**, or **Admin**.
-    *   **Interaction Type**: Classifies segments as **Admin**, **Answer**, or **Question**.
-*   **Q&A Clustering (Robust)**:
-    *   Automatically groups questions and their corresponding answers into "Sessions" using a resilient regex-based detection system that handles varied operator phrasing and classification noise.
-*   **Parallel Processing** (NEW):
-    *   **Multi-core support**: Process transcripts across multiple CPU cores for 3-8x speedup
-    *   **Auto-tuning**: Automatically detects optimal settings based on your system
-    *   **Configurable**: Fine-tune workers, batch sizes, and processing strategy
-    *   **Progress tracking**: Real-time progress bars and performance metrics
-*   **Optimized Batch Processing**:
-    *   Both local and cloud pipelines use vectorized batch inference for classification and sentiment analysis, significantly improving performance.
-*   **Data Integrity**:
-    *   **Fragment Rejoining**: Automatically rejoins segments split by line breaks to ensure models process complete statements.
-*   **Company & Date Filtering**:
-    *   Select specific companies or use Fortune 100 default list
-    *   Filter by date ranges for targeted analysis
-    *   Test mode (50 records) or full production mode
+## Table of Contents
 
-## Usage
+1. [Overview](#1-overview)
+2. [Architecture](#2-architecture)
+3. [Setup](#3-setup)
+4. [Quick Start](#4-quick-start)
+5. [CLI Reference](#5-cli-reference)
+6. [Configuration](#6-configuration)
+7. [Cloud Deployment](#7-cloud-deployment)
+8. [Output Schema](#8-output-schema)
+9. [Development](#9-development)
 
-### Enhanced CLI Tool (`cli_analysis.py`)
+---
 
-The primary interface for running analysis with full control over companies, date ranges, and processing limits. Can execute locally or send requests to Cloud Run.
+## 1. Overview
 
-**Basic Usage:**
-```bash
-# Test mode with default companies from tickers.csv (50 records)
-python cli_analysis.py --test
+**What it does:**
+- Pulls earnings call transcript segments from BigQuery
+- Classifies each segment by speaker role (Analyst, Executive, Operator, Admin) and interaction type (Question, Answer, Admin)
+- Detects relevant topics using exact keyword matching (spaCy) and semantic similarity (sentence-transformers)
+- Scores sentiment per topic using VADER
+- Groups Q&A exchanges into numbered sessions
+- Writes enriched results to a local CSV (and optionally to BigQuery)
 
-# Specific companies, last 90 days
-python cli_analysis.py --companies AAPL,MSFT,GOOGL
+**Data source:** Google BigQuery — `sri-benchmarking-databases.pressure_monitoring`
+- Source table: `earnings_call_transcript_content`
+- Metadata table: `earnings_call_transcript_metadata`
+- Output table: `earnings_call_transcript_enriched_local`
 
-# Full analysis for all companies in tickers.csv, specific date range
-python cli_analysis.py --mode full --start-date 2024-01-01 --end-date 2024-12-31
+**Outputs:** Timestamped CSV files in `outputs/`
 
-# Custom company file with symbols
-python cli_analysis.py --company-file my_companies.csv --mode full
+---
 
-# Write results to both CSV and BigQuery
-python cli_analysis.py --companies AAPL,MSFT --write-to-bq
-
-# Execute on Cloud Run and download results (uses default Cloud Run URL)
-python cli_analysis.py --companies AAPL,MSFT,GOOGL --cloud
-
-# Or specify a custom Cloud Run URL
-python cli_analysis.py --companies AAPL,MSFT,GOOGL --cloud --cloud-url https://custom-service.run.app
-```
-
-**CLI Arguments:**
-- `--companies AAPL,MSFT,GOOGL` - Comma-separated list of stock symbols
-- `--company-file path/to/file.csv` - CSV file with 'symbol' column (defaults to tickers.csv)
-- `--start-date YYYY-MM-DD` - Start date for analysis
-- `--end-date YYYY-MM-DD` - End date for analysis
-- `--days-back N` - Analyze last N days (default: 90)
-- `--mode [test|full]` - Processing mode (default: test = 50 records)
-- `--test` - Shorthand for `--mode test`
-- `--limit N` - Custom record limit
-- `--write-to-bq` - Write results to BigQuery in addition to CSV (local execution only)
-- `--no-content` - Exclude transcript content from output (smaller files, local execution only)
-- `--cloud` - Execute analysis on Cloud Run instead of locally (uses default URL)
-- `--cloud-url URL` - Override default Cloud Run service URL (optional)
-
-**Examples:**
-```bash
-# Tech giants, last quarter (local)
-python cli_analysis.py --companies AAPL,MSFT,GOOGL,AMZN,META --days-back 90
-
-# Energy sector, full year 2024 (local)
-python cli_analysis.py --companies XOM,CVX --start-date 2024-01-01 --end-date 2024-12-31 --mode full
-
-# Test with custom limit (local)
-python cli_analysis.py --companies AAPL --limit 100
-
-# Cloud execution - leverage Google's compute (default URL)
-python cli_analysis.py --companies AAPL,MSFT,GOOGL --mode full --cloud
-
-# Cloud execution - all tickers, specific dates
-python cli_analysis.py --start-date 2024-01-01 --end-date 2024-12-31 --cloud
-```
-
-### Legacy Local Analysis (`local_analysis.py`)
-
-Original local analysis script with hardcoded configuration:
-
-```bash
-python local_analysis.py
-```
-
-**Testing:**
-```bash
-python test_local_pipeline.py
-```
-
-### Production Deployment (Cloud Run)
-
-The production pipeline (`analysis.py`) is designed for Cloud Run and supports both GET and POST requests with the same parameters as the CLI tool.
-
-**Health Check:**
-```bash
-curl https://[YOUR-SERVICE-URL]/
-```
-
-**Trigger via GET (Query Parameters):**
-```bash
-# Test mode with default Fortune 100
-curl "https://[YOUR-SERVICE-URL]/run?mode=test"
-
-# Specific companies
-curl "https://[YOUR-SERVICE-URL]/run?companies=AAPL,MSFT,GOOGL&mode=test"
-
-# Date range
-curl "https://[YOUR-SERVICE-URL]/run?start_date=2024-01-01&end_date=2024-12-31&mode=test"
-```
-
-**Trigger via POST (JSON Payload):**
-```bash
-# Full configuration
-curl -X POST "https://[YOUR-SERVICE-URL]/run" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "companies": "AAPL,MSFT,GOOGL,AMZN,NVDA",
-    "start_date": "2024-01-01",
-    "end_date": "2024-12-31",
-    "mode": "test",
-    "limit": 100
-  }'
-
-# Full mode - Fortune 100
-curl -X POST "https://[YOUR-SERVICE-URL]/run" \
-  -H "Content-Type: application/json" \
-  -d '{"mode": "full"}'
-```
-
-**API Parameters:**
-- `companies` - Comma-separated string of stock symbols (default: Fortune 100)
-- `start_date` - Start date in YYYY-MM-DD format
-- `end_date` - End date in YYYY-MM-DD format
-- `mode` - "test" (50 records) or "full" (all records)
-- `limit` - Custom record limit (overrides mode)
-
-**Testing Scripts:**
-```bash
-# Bash/Linux/Mac
-./test_cloud_api.sh [YOUR-SERVICE-URL]
-
-# PowerShell/Windows
-.\test_cloud_api.ps1 [YOUR-SERVICE-URL]
-
-# Python
-python test_cloud_pipeline.py [YOUR-SERVICE-URL]
-```
-
-## Configuration Files
-
-### Company Tickers (`tickers.csv`)
-Default company list used when no specific companies are provided. Contains stock symbols for companies to analyze. Customize this file to match your specific use case.
-
-### Issue Configuration (`issue_config_inputs_raw.csv`)
-Defines topics, patterns, and exclusionary terms for issue detection.
-
-### Topic Definitions (`topics.json`)
-Auto-generated from `issue_config_inputs_raw.csv` via `generate_topics.py`.
-
-## Configuration Variables
-
-### Environment Variables (Cloud Run)
-- `BATCH_SIZE` - Number of segments to process per BigQuery cycle (default: 500)
-- `PRODUCTION_MODE` - Set to "true" for full run, "false" for testing (default: false)
-- `PORT` - Server port (default: 8080)
-
-### BigQuery Tables
-- `BQ_SOURCE_TABLE` - Source transcript content
-- `BQ_METADATA_TABLE` - Transcript metadata (report_date, symbol, etc.)
-- `BQ_DEST_TABLE` - Enriched analysis results
-
-## Project Structure
+## 2. Architecture
 
 ```
-├── cli_analysis.py              # Enhanced CLI tool with company/date selection
-├── analysis.py                  # Cloud Run production pipeline (supports GET/POST)
-├── local_analysis.py            # Legacy local analysis script
-├── analyzer.py                  # Core analyzer class for topic detection
-├── generate_topics.py           # Topic configuration generator
-├── download_models.py           # Model download utility
-├── fortune_100_companies.csv    # Default company list
-├── issue_config_inputs_raw.csv  # Issue configuration
-├── topics.json                  # Auto-generated topic definitions
-├── test_cloud_api.sh            # Bash test script for Cloud Run
-├── test_cloud_api.ps1           # PowerShell test script for Cloud Run
-├── test_cloud_pipeline.py       # Python test script for Cloud Run
-├── test_local_pipeline.py       # Test script for local pipeline
-├── models/                      # Pre-downloaded ML models
-└── outputs/                     # Analysis results (CSV files)
+issue_config_inputs_raw.csv
+        │
+        ▼
+ generate_topics.py  ──────► topics.json
+                                  │
+                                  ▼
+                            analyzer.py          (IssueAnalyzer: topic detection engine)
+                                  │
+                    ┌─────────────┴──────────────┐
+                    ▼                            ▼
+            cli_analysis.py              analysis.py
+          (local CLI runner)         (Cloud Run HTTP server)
+                    │
+                    ▼
+          parallel_analyzer.py      (multi-core processing wrapper)
 ```
 
-## Installation
+| File | Role |
+|---|---|
+| `cli_analysis.py` | Main entry point for local and cloud-triggered analysis. Parses CLI args, queries BigQuery, orchestrates the pipeline, writes CSV output. |
+| `analysis.py` | Cloud Run HTTP server. Exposes `/` (health check) and `/run` (POST/GET) endpoints. Same pipeline logic as `cli_analysis.py`. |
+| `analyzer.py` | Core `IssueAnalyzer` class. Loads topic config, builds spaCy Matcher patterns, pre-computes anchor embeddings, detects topics in text. |
+| `parallel_analyzer.py` | `ParallelAnalyzer` wrapper. Distributes classification and topic detection across CPU cores. Auto-detects optimal worker/batch settings. |
+| `generate_topics.py` | Reads `issue_config_inputs_raw.csv`, transforms it, and writes `topics.json`. Called automatically on startup. |
+| `setup.py` | Interactive setup script. Creates virtualenv, installs deps, downloads models, configures GCP auth. |
+
+---
+
+## 3. Setup
+
+### Prerequisites
+
+- Python 3.8+
+- Google Cloud SDK (`gcloud`) — for BigQuery access
+- GCP project with BigQuery access to `sri-benchmarking-databases`
 
 ### Automated Setup (Recommended)
-
-Run the automated setup script which handles all installation steps:
 
 ```bash
 python setup.py
 ```
 
-The setup script will:
-- Check Python version (3.8+ required)
-- Create a virtual environment
-- Install all dependencies
-- Download spaCy models
-- Download ML models
-- Configure Google Cloud authentication (optional)
-- Verify all project files
+This will:
+1. Check Python version
+2. Create `.venv` virtual environment
+3. Install dependencies from `requirements.txt`
+4. Download spaCy `en_core_web_sm` model
+5. Download ML models via `scripts/download_models.py`
+6. Prompt for `gcloud auth application-default login`
+7. Verify required core files exist
 
 ### Manual Setup
 
-If you prefer manual installation:
+```bash
+python -m venv .venv
+source .venv/bin/activate      # Linux/Mac
+.venv\Scripts\activate         # Windows
 
-1.  **Create virtual environment**:
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # Linux/Mac
-    .venv\Scripts\activate     # Windows
-    ```
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python scripts/download_models.py
+gcloud auth application-default login
+```
 
-2.  **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+---
 
-3.  **spaCy Language Model**:
-    ```bash
-    python -m spacy download en_core_web_sm
-    ```
+## 4. Quick Start
 
-4.  **ML Models**:
-    ```bash
-    python download_models.py
-    ```
+```bash
+# 1. Test run — 50 records, last 90 days, Fortune 100 companies
+python cli_analysis.py --test
 
-5.  **Google Cloud Authentication** (for BigQuery access):
-    ```bash
-    gcloud auth application-default login
-    ```
+# 2. Specific companies, last quarter
+python cli_analysis.py --companies AAPL,MSFT,GOOGL --days-back 90
 
-## Output
+# 3. Full production run, specific date range
+python cli_analysis.py --mode full --start-date 2025-01-01 --end-date 2025-03-31
+```
 
-Results are saved as CSV files in the `outputs/` directory with timestamps:
-- `cli_analysis_results_YYYYMMDD_HHMMSS.csv` - CLI tool output
-- `local_analysis_results.csv` - Legacy local analysis output
+Results are written to `outputs/cli_analysis_results_YYYYMMDD_HHMMSS.csv`.
 
-### Output Schema
-- `transcript_id` - Unique transcript identifier
-- `paragraph_number` - Segment number within transcript
-- `speaker` - Speaker name
-- `qa_session_id` - Q&A session number
-- `qa_session_label` - Analyst name for session
-- `interaction_type` - Admin/Answer/Question
-- `role` - Admin/Analyst/Executive/Operator
-- `topic` - Detected topic/issue
-- `issue_area` - Broader issue category
-- `issue_subtopic` - Specific issue subcategory
-- `sentiment_label` - Positive/Negative/Neutral
-- `sentiment_score` - Confidence score
-- `all_scores` - Detailed sentiment scores
-- `similarity_score` - Vector similarity score (if applicable)
-- `matched_anchor` - Matched anchor phrase (if applicable)
-- `report_date` - Earnings report date
-- `symbol` - Company stock symbol
-- `content` - Original transcript text (if `--no-content` not used)
+---
 
-## Cloud Deployment
+## 5. CLI Reference
 
-### Building and Deploying to Cloud Run
+Run `python cli_analysis.py --help` for the full list. Key arguments:
 
-1. **Build Docker image:**
-   ```bash
-   gcloud builds submit --tag gcr.io/[PROJECT-ID]/earnings-analysis
-   ```
+### Company Selection
 
-2. **Deploy to Cloud Run:**
-   ```bash
-   gcloud run deploy earnings-analysis \
-     --image gcr.io/[PROJECT-ID]/earnings-analysis \
-     --platform managed \
-     --region us-central1 \
-     --allow-unauthenticated \
-     --memory 4Gi \
-     --cpu 2 \
-     --timeout 3600 \
-     --set-env-vars PRODUCTION_MODE=true,BATCH_SIZE=500
-   ```
+| Argument | Description | Default |
+|---|---|---|
+| `--companies AAPL,MSFT` | Comma-separated ticker symbols | — |
+| `--company-file path.csv` | CSV file with a `symbol` column | — |
+| *(neither)* | Uses all symbols from `tickers.csv` | Fortune 100 |
 
-3. **Test deployment:**
-   ```bash
-   SERVICE_URL=$(gcloud run services describe earnings-analysis --region us-central1 --format 'value(status.url)')
-   ./test_cloud_api.sh $SERVICE_URL
-   ```
+### Date Range
 
-## Performance Tips
+| Argument | Description | Default |
+|---|---|---|
+| `--start-date YYYY-MM-DD` | Start of date range | — |
+| `--end-date YYYY-MM-DD` | End of date range | — |
+| `--days-back N` | Last N days from today | `90` |
+| `--latest N` | Pull the N most-recent complete transcripts | — |
+| `--earliest N` | Pull the N oldest complete transcripts | — |
 
-- **Use parallel processing**: Local runs now use multi-core processing by default (3-8x faster)
-- **Auto-tuning**: System automatically configures optimal settings based on your hardware
-- **Custom tuning**: Use `--workers`, `--sentiment-batch-size`, and `--classification-batch-size` for fine-tuning
-- **Benchmark your system**: Run `python benchmark_parallel.py` to test performance
-- **Test mode first**: Always run with `--test` or `mode=test` to validate configuration before full runs
-- **Date filtering**: Use `--start-date` and `--end-date` to limit scope and improve performance
-- **Company filtering**: Analyze specific companies rather than full Fortune 100 when possible
-- **BigQuery costs**: Use `--limit` to control query costs during development
+If neither `--start-date` nor `--end-date` is provided, defaults to the last `--days-back` days.
 
-See [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) for detailed optimization tips.
+### Volume / Mode
 
-## License
+| Argument | Description | Default |
+|---|---|---|
+| `--mode [test\|full]` | `test` = 50 records; `full` = all records | `test` |
+| `--test` | Shorthand for `--mode test` | — |
+| `--limit N` | Custom record cap (returns complete transcripts only) | — |
 
-See LICENSE file for details.
+`--latest` / `--earliest` override `--limit` and `--mode`.
+
+### Output
+
+| Argument | Description |
+|---|---|
+| `--output path.csv` | Custom output path (default: `outputs/cli_analysis_results_TIMESTAMP.csv`) |
+| `--write-to-bq` | Also write results to BigQuery destination table |
+| `--no-content` | Omit transcript text from output (smaller files) |
+
+### Execution Target
+
+| Argument | Description |
+|---|---|
+| `--cloud` | Send request to Cloud Run instead of running locally |
+| `--cloud-url URL` | Override default Cloud Run service URL |
+
+### Parallelization (local only)
+
+| Argument | Description |
+|---|---|
+| `--no-parallel` | Disable multi-core processing |
+| `--workers N` | Number of worker processes (default: auto) |
+| `--sentiment-batch-size N` | Batch size for VADER sentiment (default: auto) |
+| `--classification-batch-size N` | Batch size for role/interaction classifiers (default: auto) |
+
+---
+
+## 6. Configuration
+
+### Topic Configuration (`issue_config_inputs_raw.csv`)
+
+The human-readable source of truth for all topic definitions. Each row defines one topic with:
+- `issue_area` — broad category (e.g., "Tariffs & Trade")
+- `issue_subtopic` — specific topic label
+- Keyword patterns for exact matching
+- Anchor phrases for semantic similarity matching
+- Exclusionary terms to suppress false positives
+
+After editing this file, regenerate `topics.json`:
+
+```bash
+python generate_topics.py
+```
+
+`topics.json` is also auto-regenerated on every startup of `cli_analysis.py` and `analysis.py`.
+
+### Company List (`tickers.csv`)
+
+Default company universe. Must have a `symbol` column. Replace or extend to target different companies. Pass `--company-file` to use an alternative file without modifying `tickers.csv`.
+
+### Similarity Threshold
+
+Defined in `cli_analysis.py` at the top:
+
+```python
+SIMILARITY_THRESHOLD = 0.7
+```
+
+Segments with cosine similarity to an anchor phrase below this value are not tagged with that topic.
+
+---
+
+## 7. Cloud Deployment
+
+### Cloud Run Service
+
+The `analysis.py` server exposes:
+- `GET /` — health check, returns `200 OK`
+- `GET /run?companies=AAPL,MSFT&mode=test` — trigger analysis via query params
+- `POST /run` — trigger analysis via JSON body
+
+**POST body parameters:**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `companies` | string | Comma-separated symbols (default: Fortune 100) |
+| `start_date` | string | YYYY-MM-DD |
+| `end_date` | string | YYYY-MM-DD |
+| `mode` | string | `"test"` or `"full"` |
+| `limit` | int | Max records |
+| `latest` | int | N most-recent complete transcripts |
+| `earliest` | int | N oldest complete transcripts |
+| `return_csv` | bool | Return CSV in response body (default: false) |
+
+### Build & Deploy
+
+```bash
+# Build and push image
+gcloud builds submit --tag gcr.io/[PROJECT-ID]/earnings-analysis
+
+# Deploy to Cloud Run
+gcloud run deploy earnings-analysis \
+  --image gcr.io/[PROJECT-ID]/earnings-analysis \
+  --platform managed \
+  --region us-central1 \
+  --memory 4Gi \
+  --cpu 2 \
+  --timeout 3600 \
+  --set-env-vars PRODUCTION_MODE=true,BATCH_SIZE=500
+```
+
+The `cloudbuild.yaml` file automates build + deploy via Cloud Build triggers.
+
+### Triggering from `cli_analysis.py`
+
+```bash
+# Use default Cloud Run URL (hardcoded in cli_analysis.py)
+python cli_analysis.py --companies AAPL,MSFT --cloud
+
+# Use a custom URL
+python cli_analysis.py --companies AAPL,MSFT --cloud --cloud-url https://my-service.run.app
+```
+
+Authentication uses `gcloud auth print-identity-token` automatically.
+
+---
+
+## 8. Output Schema
+
+Each row in the output CSV represents one transcript segment × one detected topic. Segments with no detected topic produce one row with null topic fields.
+
+| Column | Description |
+|---|---|
+| `transcript_id` | Unique identifier for the earnings call transcript |
+| `paragraph_number` | Sequential segment number within the transcript |
+| `speaker` | Speaker name as it appears in the transcript |
+| `qa_session_id` | Integer session counter; increments at each Q&A exchange boundary |
+| `interaction_type` | `Question`, `Answer`, or `Admin` |
+| `role` | `Analyst`, `Executive`, `Operator`, or `Admin` |
+| `issue_area` | Broad topic category (from `issue_config_inputs_raw.csv`) |
+| `issue_subtopic` | Specific topic label |
+| `sentiment_label` | `positive`, `negative`, or `neutral` (VADER compound score) |
+| `sentiment_score` | Absolute VADER compound score (0–1) |
+| `all_scores` | Full VADER breakdown: `pos`, `neu`, `neg`, `compound` |
+| `similarity_score` | Cosine similarity score (vector-match rows only; null for pattern-match rows) |
+| `matched_anchor` | The anchor phrase that triggered the match (vector-match rows only) |
+| `report_date` | Earnings call date from BigQuery metadata |
+| `symbol` | Company ticker symbol |
+| `content` | Original transcript text (omitted if `--no-content`) |
+
+Additional columns from the BigQuery metadata table are appended as-is.
+
+---
+
+## 9. Development
+
+Utility and test scripts live in `scripts/`. Run them from the project root:
+
+```bash
+python scripts/verify_parallel.py
+python scripts/benchmark_parallel.py --companies AAPL --limit 100
+python scripts/test_local_pipeline.py
+```
+
+See [`scripts/README.md`](scripts/README.md) for a full index of available scripts.
+
+### ML Models
+
+Downloaded to `models/` (not tracked in git):
+- `models/all-MiniLM-L6-v2` — sentence embeddings
+- `models/eng_type_class_v1` — interaction type classifier (custom)
+- `models/role_class_v1` — speaker role classifier (custom)
+
+Re-download with:
+```bash
+python scripts/download_models.py
+```

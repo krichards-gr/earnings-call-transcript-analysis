@@ -138,8 +138,8 @@ def download_ml_models():
     """Download ML models for the analysis pipeline"""
     print_step(4, 6, "Downloading Machine Learning Models")
 
-    if not os.path.exists('download_models.py'):
-        print_warning("download_models.py not found. Skipping model download.")
+    if not os.path.exists('scripts/download_models.py'):
+        print_warning("scripts/download_models.py not found. Skipping model download.")
         print_info("Models will be downloaded on first run.")
         return True
 
@@ -149,7 +149,7 @@ def download_ml_models():
         python_cmd = '.venv/bin/python'
 
     print_info("This may take several minutes...")
-    if not run_command(f"{python_cmd} download_models.py", "Download ML models"):
+    if not run_command(f"{python_cmd} scripts/download_models.py", "Download ML models"):
         print_warning("Failed to download models")
         print_info("Models will be downloaded automatically on first run")
         return False
@@ -261,13 +261,12 @@ def print_next_steps():
 
     print(f"{Colors.BOLD}Documentation:{Colors.ENDC}")
     print(f"   • README.md - Full documentation")
-    print(f"   • QUICKSTART.md - Quick start guide")
     print(f"   • {Colors.OKCYAN}{python_cmd} cli_analysis.py --help{Colors.ENDC} - CLI help\n")
 
     print(f"{Colors.BOLD}Troubleshooting:{Colors.ENDC}")
     print(f"   • If you encounter issues, check that you're using the virtual environment")
     print(f"   • For BigQuery access, ensure you've authenticated with gcloud")
-    print(f"   • For models issues, run: {Colors.OKCYAN}{python_cmd} download_models.py{Colors.ENDC}\n")
+    print(f"   • For models issues, run: {Colors.OKCYAN}{python_cmd} scripts/download_models.py{Colors.ENDC}\n")
 
 def main():
     """Main setup workflow"""
