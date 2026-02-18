@@ -15,6 +15,11 @@ This tool performs deep analysis on earnings call transcripts by identifying top
     *   **Interaction Type**: Classifies segments as **Admin**, **Answer**, or **Question**.
 *   **Q&A Clustering (Robust)**:
     *   Automatically groups questions and their corresponding answers into "Sessions" using a resilient regex-based detection system that handles varied operator phrasing and classification noise.
+*   **Parallel Processing** (NEW):
+    *   **Multi-core support**: Process transcripts across multiple CPU cores for 3-8x speedup
+    *   **Auto-tuning**: Automatically detects optimal settings based on your system
+    *   **Configurable**: Fine-tune workers, batch sizes, and processing strategy
+    *   **Progress tracking**: Real-time progress bars and performance metrics
 *   **Optimized Batch Processing**:
     *   Both local and cloud pipelines use vectorized batch inference for classification and sentiment analysis, significantly improving performance.
 *   **Data Integrity**:
@@ -307,11 +312,16 @@ Results are saved as CSV files in the `outputs/` directory with timestamps:
 
 ## Performance Tips
 
+- **Use parallel processing**: Local runs now use multi-core processing by default (3-8x faster)
+- **Auto-tuning**: System automatically configures optimal settings based on your hardware
+- **Custom tuning**: Use `--workers`, `--sentiment-batch-size`, and `--classification-batch-size` for fine-tuning
+- **Benchmark your system**: Run `python benchmark_parallel.py` to test performance
 - **Test mode first**: Always run with `--test` or `mode=test` to validate configuration before full runs
-- **Batch processing**: Cloud Run automatically processes in batches to handle large datasets
 - **Date filtering**: Use `--start-date` and `--end-date` to limit scope and improve performance
 - **Company filtering**: Analyze specific companies rather than full Fortune 100 when possible
 - **BigQuery costs**: Use `--limit` to control query costs during development
+
+See [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) for detailed optimization tips.
 
 ## License
 

@@ -4,7 +4,12 @@ import os
 # This is critical for avoiding hangs when using transformers in a threaded/multiprocess environment
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+# MEMORY OPTIMIZATION: Force CPU-only mode to reduce memory usage
+# Comment out these lines if you have a GPU and want to use it
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 import json
+import warnings
 import spacy
 from sentence_transformers import SentenceTransformer, util
 from transformers import pipeline, AutoTokenizer
@@ -15,6 +20,12 @@ import time
 import re
 import logging
 import torch
+
+# MEMORY OPTIMIZATION: Limit CPU threads for lower memory footprint
+torch.set_num_threads(2)
+
+# Suppress tokenizer regex pattern warnings (known issue with DeBERTa tokenizers)
+warnings.filterwarnings('ignore', message='.*incorrect regex pattern.*', category=FutureWarning)
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from generate_topics import generate_topics_json
 from analyzer import IssueAnalyzer
@@ -157,7 +168,7 @@ SIMILARITY_THRESHOLD = 0.7
 INTERACTION_MODEL_PATH = os.path.join(current_dir, "models", "eng_type_class_v1")
 ROLE_MODEL_PATH = os.path.join(current_dir, "models", "role_class_v1")
 EMBEDDING_MODEL_PATH = os.path.join(current_dir, "models", "all-MiniLM-L6-v2")
-SENTIMENT_MODEL_PATH = os.path.join(current_dir, "models", "deberta-v3-base-absa-v1.1")
+# SENTIMENT_MODEL_PATH = os.path.join(current_dir, "models", "deberta-v3-base-absa-v1.1")  # COMMENTED OUT - Using VADER instead
 
 # Initialize the modular analyzer for topic detection
 # This ensures local CLI and Cloud Run use the exact same logic
@@ -231,9 +242,11 @@ def load_model_safely(model_path, model_type="embedding"):
         if model_type == "embedding":
             return SentenceTransformer(model_path)
         elif model_type == "sentiment":
-            # Load tokenizer with regex fix for DeBERTa models
-            tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
-            return pipeline("text-classification", model=model_path, tokenizer=tokenizer)
+            # Load tokenizer - suppress regex pattern warning (known DeBERTa issue, doesn't affect functionality)
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', message='.*incorrect regex pattern.*')
+                tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+                return pipeline("text-classification", model=model_path, tokenizer=tokenizer)
         else:
             return pipeline("text-classification", model=model_path)
     except Exception as e:
@@ -241,9 +254,14 @@ def load_model_safely(model_path, model_type="embedding"):
         sys.exit(1)
 
 # Load all models strictly from local paths
-sentiment_analyzer = load_model_safely(SENTIMENT_MODEL_PATH, "sentiment")
+# sentiment_analyzer = load_model_safely(SENTIMENT_MODEL_PATH, "sentiment")  # COMMENTED OUT - Using VADER instead
 interaction_classifier = load_model_safely(INTERACTION_MODEL_PATH, "interaction")
 role_classifier = load_model_safely(ROLE_MODEL_PATH, "role")
+
+# Initialize VADER sentiment analyzer (fast and simple)
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+sentiment_analyzer = SentimentIntensityAnalyzer()
+logger.info("Using VADER for sentiment analysis (fast mode)")
 
 print("Models loaded successfully.")
 
@@ -382,62 +400,33 @@ def analyze_batch(texts):
         
         results_by_text.append(top_topics)
 
-    # 2. Batch Sentiment Inference
+    # 2. VADER Sentiment Analysis (Fast and Simple)
     if sentiment_queue:
-        logger.info(f"      Running batch sentiment analysis for {len(sentiment_queue)} topic pairs...")
+        logger.info(f"      Running VADER sentiment analysis for {len(sentiment_queue)} topic pairs...")
         start_time = time.time()
-        # Prepare inputs as parallel lists for better pipeline batch handling
-        texts_input = [item["text"] for item in sentiment_queue]
-        pairs_input = [item["text_pair"] for item in sentiment_queue]
-        
-        # Custom batch processing to handle text pairs correctly
-        # (Pipeline's text_pair argument doesn't handle batches of pairs intuitively)
-        batch_size = 4
-        sent_results_flat = []
-        
-        try:
-            for i in range(0, len(texts_input), batch_size):
-                batch_texts = texts_input[i:i+batch_size]
-                batch_pairs = pairs_input[i:i+batch_size]
-                
-                # Tokenize batch of pairs
-                inputs = sentiment_analyzer.tokenizer(
-                    batch_texts, 
-                    text_pair=batch_pairs, 
-                    padding=True, 
-                    truncation=True, 
-                    return_tensors="pt"
-                )
-                
-                # Move inputs to same device as model
-                device = sentiment_analyzer.model.device
-                inputs = {k: v.to(device) for k, v in inputs.items()}
-                
-                # Inference
-                with torch.no_grad():
-                    outputs = sentiment_analyzer.model(**inputs)
-                    probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-                
-                # Process results
-                id2label = sentiment_analyzer.model.config.id2label
-                for j in range(len(batch_texts)):
-                    # Get top prediction (max score)
-                    score, label_idx = torch.max(probs[j], dim=0)
-                    label = id2label[label_idx.item()]
-                    sent_results_flat.append({"label": label, "score": score.item()})
 
-            logger.info(f"      Finished sentiment analysis in {time.time() - start_time:.2f}s")
-            
-            for i, res in enumerate(sent_results_flat):
-                meta = sentiment_queue[i]
-                target = results_by_text[meta["text_idx"]][meta["topic_idx"]]
-                target["sentiment"] = res['label']
-                target["sentiment_score"] = res['score']
-                
-        except Exception as e:
-            logger.error(f"Error during sentiment batch processing: {e}")
-            # Fallback or skip
-            pass
+        # VADER is super fast - just analyze each text directly
+        for item in sentiment_queue:
+            text = str(item["text"])
+            # Get VADER scores
+            scores = sentiment_analyzer.polarity_scores(text)
+
+            # Determine sentiment label based on compound score
+            compound = scores['compound']
+            if compound >= 0.05:
+                label = 'positive'
+            elif compound <= -0.05:
+                label = 'negative'
+            else:
+                label = 'neutral'
+
+            # Update the result
+            meta = item
+            target = results_by_text[meta["text_idx"]][meta["topic_idx"]]
+            target["sentiment"] = label
+            target["sentiment_score"] = abs(compound)  # Use absolute compound score
+
+        logger.info(f"      Finished sentiment analysis in {time.time() - start_time:.2f}s")
 
     return results_by_text
 
@@ -673,19 +662,40 @@ def process_pipeline(config=None, return_data=False):
             logger.info(f"   (After rejoining: {len(df)} segments)")
 
             texts = df['content'].astype(str).tolist()
+
+            # PREPROCESSING: Clean operator intro text BEFORE classification
+            # This prevents classifier from seeing operator language and misclassifying analyst questions
+            logger.info(f"   Preprocessing texts (stripping operator intros)...")
+            operator_intro_pattern = r"^(?:We'll|We will|Let's|Certainly\.?)?\s*(?:go ahead and\s+)?(?:take|move to|now go to)\s+(?:our\s+)?(?:the\s+)?(?:first|next)?\s*question\s+(?:from|is from)\s+[^.!?]+[.!?]\s+"
+            cleaned_texts = []
+            cleaning_count = 0
+            for text in texts:
+                cleaned = re.sub(operator_intro_pattern, '', text, flags=re.IGNORECASE).strip()
+                if len(cleaned) < len(text):
+                    cleaning_count += 1
+                cleaned_texts.append(cleaned if cleaned else text)  # Keep original if cleaning removed everything
+
+            if cleaning_count > 0:
+                logger.info(f"      Cleaned operator intro from {cleaning_count} segments")
+
+            # Use cleaned texts for classification
             # Truncate for classifiers to avoid position embedding errors
-            truncated_texts = [t[:512] for t in texts]
+            truncated_texts = [t[:512] for t in cleaned_texts]
 
             # 1. Batch Classification
+            # MEMORY OPTIMIZATION: Using batch_size=2 instead of 4 to reduce memory usage
             logger.info(f"   Running batch interaction classification for {len(df)} segments...")
             start_time = time.time()
-            int_results = interaction_classifier(truncated_texts, batch_size=4)
+            int_results = interaction_classifier(truncated_texts, batch_size=2)
             logger.info(f"   Finished interaction classification in {time.time() - start_time:.2f}s")
 
             logger.info(f"   Running batch role classification for {len(df)} segments...")
             start_time = time.time()
-            role_results = role_classifier(truncated_texts, batch_size=4)
+            role_results = role_classifier(truncated_texts, batch_size=2)
             logger.info(f"   Finished role classification in {time.time() - start_time:.2f}s")
+
+            # Update texts to use cleaned versions
+            texts = cleaned_texts
 
             # 2. Batch Topic & Sentiment Analysis
             logger.info(f"   Running batch topic/sentiment analysis...")
@@ -694,64 +704,78 @@ def process_pipeline(config=None, return_data=False):
             # 3. Assemble and Checkpoint Upload
             all_results = []
             # Session tracking regexes
+            # Updated to match actual transcript patterns
             SESSION_START_PATTERNS = [
-                r"next question (?:comes|is coming)",
-                r"next we (?:have|will go to)",
-                r"question (?:comes|is coming) from",
-                r"your first question (?:comes|is coming)",
+                r"next question",  # Simplified - matches "next question is from" etc.
+                r"first question",  # Matches "first question from"
+                r"question (?:is |will be )?(?:coming )?from",  # "question is from", "question from"
+                r"(?:we'll |we will )?(?:now )?(?:go to|take)",  # "we'll go to", "we'll take", "now go to"
                 r"move to the line of",
                 r"go to the line of",
-                r"from the line of",
-                r"comes? from the line of"
+                r"from the line of"
             ]
             session_start_regex = re.compile("|".join(SESSION_START_PATTERNS), re.IGNORECASE)
-            
-            # Analyst extraction regex
-            # Optimized to match common "Operator" phrasing
-            intro_regex = re.compile(
-                r"(?:line of|comes from|is from|from|at)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from|at|is coming)", 
-                re.IGNORECASE
-            )
 
             # Checkpoint variables
-            CHECKPOINT_SIZE = 10 
-            
+            CHECKPOINT_SIZE = 10
+
+            # Track previous interaction type for Answer validation
+            previous_interaction = None
+            previous_role = None
+
             for i, (_, row) in enumerate(df.iterrows()):
                 # Reset session tracking if we've moved to a new transcript
                 if last_transcript_id is not None and row['transcript_id'] != last_transcript_id:
                     current_session_id = 0
-                    current_analyst = "None"
+                    previous_interaction = None
+                    previous_role = None
                 last_transcript_id = row['transcript_id']
 
                 int_res = int_results[i]['label']
                 role_res = role_results[i]['label']
                 interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
                 role_label = ROLE_ID_MAP.get(role_res, role_res)
-                text = str(row['content'])
+                # Use cleaned text from preprocessing step
+                text = texts[i]
+
+                # POST-PROCESSING: Validate "Answer" labels
+                # An "Answer" should only follow a "Question" from an Analyst
+                # This fixes executives' opening remarks being incorrectly labeled as "Answer"
+                if interaction_type == "Answer":
+                    if previous_interaction != "Question" or previous_role != "Analyst":
+                        # Not a valid answer context - reclassify as Admin
+                        interaction_type = "Admin"
+
+                # POST-PROCESSING: Boost "Question" detection for Analyst segments
+                # If an Analyst segment contains question indicators, prioritize labeling it as "Question"
+                # This handles edge cases where operator intro text confused the classifier
+                if role_label == "Analyst" and interaction_type != "Question":
+                    question_indicators = [
+                        "have two", "have a question", "wondering", "curious", "want to ask",
+                        "can you", "could you", "would you", "will you",
+                        "how do", "how does", "how should", "how would",
+                        "what", "why", "when", "where", "which",
+                        "talk about", "comment on", "thoughts on", "perspective on"
+                    ]
+                    lower_text = text.lower()
+                    if any(indicator in lower_text for indicator in question_indicators):
+                        logger.info(f"      [OVERRIDE] Changed Analyst {interaction_type} → Question (contains question indicators)")
+                        interaction_type = "Question"
 
                 # Session tracking:
-                # We trigger a new session if:
-                # 1. Role is Operator (strong role signal) AND we see any Q&A keyword
-                # 2. OR if we see a very strong "next question" pattern (strong text signal) regardless of role
+                # We trigger a new session if we see strong "next question" pattern
                 lower_text = text.lower()
                 is_operator = role_label == "Operator"
                 has_session_start_keyword = session_start_regex.search(lower_text)
-                
+
                 # Broad keywords for operator when they don't match the specific start patterns
                 is_transition_text = any(k in lower_text for k in ["question", "line of", "analyst"])
 
                 if (is_operator and is_transition_text) or has_session_start_keyword:
                     current_session_id += 1
-                    match = intro_regex.search(text)
-                    if match:
-                        current_analyst = match.group(1).strip()
-                    elif is_operator and "question" in lower_text:
-                        # Fallback if regex fails but we know it's a question transition
-                        current_analyst = "Unknown Analyst"
-                    # else: keep current_analyst from previous turn or leave as is if it's the operator again
 
                 detected = enrichment_results[i]
-                if not detected: 
+                if not detected:
                     detected = [{"topic": None, "sentiment": None, "sentiment_score": None}]
 
                 for d in detected:
@@ -760,7 +784,6 @@ def process_pipeline(config=None, return_data=False):
                         "paragraph_number": row['paragraph_number'],
                         "speaker": row['speaker'],
                         "qa_session_id": current_session_id,
-                        "qa_session_label": current_analyst,
                         "interaction_type": interaction_type,
                         "role": role_label,
                         "issue_area": ISSUE_AREA_MAP.get(d.get('topic'), "Unknown"),
@@ -776,6 +799,10 @@ def process_pipeline(config=None, return_data=False):
                             res_row[col] = row[col]
 
                     all_results.append(res_row)
+
+                # Update previous interaction tracking for next iteration (outside detected loop)
+                previous_interaction = interaction_type
+                previous_role = role_label
 
                 # Checkpoint Upload or accumulation
                 if (i + 1) % CHECKPOINT_SIZE == 0 or (i + 1) == len(df):

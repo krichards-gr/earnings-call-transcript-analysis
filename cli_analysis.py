@@ -22,10 +22,16 @@ Usage:
 import argparse
 import json
 import os
+
+# MEMORY OPTIMIZATION: Force CPU-only mode to reduce memory usage
+# Comment out these lines if you have a GPU and want to use it
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 import sys
 import time
 import re
 import requests
+import warnings
 from datetime import datetime, timedelta
 import pandas as pd
 from google.cloud import bigquery
@@ -37,8 +43,16 @@ from sentence_transformers import SentenceTransformer, util
 from transformers import pipeline, AutoTokenizer
 import torch
 
+# MEMORY OPTIMIZATION: Limit CPU threads for lower memory footprint
+torch.set_num_threads(2)
+
+# Suppress tokenizer regex pattern warnings (known issue with DeBERTa tokenizers)
+warnings.filterwarnings('ignore', message='.*incorrect regex pattern.*', category=FutureWarning)
+
 from generate_topics import generate_topics_json
 from analyzer import IssueAnalyzer
+from parallel_analyzer import ParallelAnalyzer, get_optimal_config
+from tqdm import tqdm
 
 # =================================================================================================
 # CONFIGURATION
@@ -60,7 +74,7 @@ SIMILARITY_THRESHOLD = 0.7
 INTERACTION_MODEL_PATH = os.path.join(current_dir, "models", "eng_type_class_v1")
 ROLE_MODEL_PATH = os.path.join(current_dir, "models", "role_class_v1")
 EMBEDDING_MODEL_PATH = os.path.join(current_dir, "models", "all-MiniLM-L6-v2")
-SENTIMENT_MODEL_PATH = os.path.join(current_dir, "models", "deberta-v3-base-absa-v1.1")
+# SENTIMENT_MODEL_PATH = os.path.join(current_dir, "models", "deberta-v3-base-absa-v1.1")  # COMMENTED OUT - Using VADER instead
 
 # Initialize the modular analyzer
 issue_analyzer = IssueAnalyzer(
@@ -108,18 +122,25 @@ def load_model_safely(model_path, model_type="embedding"):
         if model_type == "embedding":
             return SentenceTransformer(model_path)
         elif model_type == "sentiment":
-            # Load tokenizer with regex fix for DeBERTa models
-            tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
-            return pipeline("text-classification", model=model_path, tokenizer=tokenizer)
+            # Load tokenizer - suppress regex pattern warning (known DeBERTa issue, doesn't affect functionality)
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', message='.*incorrect regex pattern.*')
+                tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+                return pipeline("text-classification", model=model_path, tokenizer=tokenizer)
         else:
             return pipeline("text-classification", model=model_path)
     except Exception as e:
         print(f"CRITICAL ERROR loading {model_type} model: {e}")
         sys.exit(1)
 
-sentiment_analyzer = load_model_safely(SENTIMENT_MODEL_PATH, "sentiment")
+# sentiment_analyzer = load_model_safely(SENTIMENT_MODEL_PATH, "sentiment")  # COMMENTED OUT - Using VADER instead
 interaction_classifier = load_model_safely(INTERACTION_MODEL_PATH, "interaction")
 role_classifier = load_model_safely(ROLE_MODEL_PATH, "role")
+
+# Initialize VADER sentiment analyzer (fast and simple)
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+sentiment_analyzer = SentimentIntensityAnalyzer()
+print("Using VADER for sentiment analysis (fast mode)")
 
 print("Models loaded successfully.")
 
@@ -128,6 +149,32 @@ anchor_metadata = issue_analyzer.anchor_metadata
 matcher = issue_analyzer.matcher
 EXCLUSIONS_MAP = issue_analyzer.exclusions_map
 ISSUE_AREA_MAP = issue_analyzer.issue_area_map
+
+# =================================================================================================
+# PARALLEL CONFIGURATION
+# =================================================================================================
+
+# Get optimal configuration based on system resources
+print("\nDetecting optimal configuration...")
+OPTIMAL_CONFIG = get_optimal_config()
+
+# Initialize parallel analyzer after models are loaded
+print("\nInitializing parallel processing...")
+parallel_analyzer = ParallelAnalyzer(
+    sentiment_analyzer=sentiment_analyzer,
+    interaction_classifier=interaction_classifier,
+    role_classifier=role_classifier,
+    embedder=embedder,
+    nlp=nlp,
+    matcher=matcher,
+    anchor_embeddings=anchor_embeddings,
+    anchor_metadata=anchor_metadata,
+    exclusions_map=EXCLUSIONS_MAP,
+    similarity_threshold=SIMILARITY_THRESHOLD,
+    num_workers=OPTIMAL_CONFIG['num_workers'],
+    sentiment_batch_size=OPTIMAL_CONFIG['sentiment_batch_size'],
+    classification_batch_size=OPTIMAL_CONFIG['classification_batch_size']
+)
 
 # =================================================================================================
 # HELPER FUNCTIONS
@@ -308,57 +355,31 @@ def analyze_batch(texts):
 
         results_by_text.append(top_topics)
 
-    # 3. Batch Sentiment
+    # 3. VADER Sentiment Analysis (Fast and Simple)
     if sentiment_queue:
-        print(f"      Running batch sentiment analysis for {len(sentiment_queue)} topic pairs...")
-        texts_input = [item["text"] for item in sentiment_queue]
-        pairs_input = [item["text_pair"] for item in sentiment_queue]
+        print(f"      Running VADER sentiment analysis for {len(sentiment_queue)} topic pairs...")
 
-        batch_size = 4
-        sent_results_flat = []
+        # VADER is super fast - just analyze each text directly
+        for item in sentiment_queue:
+            text = str(item["text"])
+            # Get VADER scores
+            scores = sentiment_analyzer.polarity_scores(text)
 
-        try:
-            for i in range(0, len(texts_input), batch_size):
-                batch_texts = [str(t) for t in texts_input[i:i+batch_size]]
-                batch_pairs = [str(p) for p in pairs_input[i:i+batch_size]]
+            # Determine sentiment label based on compound score
+            compound = scores['compound']
+            if compound >= 0.05:
+                label = 'positive'
+            elif compound <= -0.05:
+                label = 'negative'
+            else:
+                label = 'neutral'
 
-                inputs = sentiment_analyzer.tokenizer(
-                    batch_texts,
-                    text_pair=batch_pairs,
-                    padding=True,
-                    truncation=True,
-                    return_tensors="pt"
-                )
-
-                device = sentiment_analyzer.model.device
-                inputs = {k: v.to(device) for k, v in inputs.items()}
-
-                with torch.no_grad():
-                    outputs = sentiment_analyzer.model(**inputs)
-                    probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-
-                id2label = sentiment_analyzer.model.config.id2label
-                for j in range(len(batch_texts)):
-                    score, label_idx = torch.max(probs[j], dim=0)
-                    label = id2label[label_idx.item()]
-                    scores_str = ", ".join([f"{id2label[k][:3]}: {probs[j][k].item():.2f}" for k in range(len(id2label))])
-
-                    sent_results_flat.append({
-                        "label": label,
-                        "score": score.item(),
-                        "all_scores": scores_str
-                    })
-
-            for i, res in enumerate(sent_results_flat):
-                meta = sentiment_queue[i]
-                target = results_by_text[meta["text_idx"]][meta["topic_idx"]]
-                target["sentiment"] = res['label']
-                target["sentiment_score"] = res['score']
-                target["all_scores"] = res['all_scores']
-
-        except Exception as e:
-            print(f"Error during sentiment batch processing: {e}")
-            pass
+            # Update the result
+            meta = item
+            target = results_by_text[meta["text_idx"]][meta["topic_idx"]]
+            target["sentiment"] = label
+            target["sentiment_score"] = abs(compound)  # Use absolute compound score
+            target["all_scores"] = f"pos: {scores['pos']:.2f}, neu: {scores['neu']:.2f}, neg: {scores['neg']:.2f}, compound: {compound:.2f}"
 
     return results_by_text
 
@@ -528,7 +549,8 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
 # =================================================================================================
 
 def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=None, earliest=None,
-                 write_to_bq=False, include_content=True, output_path=None):
+                 write_to_bq=False, include_content=True, output_path=None, use_parallel=True,
+                 num_workers=None, sentiment_batch_size=None, classification_batch_size=None):
     """
     Run the analysis pipeline with specified parameters.
 
@@ -541,8 +563,32 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
         earliest: Number of earliest transcripts to pull (overrides limit)
         write_to_bq: Whether to write results to BigQuery
         include_content: Whether to include transcript content in output
+        use_parallel: Whether to use parallel processing (default: True)
+        num_workers: Number of worker processes (None = auto-detect)
+        sentiment_batch_size: Batch size for sentiment analysis (None = auto-detect)
+        classification_batch_size: Batch size for classification (None = auto-detect)
     """
     start_time = time.time()
+
+    # Override parallel analyzer settings if specified
+    global parallel_analyzer
+    if use_parallel and (num_workers or sentiment_batch_size or classification_batch_size):
+        print("\nReconfiguring parallel analyzer with custom settings...")
+        parallel_analyzer = ParallelAnalyzer(
+            sentiment_analyzer=sentiment_analyzer,
+            interaction_classifier=interaction_classifier,
+            role_classifier=role_classifier,
+            embedder=embedder,
+            nlp=nlp,
+            matcher=matcher,
+            anchor_embeddings=anchor_embeddings,
+            anchor_metadata=anchor_metadata,
+            exclusions_map=EXCLUSIONS_MAP,
+            similarity_threshold=SIMILARITY_THRESHOLD,
+            num_workers=num_workers or OPTIMAL_CONFIG['num_workers'],
+            sentiment_batch_size=sentiment_batch_size or OPTIMAL_CONFIG['sentiment_batch_size'],
+            classification_batch_size=classification_batch_size or OPTIMAL_CONFIG['classification_batch_size']
+        )
 
     mode_desc = f"Latest {latest} transcripts" if latest else f"Earliest {earliest} transcripts" if earliest else f"Limit: {limit or 'No limit'}"
 
@@ -631,16 +677,28 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
             {f'LIMIT {limit * 2}' if limit else ''}
         """
 
+    print(f"\n[BIGQUERY STAGE]")
+    print(f"=" * 80)
     print(f"Executing query...")
-    print(f"Query: {query[:300]}...")
+    print(f"Query preview: {query[:200]}...")
 
-    df = client.query(query).to_dataframe()
+    # Execute query with progress tracking
+    query_start = time.time()
+    query_job = client.query(query)
+
+    # Show query progress
+    print("   Waiting for query to complete...", end="", flush=True)
+    df = query_job.result().to_dataframe()
+    query_time = time.time() - query_start
+    print(f" Done! ({query_time:.2f}s)")
 
     if df.empty:
-        print("No data found matching criteria.")
+        print("\n[WARNING] No data found matching criteria.")
         return
 
-    print(f"Found {len(df)} transcript segments")
+    print(f"   Found {len(df)} transcript segments from {df['transcript_id'].nunique()} transcripts")
+    print(f"   Data size: {df.memory_usage(deep=True).sum() / (1024**2):.2f} MB")
+    print(f"=" * 80)
 
     # Ensure only complete transcripts (important when using limit)
     if not latest and not earliest:
@@ -651,54 +709,130 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
     print(f"Processing {len(df)} rows after rejoining fragments...")
 
     texts = df['content'].astype(str).tolist()
-    truncated_texts = [t[:512] for t in texts]
 
-    # 1. Batch Classification
-    print(f"   Running batch interaction classification for {len(df)} segments...")
-    int_results = interaction_classifier(truncated_texts, batch_size=4)
+    # PREPROCESSING: Clean operator intro text BEFORE classification
+    # This prevents classifier from seeing operator language and misclassifying analyst questions
+    print(f"Preprocessing texts (stripping operator intros)...")
+    operator_intro_pattern = r"^(?:We'll|We will|Let's|Certainly\.?)?\s*(?:go ahead and\s+)?(?:take|move to|now go to)\s+(?:our\s+)?(?:the\s+)?(?:first|next)?\s*question\s+(?:from|is from)\s+[^.!?]+[.!?]\s+"
+    cleaned_texts = []
+    cleaning_count = 0
+    for text in texts:
+        cleaned = re.sub(operator_intro_pattern, '', text, flags=re.IGNORECASE).strip()
+        if len(cleaned) < len(text):
+            cleaning_count += 1
+        cleaned_texts.append(cleaned if cleaned else text)  # Keep original if cleaning removed everything
 
-    print(f"   Running batch role classification for {len(df)} segments...")
-    role_results = role_classifier(truncated_texts, batch_size=4)
+    if cleaning_count > 0:
+        print(f"   Cleaned operator intro from {cleaning_count} segments")
 
-    # 2. Batch Topic & Sentiment Analysis
-    print(f"   Running batch topic/sentiment analysis...")
-    enrichment_results = analyze_batch(texts)
+    # Use cleaned texts for everything
+    texts = cleaned_texts
+
+    # Choose processing method
+    if use_parallel:
+        print(f"\n[PARALLEL PROCESSING MODE]")
+        print(f"=" * 80)
+
+        # 1. Parallel Classification
+        print(f"\n1. Classification Stage ({len(df)} segments)")
+        print("-" * 80)
+
+        print(f"   Running batch interaction classification...")
+        int_results = parallel_analyzer.classify_batch_parallel(texts, 'interaction')
+
+        print(f"   Running batch role classification...")
+        role_results = parallel_analyzer.classify_batch_parallel(texts, 'role')
+
+        # 2. Parallel Topic & Sentiment Analysis
+        print(f"\n2. Topic & Sentiment Analysis Stage")
+        print("-" * 80)
+        enrichment_results = parallel_analyzer.analyze_batch_parallel(texts, show_progress=True)
+
+        print(f"\n" + "=" * 80)
+    else:
+        print(f"\n[SEQUENTIAL PROCESSING MODE]")
+        print(f"=" * 80)
+
+        truncated_texts = [t[:512] for t in texts]
+
+        # 1. Batch Classification
+        # MEMORY OPTIMIZATION: Using batch_size=2 instead of 4 to reduce memory usage
+        print(f"   Running batch interaction classification for {len(df)} segments...")
+        int_results = interaction_classifier(truncated_texts, batch_size=2)
+
+        print(f"   Running batch role classification for {len(df)} segments...")
+        role_results = role_classifier(truncated_texts, batch_size=2)
+
+        # 2. Batch Topic & Sentiment Analysis
+        print(f"   Running batch topic/sentiment analysis...")
+        enrichment_results = analyze_batch(texts)
+
+        print(f"\n" + "=" * 80)
 
     # 3. Assemble Results
+    print(f"\n3. Results Assembly Stage")
+    print("-" * 80)
     all_results = []
     current_session_id = 0
-    current_analyst = "None"
     last_transcript_id = None
 
+    # Session tracking regexes
+    # Updated to match actual transcript patterns
     SESSION_START_PATTERNS = [
-        r"next question (?:comes|is coming)",
-        r"next we (?:have|will go to)",
-        r"question (?:comes|is coming) from",
-        r"your first question (?:comes|is coming)",
+        r"next question",  # Simplified - matches "next question is from" etc.
+        r"first question",  # Matches "first question from"
+        r"question (?:is |will be )?(?:coming )?from",  # "question is from", "question from"
+        r"(?:we'll |we will )?(?:now )?(?:go to|take)",  # "we'll go to", "we'll take", "now go to"
         r"move to the line of",
         r"go to the line of",
-        r"from the line of",
-        r"comes? from the line of"
+        r"from the line of"
     ]
     session_start_regex = re.compile("|".join(SESSION_START_PATTERNS), re.IGNORECASE)
 
-    intro_regex = re.compile(
-        r"(?:line of|comes from|is from|from|at)\s+(?:the line of\s+)?([^,.]+?)\s+(?:with|from|at|is coming)",
-        re.IGNORECASE
-    )
+    # Track previous interaction type for Answer validation
+    previous_interaction = None
+    previous_role = None
 
-    for i, (_, row) in enumerate(df.iterrows()):
+    print(f"   Assembling {len(df)} segments into enriched results...")
+    for i, (_, row) in enumerate(tqdm(list(df.iterrows()), desc="Assembling Results", leave=False)):
         if last_transcript_id is not None and row['transcript_id'] != last_transcript_id:
             current_session_id = 0
-            current_analyst = "None"
+            previous_interaction = None
+            previous_role = None
         last_transcript_id = row['transcript_id']
 
         int_res = int_results[i]['label']
         role_res = role_results[i]['label']
         interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
         role_label = ROLE_ID_MAP.get(role_res, role_res)
-        text = str(row['content'])
+        # Use cleaned text from preprocessing step
+        text = texts[i]
 
+        # POST-PROCESSING: Validate "Answer" labels
+        # An "Answer" should only follow a "Question" from an Analyst
+        # This fixes executives' opening remarks being incorrectly labeled as "Answer"
+        if interaction_type == "Answer":
+            if previous_interaction != "Question" or previous_role != "Analyst":
+                # Not a valid answer context - reclassify as Admin
+                interaction_type = "Admin"
+
+        # POST-PROCESSING: Boost "Question" detection for Analyst segments
+        # If an Analyst segment contains question indicators, prioritize labeling it as "Question"
+        # This handles edge cases where operator intro text confused the classifier
+        if role_label == "Analyst" and interaction_type != "Question":
+            question_indicators = [
+                "have two", "have a question", "wondering", "curious", "want to ask",
+                "can you", "could you", "would you", "will you",
+                "how do", "how does", "how should", "how would",
+                "what", "why", "when", "where", "which",
+                "talk about", "comment on", "thoughts on", "perspective on"
+            ]
+            lower_text = text.lower()
+            if any(indicator in lower_text for indicator in question_indicators):
+                interaction_type = "Question"
+
+        # Session tracking:
+        # We trigger a new session if we see strong "next question" pattern
         lower_text = text.lower()
         is_operator = role_label == "Operator"
         has_session_start_keyword = session_start_regex.search(lower_text)
@@ -706,11 +840,6 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
 
         if (is_operator and is_transition_text) or has_session_start_keyword:
             current_session_id += 1
-            match = intro_regex.search(text)
-            if match:
-                current_analyst = match.group(1).strip()
-            elif is_operator and "question" in lower_text:
-                current_analyst = "Unknown Analyst"
 
         detected = enrichment_results[i]
         if not detected:
@@ -729,7 +858,6 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
                 "paragraph_number": row['paragraph_number'],
                 "speaker": row['speaker'],
                 "qa_session_id": current_session_id,
-                "qa_session_label": current_analyst,
                 "interaction_type": interaction_type,
                 "role": role_label,
                 "issue_area": ISSUE_AREA_MAP.get(d.get('topic'), "Unknown"),
@@ -753,6 +881,10 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
 
             all_results.append(res_row)
 
+        # Update previous interaction tracking for next iteration (outside detected loop)
+        previous_interaction = interaction_type
+        previous_role = role_label
+
     # 4. Save Results
     if all_results:
         results_df = pd.DataFrame(all_results)
@@ -773,10 +905,28 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
         elapsed_time = time.time() - start_time
         time_str = format_time(elapsed_time)
 
-        print(f"\n[SUCCESS] Analysis complete!")
-        print(f"  Results saved to: {output_path}")
-        print(f"  Total records: {len(results_df)}")
+        # Calculate statistics
+        unique_transcripts = results_df['transcript_id'].nunique()
+        unique_companies = results_df.get('symbol', pd.Series()).nunique()
+        topics_detected = results_df['issue_subtopic'].notna().sum()
+        avg_processing_rate = len(df) / elapsed_time
+
+        print(f"\n{'='*80}")
+        print(f"[SUCCESS] Analysis Complete!")
+        print(f"{'='*80}")
+        print(f"\nOutput:")
+        print(f"  File: {output_path}")
+        print(f"  Size: {os.path.getsize(output_path) / (1024**2):.2f} MB")
+        print(f"\nStatistics:")
+        print(f"  Total records: {len(results_df):,}")
+        print(f"  Transcripts: {unique_transcripts}")
+        if unique_companies > 0:
+            print(f"  Companies: {unique_companies}")
+        print(f"  Topics detected: {topics_detected:,}")
+        print(f"\nPerformance:")
         print(f"  Time taken: {time_str}")
+        print(f"  Processing rate: {avg_processing_rate:.1f} segments/sec")
+        print(f"{'='*80}\n")
 
         if write_to_bq:
             print(f"\n  Writing results to BigQuery: {BQ_DEST_TABLE}")
@@ -856,6 +1006,16 @@ Examples:
     parser.add_argument('--cloud-url', type=str, default=DEFAULT_CLOUD_URL,
                        help=f'Cloud Run service URL (default: {DEFAULT_CLOUD_URL})')
 
+    # Parallelization options (local execution only)
+    parser.add_argument('--no-parallel', action='store_true',
+                       help='Disable parallel processing (use sequential mode)')
+    parser.add_argument('--workers', type=int,
+                       help='Number of worker processes for parallel processing (default: auto-detect)')
+    parser.add_argument('--sentiment-batch-size', type=int,
+                       help='Batch size for sentiment analysis (default: auto-detect based on system)')
+    parser.add_argument('--classification-batch-size', type=int,
+                       help='Batch size for classification (default: auto-detect based on system)')
+
     args = parser.parse_args()
 
     # Parse companies
@@ -928,7 +1088,11 @@ Examples:
             earliest=earliest,
             write_to_bq=args.write_to_bq,
             include_content=not args.no_content,
-            output_path=args.output
+            output_path=args.output,
+            use_parallel=not args.no_parallel,
+            num_workers=args.workers,
+            sentiment_batch_size=args.sentiment_batch_size,
+            classification_batch_size=args.classification_batch_size
         )
 
 if __name__ == "__main__":

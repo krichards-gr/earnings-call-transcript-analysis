@@ -16,7 +16,9 @@ class IssueAnalyzer:
 
         print(f"Loading models ({nlp_model}, {embedding_model})...")
         try:
-            self.nlp = spacy.load(nlp_model)
+            # MEMORY OPTIMIZATION: Disable unused spaCy components to reduce memory
+            # Only keep tokenizer and basic attributes needed for matcher
+            self.nlp = spacy.load(nlp_model, disable=["parser", "ner"])
             self.embedder = SentenceTransformer(embedding_model)
         except Exception as e:
             print(f"ERROR: Could not load models: {e}")
