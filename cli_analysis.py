@@ -59,7 +59,7 @@ from tqdm import tqdm
 # =================================================================================================
 
 # Regenerate topics.json from topic_definitions.csv
-generate_all(from_raw=False)
+# generate_all(from_raw=False)
 
 current_dir = os.getcwd()
 TOPICS_FILE = os.path.join(current_dir, 'topics.json')
@@ -964,6 +964,10 @@ Examples:
         """
     )
 
+    # Issue config generation
+    parser.add_argument('-p', '--parse-raw', action='store_true',
+                       help="If present, generates issue configs from the raw Zignal formatted input CSV; otherwise, uses the intermediate tidy CSV.")
+
     # Company selection
     parser.add_argument('--companies', type=str,
                        help='Comma-separated list of company symbols (e.g., AAPL,MSFT,GOOGL)')
@@ -1017,6 +1021,9 @@ Examples:
                        help='Batch size for classification (default: auto-detect based on system)')
 
     args = parser.parse_args()
+
+    # Parse parsing options
+    generate_all(from_raw=args.parse_raw)
 
     # Parse companies
     company_symbols = None
