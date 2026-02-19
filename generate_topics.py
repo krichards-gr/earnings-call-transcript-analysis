@@ -8,78 +8,77 @@ RAW_INPUTS_FILE = 'issue_config_inputs_raw.csv'
 INTERMEDIATE_CSV = 'updated_issue_config_inputs.csv'
 JSON_OUTPUT = 'topics.json'
 
-def transform_raw_inputs(from_raw: bool): # from_raw argument will determine whether to generate topics.json from raw or intermediate csv inputs
-    if from_raw:
-        """
-        Reads the raw input CVS (human-friendly format) and transforms it into 
-        the intermediate long-format CSV used for generation.
-        """
-        print(f"Transforming {RAW_INPUTS_FILE} to {INTERMEDIATE_CSV}...")
-        
-        if not os.path.exists(RAW_INPUTS_FILE):
-            print(f"Error: {RAW_INPUTS_FILE} not found.")
-            return False
+def transform_raw_inputs():
+    """
+    Reads the raw input CVS (human-friendly format) and transforms it into 
+    the intermediate long-format CSV used for generation.
+    """
+    print(f"Transforming {RAW_INPUTS_FILE} to {INTERMEDIATE_CSV}...")
+    
+    if not os.path.exists(RAW_INPUTS_FILE):
+        print(f"Error: {RAW_INPUTS_FILE} not found.")
+        return False
 
+    try:
+        # Read raw inputs with proper encoding handling
+        # Try UTF-8 first, fallback to latin-1 for special characters
         try:
-            # Read raw inputs with proper encoding handling
-            # Try UTF-8 first, fallback to latin-1 for special characters
-            try:
-                df = pd.read_csv(RAW_INPUTS_FILE, encoding='utf-8')
-            except UnicodeDecodeError:
-                print("UTF-8 decoding failed, trying latin-1 encoding...")
-                df = pd.read_csv(RAW_INPUTS_FILE, encoding='latin-1')
+            df = pd.read_csv(RAW_INPUTS_FILE, encoding='utf-8')
+        except UnicodeDecodeError:
+            print("UTF-8 decoding failed, trying latin-1 encoding...")
+            df = pd.read_csv(RAW_INPUTS_FILE, encoding='latin-1')
+        
+        # Clean up any potential empty columns from trailing commas
+        df = df.dropna(how='all', axis=1)
+        
+        transformed_rows = []
+        
+        for index, row in df.iterrows():
+            area = row.get('issue_area')
+            subtopic = row.get('issue_subtopic')
             
-            # Clean up any potential empty columns from trailing commas
-            df = df.dropna(how='all', axis=1)
-            
-            transformed_rows = []
-            
-            for index, row in df.iterrows():
-                area = row.get('issue_area')
-                subtopic = row.get('issue_subtopic')
+            # Skip empty rows
+            if pd.isna(area) or pd.isna(subtopic):
+                continue
                 
-                # Skip empty rows
-                if pd.isna(area) or pd.isna(subtopic):
-                    continue
-                    
-                area = str(area).strip()
-                subtopic = str(subtopic).strip()
-                
-                # Helper to add rows
-                def add_terms(term_str, term_type):
-                    if pd.isna(term_str): return
-                    terms = str(term_str).split(';')
-                    for t in terms:
-                        t = t.strip()
-                        if t:
-                            transformed_rows.append({
-                                'issue_area': area,
-                                'issue_subtopic': subtopic,
-                                'topic': subtopic, # Mapping subtopic as the main topic key
-                                'term': t,
-                                'type': term_type
-                            })
-
-                # Process each column
-                add_terms(row.get('pattern'), 'pattern')
-                add_terms(row.get('exclusionary_term'), 'exclusionary term')
-                add_terms(row.get('anchor_phrases'), 'anchor term')
-
-            # Create DataFrame and save
-            out_df = pd.DataFrame(transformed_rows)
-            # Ensure consistent column order
-            cols = ['issue_area', 'issue_subtopic', 'topic', 'term', 'type']
-            out_df = out_df[cols]
+            area = str(area).strip()
+            subtopic = str(subtopic).strip()
             
-            out_df.to_csv(INTERMEDIATE_CSV, index=False)
-            print(f"Successfully created {INTERMEDIATE_CSV} with {len(out_df)} rows.")
-            return True
-            
-        except Exception as e:
-            print(f"Error during transformation: {e}")
-            return False
+            # Helper to add rows
+            def add_terms(term_str, term_type):
+                if pd.isna(term_str): return
+                terms = str(term_str).split(';')
+                for t in terms:
+                    t = t.strip()
+                    if t:
+                        transformed_rows.append({
+                            'issue_area': area,
+                            'issue_subtopic': subtopic,
+                            'topic': subtopic, # Mapping subtopic as the main topic key
+                            'term': t,
+                            'type': term_type
+                        })
 
-def generate_topics_json():
+            # Process each column
+            add_terms(row.get('pattern'), 'pattern')
+            add_terms(row.get('exclusionary_term'), 'exclusionary term')
+            add_terms(row.get('anchor_phrases'), 'anchor term')
+
+        # Create DataFrame and save
+        out_df = pd.DataFrame(transformed_rows)
+        # Ensure consistent column order
+        cols = ['issue_area', 'issue_subtopic', 'topic', 'term', 'type']
+        out_df = out_df[cols]
+        
+        out_df.to_csv(INTERMEDIATE_CSV, index=False)
+        print(f"Successfully created {INTERMEDIATE_CSV} with {len(out_df)} rows.")
+        return True
+        
+    except Exception as e:
+        print(f"Error during transformation: {e}")
+        return False
+
+def generate_topics_json(from_raw: bool): # from_raw argument will determine whether to generate topics.json from raw or intermediate csv inputs
     """
     Reads the intermediate CSV and generates the final topics.json file
     used by the analysis pipeline.

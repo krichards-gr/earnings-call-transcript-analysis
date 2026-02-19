@@ -59,7 +59,7 @@ from tqdm import tqdm
 # =================================================================================================
 
 # Regenerate topics.json from topic_definitions.csv
-generate_topics_json()
+generate_topics_json(from_raw=True)
 
 current_dir = os.getcwd()
 TOPICS_FILE = os.path.join(current_dir, 'topics.json')
