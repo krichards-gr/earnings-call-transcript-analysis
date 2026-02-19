@@ -635,7 +635,7 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
                 t.paragraph_number,
                 t.speaker,
                 t.content,
-                m.* EXCEPT(transcript_id),
+                m.* EXCEPT(transcript_id, corporation, sector),
                 cr.corporation,
                 cr.sector
             FROM `{BQ_SOURCE_TABLE}` t
