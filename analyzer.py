@@ -9,7 +9,7 @@ from generate_topics import generate_all
 class IssueAnalyzer:
     def __init__(self, topics_file='topics.json', similarity_threshold=0.7, nlp_model="en_core_web_sm", embedding_model="all-MiniLM-L6-v2"):
         # Always regenerate topics.json to ensure latest configs are used
-        generate_all()
+        generate_all(from_raw=True)
 
         self.topics_file = topics_file
         self.similarity_threshold = similarity_threshold
