@@ -53,7 +53,7 @@ def transform_raw_inputs():
                     if t:
                         transformed_rows.append({
                             'issue_area': area,
-                            'issue_subtopic': subtopic,
+                            # 'issue_subtopic': subtopic,
                             'topic': subtopic, # Mapping subtopic as the main topic key
                             'term': t,
                             'type': term_type
@@ -67,7 +67,7 @@ def transform_raw_inputs():
         # Create DataFrame and save
         out_df = pd.DataFrame(transformed_rows)
         # Ensure consistent column order
-        cols = ['issue_area', 'issue_subtopic', 'topic', 'term', 'type']
+        cols = ['issue_area', 'topic', 'term', 'type']
         out_df = out_df[cols]
         
         out_df.to_csv(INTERMEDIATE_CSV, index=False)
@@ -104,7 +104,7 @@ def generate_topics_json():
                 topics_dict[topic_label] = {
                     "label": topic_label,
                     "issue_area": issue_area,
-                    "issue_subtopic": row.get('issue_subtopic', 'Unknown'),
+                    "issue_subtopic": row.get('topic', 'Unknown'),
                     "patterns": [],
                     "anchors": [],
                     "exclusions": []
