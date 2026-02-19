@@ -49,7 +49,7 @@ torch.set_num_threads(2)
 # Suppress tokenizer regex pattern warnings (known issue with DeBERTa tokenizers)
 warnings.filterwarnings('ignore', message='.*incorrect regex pattern.*', category=FutureWarning)
 
-from generate_topics import generate_topics_json
+from generate_topics import generate_all
 from analyzer import IssueAnalyzer
 from parallel_analyzer import ParallelAnalyzer, get_optimal_config
 from tqdm import tqdm
@@ -59,7 +59,7 @@ from tqdm import tqdm
 # =================================================================================================
 
 # Regenerate topics.json from topic_definitions.csv
-generate_topics_json(from_raw=True)
+generate_all(from_raw=True)
 
 current_dir = os.getcwd()
 TOPICS_FILE = os.path.join(current_dir, 'topics.json')

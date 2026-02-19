@@ -78,7 +78,7 @@ def transform_raw_inputs():
         print(f"Error during transformation: {e}")
         return False
 
-def generate_topics_json(from_raw: bool): # from_raw argument will determine whether to generate topics.json from raw or intermediate csv inputs
+def generate_topics_json():
     """
     Reads the intermediate CSV and generates the final topics.json file
     used by the analysis pipeline.
@@ -132,16 +132,21 @@ def generate_topics_json(from_raw: bool): # from_raw argument will determine whe
     except Exception as e:
         print(f"Error during JSON generation: {e}")
 
-def generate_all():
+def generate_all(from_raw: bool): # from_raw argument will determine whether to generate topics.json from raw or intermediate csv inputs
     """
     Orchestrates the full generation pipeline:
     1. Raw Inputs -> Intermediate CSV
     2. Intermediate CSV -> Topics JSON
     """
-    if transform_raw_inputs():
-        generate_topics_json()
+    if from_raw:
+        if transform_raw_inputs():
+            generate_topics_json()
+        else:
+            print("Skipping JSON generation due to transformation failure.")
+
     else:
-        print("Skipping JSON generation due to transformation failure.")
+        print("Skipping raw parsing, reading from intermmediate inputs file.")
+        generate_topics_json()
 
 if __name__ == "__main__":
     generate_all()
