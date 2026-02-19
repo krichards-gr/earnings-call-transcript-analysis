@@ -102,6 +102,7 @@ BQ_DATASET = "pressure_monitoring"
 BQ_SOURCE_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_content"
 BQ_METADATA_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_metadata"
 BQ_DEST_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_enriched_local"
+BQ_CORP_REF_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.corporation_reference"
 
 # =================================================================================================
 # MODEL LOADING
@@ -634,9 +635,12 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
                 t.paragraph_number,
                 t.speaker,
                 t.content,
-                m.* EXCEPT(transcript_id)
+                m.* EXCEPT(transcript_id),
+                cr.corporation,
+                cr.sector
             FROM `{BQ_SOURCE_TABLE}` t
             JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+            LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
             WHERE t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
             ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
         """
@@ -655,9 +659,12 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
                 t.paragraph_number,
                 t.speaker,
                 t.content,
-                m.* EXCEPT(transcript_id)
+                m.* EXCEPT(transcript_id),
+                cr.corporation,
+                cr.sector
             FROM `{BQ_SOURCE_TABLE}` t
             JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+            LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
             WHERE t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
             ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
         """
@@ -669,9 +676,12 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
                 t.paragraph_number,
                 t.speaker,
                 t.content,
-                m.* EXCEPT(transcript_id)
+                m.* EXCEPT(transcript_id),
+                cr.corporation,
+                cr.sector
             FROM `{BQ_SOURCE_TABLE}` t
             JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+            LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
             WHERE {where_clause}
             ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
             {f'LIMIT {limit * 2}' if limit else ''}
