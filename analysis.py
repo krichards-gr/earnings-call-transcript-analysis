@@ -202,6 +202,7 @@ BQ_DATASET = "pressure_monitoring"
 BQ_SOURCE_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_content"
 BQ_METADATA_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_metadata"
 BQ_DEST_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.earnings_call_transcript_enriched"
+BQ_CORP_REF_TABLE = f"{BQ_PROJECT_ID}.{BQ_DATASET}.corporation_reference"
 TICKERS_FILE = os.path.join(current_dir, 'tickers.csv')
 
 if PRODUCTION_TESTING:
@@ -386,7 +387,7 @@ def analyze_batch(texts):
                 if any(ext.lower() in text.lower() for ext in exclusions):
                     continue
                     
-                text_results.append({"topic": topic, "score": score.item(), "idx": i})
+                text_results.append({"topic": topic, "score": score.item(), "idx": i, "matched_anchor": anchor_metadata[idx][1]})
         
         # Sort and take Top 3
         text_results.sort(key=lambda x: x['score'], reverse=True)
@@ -425,6 +426,7 @@ def analyze_batch(texts):
             target = results_by_text[meta["text_idx"]][meta["topic_idx"]]
             target["sentiment"] = label
             target["sentiment_score"] = abs(compound)  # Use absolute compound score
+            target["all_scores"] = f"pos: {scores['pos']:.2f}, neu: {scores['neu']:.2f}, neg: {scores['neg']:.2f}, compound: {compound:.2f}"
 
         logger.info(f"      Finished sentiment analysis in {time.time() - start_time:.2f}s")
 
@@ -543,9 +545,12 @@ def process_pipeline(config=None, return_data=False):
                             LIMIT {latest}
                         )
                         SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
-                               m.* EXCEPT(transcript_id)
+                               m.* EXCEPT(transcript_id, corporation, sector),
+                               cr.corporation,
+                               cr.sector
                         FROM `{BQ_SOURCE_TABLE}` t
                         JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
                         WHERE t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
                         ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
                     """
@@ -561,9 +566,12 @@ def process_pipeline(config=None, return_data=False):
                             LIMIT {earliest}
                         )
                         SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
-                               m.* EXCEPT(transcript_id)
+                               m.* EXCEPT(transcript_id),
+                               cr.corporation,
+                               cr.sector
                         FROM `{BQ_SOURCE_TABLE}` t
                         JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
                         WHERE t.transcript_id IN (SELECT transcript_id FROM selected_transcripts)
                         ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
                     """
@@ -571,9 +579,12 @@ def process_pipeline(config=None, return_data=False):
                     # Standard limit query (will be post-processed for complete transcripts)
                     query = f"""
                         SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
-                               m.* EXCEPT(transcript_id)
+                               m.* EXCEPT(transcript_id),
+                               cr.corporation,
+                               cr.sector
                         FROM `{BQ_SOURCE_TABLE}` t
                         JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
                         WHERE 1=1
                         {where_filter}
                         ORDER BY m.report_date DESC, m.symbol, t.paragraph_number
@@ -592,9 +603,12 @@ def process_pipeline(config=None, return_data=False):
                             LIMIT {latest}
                         )
                         SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
-                               m.* EXCEPT(transcript_id)
+                               m.* EXCEPT(transcript_id, corporation, sector),
+                               cr.corporation,
+                               cr.sector
                         FROM `{BQ_SOURCE_TABLE}` t
                         JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
                         LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
                         ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
                         WHERE e.transcript_id IS NULL
@@ -612,9 +626,12 @@ def process_pipeline(config=None, return_data=False):
                             LIMIT {earliest}
                         )
                         SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
-                               m.* EXCEPT(transcript_id)
+                               m.* EXCEPT(transcript_id),
+                               cr.corporation,
+                               cr.sector
                         FROM `{BQ_SOURCE_TABLE}` t
                         JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
                         LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
                         ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
                         WHERE e.transcript_id IS NULL
@@ -624,9 +641,12 @@ def process_pipeline(config=None, return_data=False):
                 else:
                     query = f"""
                         SELECT t.transcript_id, t.paragraph_number, t.speaker, t.content,
-                               m.* EXCEPT(transcript_id)
+                               m.* EXCEPT(transcript_id),
+                               cr.corporation,
+                               cr.sector
                         FROM `{BQ_SOURCE_TABLE}` t
                         JOIN `{BQ_METADATA_TABLE}` m ON t.transcript_id = m.transcript_id
+                        LEFT JOIN `{BQ_CORP_REF_TABLE}` cr ON m.symbol = cr.Ticker
                         LEFT JOIN (SELECT DISTINCT transcript_id, paragraph_number FROM `{BQ_DEST_TABLE}`) e
                         ON t.transcript_id = e.transcript_id AND t.paragraph_number = e.paragraph_number
                         WHERE e.transcript_id IS NULL
@@ -776,7 +796,14 @@ def process_pipeline(config=None, return_data=False):
 
                 detected = enrichment_results[i]
                 if not detected:
-                    detected = [{"topic": None, "sentiment": None, "sentiment_score": None}]
+                    detected = [{
+                        "topic": None,
+                        "sentiment": None,
+                        "sentiment_score": None,
+                        "all_scores": None,
+                        "similarity_score": None,
+                        "matched_anchor": None
+                    }]
 
                 for d in detected:
                     res_row = {
@@ -790,6 +817,9 @@ def process_pipeline(config=None, return_data=False):
                         "issue_subtopic": d.get('topic'),
                         "sentiment_label": d.get('sentiment'),
                         "sentiment_score": d.get('sentiment_score'),
+                        "all_scores": d.get('all_scores'),
+                        "similarity_score": d.get('similarity_score'),
+                        "matched_anchor": d.get('matched_anchor'),
                         "content": text
                     }
 
