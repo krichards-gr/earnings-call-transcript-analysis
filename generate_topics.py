@@ -78,19 +78,20 @@ def transform_raw_inputs():
         print(f"Error during transformation: {e}")
         return False
 
-def generate_topics_json():
+def generate_topics_json(intermediate_csv=None):
     """
     Reads the intermediate CSV and generates the final topics.json file
     used by the analysis pipeline.
     """
-    print(f"Generating {JSON_OUTPUT} from {INTERMEDIATE_CSV}...")
+    csv_path = intermediate_csv or INTERMEDIATE_CSV
+    print(f"Generating {JSON_OUTPUT} from {csv_path}...")
     
-    if not os.path.exists(INTERMEDIATE_CSV):
-        print(f"Error: {INTERMEDIATE_CSV} not found.")
+    if not os.path.exists(csv_path):
+        print(f"Error: {csv_path} not found.")
         return
 
     try:
-        df = pd.read_csv(INTERMEDIATE_CSV)
+        df = pd.read_csv(csv_path)
         
         topics_dict = {}
         
@@ -132,18 +133,22 @@ def generate_topics_json():
     except Exception as e:
         print(f"Error during JSON generation: {e}")
 
-def generate_all(from_raw: bool): # from_raw argument will determine whether to generate topics.json from raw or intermediate csv inputs
+def generate_all(from_raw: bool, keyword_file: str = None): # from_raw argument will determine whether to generate topics.json from raw or intermediate csv inputs
     """
     Orchestrates the full generation pipeline:
     1. Raw Inputs -> Intermediate CSV
     2. Intermediate CSV -> Topics JSON
+
+    If keyword_file is provided, it is used directly as the intermediate CSV (skipping raw parsing).
     """
-    if from_raw:
+    if keyword_file:
+        print(f"Using keyword file: {keyword_file}")
+        generate_topics_json(intermediate_csv=keyword_file)
+    elif from_raw:
         if transform_raw_inputs():
             generate_topics_json()
         else:
             print("Skipping JSON generation due to transformation failure.")
-
     else:
         print("Skipping raw parsing, reading from intermmediate inputs file.")
         generate_topics_json()

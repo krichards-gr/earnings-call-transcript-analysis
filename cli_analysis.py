@@ -977,6 +977,8 @@ Examples:
     # Issue config generation
     parser.add_argument('-p', '--parse-raw', action='store_true',
                        help="If present, generates issue configs from the raw Zignal formatted input CSV; otherwise, uses the intermediate tidy CSV.")
+    parser.add_argument('--keyword-file', type=str,
+                       help='Path to a keyword inputs CSV file in the intermediate format (issue_area,topic,term,type). Overrides default keyword config.')
 
     # Company selection
     parser.add_argument('--companies', type=str,
@@ -1033,7 +1035,7 @@ Examples:
     args = parser.parse_args()
 
     # Parse parsing options
-    generate_all(from_raw=args.parse_raw)
+    generate_all(from_raw=args.parse_raw, keyword_file=args.keyword_file)
 
     # Parse companies
     company_symbols = None

@@ -1,0 +1,46 @@
+issue_area,topic,term,type
+Anti-U.S. sentiment,Anti-American Sentiment,anti-American sentiment,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,#anti-Americansentiment,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,anti-American,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,#anti-American,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,anti-US,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,#anti-US,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,anti-U.S.,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,#anti-U.S.,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,anti-U.S. sentiment,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,#antiUSsentiment,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,anti-American backlash,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,#antiAmericanbacklash,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,American brand perception,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,#Americanbrandperception,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,perception of American brands,pattern
+Anti-U.S. sentiment,Anti-American Sentiment,U.S. brand perception,pattern
+Anti-U.S. sentiment,Consumer Boycott,boycott,pattern
+Anti-U.S. sentiment,Consumer Boycott,#boycott,pattern
+Anti-U.S. sentiment,Consumer Boycott,consumer avoidance,pattern
+Anti-U.S. sentiment,Consumer Boycott,#consumeravoidance,pattern
+Anti-U.S. sentiment,Consumer Boycott,local preference,pattern
+Anti-U.S. sentiment,Consumer Boycott,#localpreference,pattern
+Anti-U.S. sentiment,Consumer Boycott,preference for local brands,pattern
+Anti-U.S. sentiment,Consumer Boycott,switching to local,pattern
+Anti-U.S. sentiment,Consumer Boycott,domestic alternatives,pattern
+Anti-U.S. sentiment,International Sales Impact,international comparable sales,pattern
+Anti-U.S. sentiment,International Sales Impact,international comps,pattern
+Anti-U.S. sentiment,International Sales Impact,#internationalcomps,pattern
+Anti-U.S. sentiment,International Sales Impact,international traffic,pattern
+Anti-U.S. sentiment,International Sales Impact,#internationaltraffic,pattern
+Anti-U.S. sentiment,International Sales Impact,international volume,pattern
+Anti-U.S. sentiment,International Sales Impact,international softness,pattern
+Anti-U.S. sentiment,International Sales Impact,#internationalsoftness,pattern
+Anti-U.S. sentiment,International Sales Impact,international headwinds,pattern
+Anti-U.S. sentiment,International Sales Impact,#internationalheadwinds,pattern
+Anti-U.S. sentiment,International Sales Impact,international demand,pattern
+Anti-U.S. sentiment,Geopolitical Framing,geopolitical tensions,pattern
+Anti-U.S. sentiment,Geopolitical Framing,#geopoliticaltensions,pattern
+Anti-U.S. sentiment,Geopolitical Framing,geopolitical environment,pattern
+Anti-U.S. sentiment,Geopolitical Framing,#geopoliticalenvironment,pattern
+Anti-U.S. sentiment,Geopolitical Framing,political climate,pattern
+Anti-U.S. sentiment,Geopolitical Framing,trade tensions,pattern
+Anti-U.S. sentiment,Geopolitical Framing,#tradetensions,pattern
+Anti-U.S. sentiment,Geopolitical Framing,diplomatic tensions,pattern
+Anti-U.S. sentiment,Geopolitical Framing,#diplomatictensions,pattern
