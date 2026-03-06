@@ -63,7 +63,7 @@ issue_config_inputs_raw.csv
 | `analysis.py` | Cloud Run HTTP server. Exposes `/` (health check) and `/run` (POST/GET) endpoints. Same pipeline logic as `cli_analysis.py`. |
 | `analyzer.py` | Core `IssueAnalyzer` class. Loads topic config, builds spaCy Matcher patterns, pre-computes anchor embeddings, detects topics in text. |
 | `parallel_analyzer.py` | `ParallelAnalyzer` wrapper. Distributes classification and topic detection across CPU cores. Auto-detects optimal worker/batch settings. |
-| `generate_topics.py` | Reads `issue_config_inputs_raw.csv`, transforms it, and writes `topics.json`. Called automatically on startup. |
+| `generate_topics.py` | Reads keyword inputs (from `--keyword-file`, `updated_issue_config_inputs.csv`, or `issue_config_inputs_raw.csv` via `--parse-raw`) and writes `topics.json`. Called automatically on startup. |
 | `setup.py` | Interactive setup script. Creates virtualenv, installs deps, downloads models, configures GCP auth. |
 
 ---
@@ -185,22 +185,42 @@ If neither `--start-date` nor `--end-date` is provided, defaults to the last `--
 
 ## 6. Configuration
 
-### Topic Configuration (`issue_config_inputs_raw.csv`)
+### Topic / Keyword Configuration
 
-The human-readable source of truth for all topic definitions. Each row defines one topic with:
-- `issue_area` — broad category (e.g., "Tariffs & Trade")
-- `issue_subtopic` — specific topic label
-- Keyword patterns for exact matching
-- Anchor phrases for semantic similarity matching
-- Exclusionary terms to suppress false positives
+The pipeline supports three ways to supply keyword inputs, in order of precedence:
 
-After editing this file, regenerate `topics.json`:
+#### 1. `--keyword-file` (highest priority)
+
+Point at any CSV in the intermediate format (`issue_area,topic,term,type`) to use it as the keyword config for that run:
 
 ```bash
+python cli_analysis.py --keyword-file inputs/anti-us-sentiment-key-terms.csv --companies MCD,SBUX
+```
+
+The file must have the columns `issue_area`, `topic`, `term`, and `type` (same format as `updated_issue_config_inputs.csv`). This overrides the default config without touching any project files.
+
+#### 2. `updated_issue_config_inputs.csv` (default intermediate format)
+
+The default intermediate CSV used when `--keyword-file` is not supplied. Columns: `issue_area`, `topic`, `term`, `type`. Edit this file directly, then re-run without any extra flags.
+
+#### 3. `issue_config_inputs_raw.csv` + `--parse-raw` (raw human-friendly format)
+
+The human-readable source of truth. Each row defines one topic with:
+- `issue_area` — broad category (e.g., "Tariffs & Trade")
+- `issue_subtopic` — specific topic label
+- `pattern` — semicolon-separated keyword patterns for exact matching
+- `anchor_phrases` — semicolon-separated phrases for semantic similarity matching
+- `exclusionary_term` — semicolon-separated terms to suppress false positives
+
+Pass `--parse-raw` to transform this file into `updated_issue_config_inputs.csv` and regenerate `topics.json`:
+
+```bash
+python cli_analysis.py --parse-raw
+# or regenerate standalone:
 python generate_topics.py
 ```
 
-`topics.json` is also auto-regenerated on every startup of `cli_analysis.py` and `analysis.py`.
+`topics.json` is auto-regenerated on every startup of `cli_analysis.py` and `analysis.py`.
 
 ### Company List (`tickers.csv`)
 
