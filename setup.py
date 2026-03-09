@@ -157,46 +157,100 @@ def download_ml_models():
     print_success("ML models downloaded")
     return True
 
+REQUIRED_SCOPES = [
+    'https://www.googleapis.com/auth/cloud-platform',
+    'https://www.googleapis.com/auth/drive',
+]
+
+# PowerShell-safe: wrap the whole --scopes=... argument in double quotes
+GCLOUD_LOGIN_CMD = (
+    'gcloud auth application-default login '
+    '"--scopes=' + ','.join(REQUIRED_SCOPES) + '"'
+)
+
+def get_adc_path():
+    """Return the path to the Application Default Credentials JSON file."""
+    if platform.system() == 'Windows':
+        return Path(os.environ.get('APPDATA', '')) / 'gcloud' / 'application_default_credentials.json'
+    return Path.home() / '.config' / 'gcloud' / 'application_default_credentials.json'
+
+def adc_has_drive_scope():
+    """Return True if existing ADC credentials include the Drive scope."""
+    import json
+    adc_path = get_adc_path()
+    if not adc_path.exists():
+        return False
+    try:
+        with open(adc_path) as f:
+            creds = json.load(f)
+        # Service accounts don't need scope checking here
+        if creds.get('type') == 'service_account':
+            return True
+        granted = creds.get('scopes', [])
+        return 'https://www.googleapis.com/auth/drive' in granted
+    except Exception:
+        return False
+
 def setup_gcloud():
     """Set up Google Cloud authentication"""
     print_step(5, 6, "Configuring Google Cloud Authentication")
 
+    BQ_PROJECT_ID = "sri-benchmarking-databases"
+
     # Check if gcloud is installed
     if not check_command_exists('gcloud'):
-        print_warning("Google Cloud SDK (gcloud) not found")
-        print_info("To use BigQuery features, install gcloud from:")
+        print_error("Google Cloud SDK (gcloud) not found")
+        print_info("gcloud is required to access BigQuery. Install it from:")
         print_info("https://cloud.google.com/sdk/docs/install")
-
-        response = input(f"\n{Colors.BOLD}Do you want to continue without gcloud? (y/n): {Colors.ENDC}").lower()
-        if response != 'y':
-            return False
-        return True
+        print_info("After installing, re-run this setup script.")
+        return False
 
     print_success("gcloud CLI found")
 
-    # Check if already authenticated
+    # Check if already authenticated AND has Drive scope
     result = run_command('gcloud auth application-default print-access-token',
-                        "Check authentication", check=False, capture_output=True)
+                        "Check existing credentials", check=False, capture_output=True)
+
+    if result and len(result) > 0 and adc_has_drive_scope():
+        print_success("Application Default Credentials already configured with required scopes")
+        run_command(
+            f'gcloud auth application-default set-quota-project {BQ_PROJECT_ID}',
+            f"Set quota project to {BQ_PROJECT_ID}", check=False
+        )
+        return True
 
     if result and len(result) > 0:
-        print_success("Already authenticated with Google Cloud")
-        return True
+        print_warning("Existing credentials are missing the Google Drive scope.")
+        print_info("This is required because some BigQuery tables are backed by Google Drive.")
+        print_info("Re-authentication is needed to add the Drive scope.")
+    else:
+        print_info("Application Default Credentials not found.")
+        print_info("This is required to access BigQuery. A browser window will open for authentication.")
 
-    print_info("Setting up Google Cloud authentication...")
-    print_info("This will open a browser window for authentication.")
+    print_warning("You must complete this step — the app cannot connect to BigQuery without it.")
 
     response = input(f"\n{Colors.BOLD}Authenticate with Google Cloud now? (y/n): {Colors.ENDC}").lower()
-    if response == 'y':
-        if run_command('gcloud auth application-default login', "Authenticate with Google Cloud"):
-            print_success("Authentication successful")
-            return True
-        else:
-            print_error("Authentication failed")
-            return False
-    else:
-        print_info("Skipping authentication. You can authenticate later with:")
-        print_info("gcloud auth application-default login")
-        return True
+    if response != 'y':
+        print_error("Authentication is required to use this application.")
+        print_info("Re-run setup when ready, or authenticate manually with:")
+        print_info(f'  {GCLOUD_LOGIN_CMD}')
+        print_info(f"  gcloud auth application-default set-quota-project {BQ_PROJECT_ID}")
+        return False
+
+    if not run_command(GCLOUD_LOGIN_CMD, "Authenticate with Google Cloud (Drive scope included)"):
+        print_error("Authentication failed. Please try again.")
+        return False
+
+    # Set quota project so BigQuery/GCS requests are correctly attributed
+    if not run_command(
+        f'gcloud auth application-default set-quota-project {BQ_PROJECT_ID}',
+        f"Set quota project to {BQ_PROJECT_ID}"
+    ):
+        print_warning(f"Could not set quota project. If you see GCS errors, run manually:")
+        print_info(f"  gcloud auth application-default set-quota-project {BQ_PROJECT_ID}")
+
+    print_success("Google Cloud authentication configured successfully")
+    return True
 
 def verify_files():
     """Verify required files exist"""
@@ -265,7 +319,8 @@ def print_next_steps():
 
     print(f"{Colors.BOLD}Troubleshooting:{Colors.ENDC}")
     print(f"   • If you encounter issues, check that you're using the virtual environment")
-    print(f"   • For BigQuery access, ensure you've authenticated with gcloud")
+    print(f"   • For BigQuery 403 Drive errors, re-authenticate with:")
+    print(f'     {Colors.OKCYAN}{GCLOUD_LOGIN_CMD}{Colors.ENDC}')
     print(f"   • For models issues, run: {Colors.OKCYAN}{python_cmd} scripts/download_models.py{Colors.ENDC}\n")
 
 def main():
@@ -302,8 +357,10 @@ def main():
     # Step 4: Download ML models
     download_ml_models()  # Continue even if this fails
 
-    # Step 5: Setup Google Cloud
-    setup_gcloud()  # Continue even if this fails
+    # Step 5: Setup Google Cloud (required — app cannot function without it)
+    if not setup_gcloud():
+        print_error("Setup failed: Google Cloud authentication is required")
+        sys.exit(1)
 
     # Step 6: Verify files
     if not verify_files():
