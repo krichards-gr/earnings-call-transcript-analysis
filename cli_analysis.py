@@ -284,7 +284,29 @@ def rejoin_fragments(df):
     rejoined_rows.append(current_row)
     return pd.DataFrame(rejoined_rows)
 
-def analyze_batch(texts):
+def _sentiment_only_batch(texts):
+    """Run standalone VADER sentiment on each text (no topic detection)."""
+    results = []
+    for text in texts:
+        scores = sentiment_analyzer.polarity_scores(str(text))
+        compound = scores['compound']
+        if compound >= 0.05:
+            label = 'positive'
+        elif compound <= -0.05:
+            label = 'negative'
+        else:
+            label = 'neutral'
+        results.append([{
+            "topic": None,
+            "sentiment": label,
+            "sentiment_score": abs(compound),
+            "all_scores": f"pos: {scores['pos']:.2f}, neu: {scores['neu']:.2f}, neg: {scores['neg']:.2f}, compound: {compound:.2f}",
+            "similarity_score": None,
+            "matched_anchor": None
+        }])
+    return results
+
+def analyze_batch(texts, skip_sentiment=False):
     """
     Optimized batch analysis for topics and sentiment.
     Identical to analysis.py logic.
@@ -357,7 +379,7 @@ def analyze_batch(texts):
         results_by_text.append(top_topics)
 
     # 3. VADER Sentiment Analysis (Fast and Simple)
-    if sentiment_queue:
+    if sentiment_queue and not skip_sentiment:
         print(f"      Running VADER sentiment analysis for {len(sentiment_queue)} topic pairs...")
 
         # VADER is super fast - just analyze each text directly
@@ -551,7 +573,9 @@ def run_cloud_analysis(cloud_url, companies, start_date=None, end_date=None, lim
 
 def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=None, earliest=None,
                  write_to_bq=False, include_content=True, output_path=None, use_parallel=True,
-                 num_workers=None, sentiment_batch_size=None, classification_batch_size=None):
+                 num_workers=None, sentiment_batch_size=None, classification_batch_size=None,
+                 enable_interaction_type=True, enable_role=True, enable_topics=True,
+                 enable_sentiment=True, enable_sessions=True):
     """
     Run the analysis pipeline with specified parameters.
 
@@ -600,9 +624,27 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
     print(f"Date Range: {start_date or 'All'} to {end_date or 'All'}")
     print(f"Mode: {mode_desc}")
     print(f"Write to BigQuery: {write_to_bq}")
+    enabled_steps = [name for name, on in [
+        ("interaction_type", enable_interaction_type), ("role", enable_role),
+        ("topics", enable_topics), ("sentiment", enable_sentiment), ("sessions", enable_sessions)
+    ] if on]
+    skipped_steps = [name for name, on in [
+        ("interaction_type", enable_interaction_type), ("role", enable_role),
+        ("topics", enable_topics), ("sentiment", enable_sentiment), ("sessions", enable_sessions)
+    ] if not on]
+    print(f"Enrichment: {', '.join(enabled_steps) if enabled_steps else 'NONE'}")
+    if skipped_steps:
+        print(f"Skipped: {', '.join(skipped_steps)}")
     print(f"{'='*80}\n")
 
-    client = bigquery.Client(project=BQ_PROJECT_ID)
+    # Use ADC with Drive scope (required for Drive-backed BQ tables)
+    credentials, _ = google.auth.default(
+        scopes=[
+            'https://www.googleapis.com/auth/cloud-platform',
+            'https://www.googleapis.com/auth/drive',
+        ]
+    )
+    client = bigquery.Client(project=BQ_PROJECT_ID, credentials=credentials)
 
     # Build query based on mode
     where_clauses = []
@@ -739,24 +781,40 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
     texts = cleaned_texts
 
     # Choose processing method
+    n_segments = len(df)
+    int_results = None
+    role_results = None
+    enrichment_results = None
+
     if use_parallel:
         print(f"\n[PARALLEL PROCESSING MODE]")
         print(f"=" * 80)
 
         # 1. Parallel Classification
-        print(f"\n1. Classification Stage ({len(df)} segments)")
-        print("-" * 80)
+        if enable_interaction_type or enable_role:
+            print(f"\n1. Classification Stage ({n_segments} segments)")
+            print("-" * 80)
 
-        print(f"   Running batch interaction classification...")
-        int_results = parallel_analyzer.classify_batch_parallel(texts, 'interaction')
+        if enable_interaction_type:
+            print(f"   Running batch interaction classification...")
+            int_results = parallel_analyzer.classify_batch_parallel(texts, 'interaction')
 
-        print(f"   Running batch role classification...")
-        role_results = parallel_analyzer.classify_batch_parallel(texts, 'role')
+        if enable_role:
+            print(f"   Running batch role classification...")
+            role_results = parallel_analyzer.classify_batch_parallel(texts, 'role')
 
         # 2. Parallel Topic & Sentiment Analysis
-        print(f"\n2. Topic & Sentiment Analysis Stage")
-        print("-" * 80)
-        enrichment_results = parallel_analyzer.analyze_batch_parallel(texts, show_progress=True)
+        if enable_topics or enable_sentiment:
+            print(f"\n2. Topic & Sentiment Analysis Stage")
+            print("-" * 80)
+            if enable_topics:
+                enrichment_results = parallel_analyzer.analyze_batch_parallel(
+                    texts, show_progress=True, skip_sentiment=not enable_sentiment
+                )
+            elif enable_sentiment:
+                # Sentiment only (no topics) — run VADER directly on each text
+                print(f"   Running standalone VADER sentiment analysis...")
+                enrichment_results = _sentiment_only_batch(texts)
 
         print(f"\n" + "=" * 80)
     else:
@@ -767,15 +825,21 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
 
         # 1. Batch Classification
         # MEMORY OPTIMIZATION: Using batch_size=2 instead of 4 to reduce memory usage
-        print(f"   Running batch interaction classification for {len(df)} segments...")
-        int_results = interaction_classifier(truncated_texts, batch_size=2)
+        if enable_interaction_type:
+            print(f"   Running batch interaction classification for {n_segments} segments...")
+            int_results = interaction_classifier(truncated_texts, batch_size=2)
 
-        print(f"   Running batch role classification for {len(df)} segments...")
-        role_results = role_classifier(truncated_texts, batch_size=2)
+        if enable_role:
+            print(f"   Running batch role classification for {n_segments} segments...")
+            role_results = role_classifier(truncated_texts, batch_size=2)
 
         # 2. Batch Topic & Sentiment Analysis
-        print(f"   Running batch topic/sentiment analysis...")
-        enrichment_results = analyze_batch(texts)
+        if enable_topics:
+            print(f"   Running batch topic/sentiment analysis...")
+            enrichment_results = analyze_batch(texts, skip_sentiment=not enable_sentiment)
+        elif enable_sentiment:
+            print(f"   Running standalone VADER sentiment analysis...")
+            enrichment_results = _sentiment_only_batch(texts)
 
         print(f"\n" + "=" * 80)
 
@@ -786,18 +850,19 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
     current_session_id = 0
     last_transcript_id = None
 
-    # Session tracking regexes
-    # Updated to match actual transcript patterns
-    SESSION_START_PATTERNS = [
-        r"next question",  # Simplified - matches "next question is from" etc.
-        r"first question",  # Matches "first question from"
-        r"question (?:is |will be )?(?:coming )?from",  # "question is from", "question from"
-        r"(?:we'll |we will )?(?:now )?(?:go to|take)",  # "we'll go to", "we'll take", "now go to"
-        r"move to the line of",
-        r"go to the line of",
-        r"from the line of"
-    ]
-    session_start_regex = re.compile("|".join(SESSION_START_PATTERNS), re.IGNORECASE)
+    # Session tracking regexes (only needed if sessions enabled)
+    session_start_regex = None
+    if enable_sessions:
+        SESSION_START_PATTERNS = [
+            r"next question",
+            r"first question",
+            r"question (?:is |will be )?(?:coming )?from",
+            r"(?:we'll |we will )?(?:now )?(?:go to|take)",
+            r"move to the line of",
+            r"go to the line of",
+            r"from the line of"
+        ]
+        session_start_regex = re.compile("|".join(SESSION_START_PATTERNS), re.IGNORECASE)
 
     # Track previous interaction type for Answer validation
     previous_interaction = None
@@ -811,47 +876,56 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
             previous_role = None
         last_transcript_id = row['transcript_id']
 
-        int_res = int_results[i]['label']
-        role_res = role_results[i]['label']
-        interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
-        role_label = ROLE_ID_MAP.get(role_res, role_res)
         # Use cleaned text from preprocessing step
         text = texts[i]
 
-        # POST-PROCESSING: Validate "Answer" labels
-        # An "Answer" should only follow a "Question" from an Analyst
-        # This fixes executives' opening remarks being incorrectly labeled as "Answer"
-        if interaction_type == "Answer":
-            if previous_interaction != "Question" or previous_role != "Analyst":
-                # Not a valid answer context - reclassify as Admin
-                interaction_type = "Admin"
+        # Classification results (None if step was skipped)
+        interaction_type = None
+        role_label = None
 
-        # POST-PROCESSING: Boost "Question" detection for Analyst segments
-        # If an Analyst segment contains question indicators, prioritize labeling it as "Question"
-        # This handles edge cases where operator intro text confused the classifier
-        if role_label == "Analyst" and interaction_type != "Question":
-            question_indicators = [
-                "have two", "have a question", "wondering", "curious", "want to ask",
-                "can you", "could you", "would you", "will you",
-                "how do", "how does", "how should", "how would",
-                "what", "why", "when", "where", "which",
-                "talk about", "comment on", "thoughts on", "perspective on"
-            ]
+        if enable_interaction_type and int_results:
+            int_res = int_results[i]['label']
+            interaction_type = INTERACTION_ID_MAP.get(int_res, int_res)
+
+        if enable_role and role_results:
+            role_res = role_results[i]['label']
+            role_label = ROLE_ID_MAP.get(role_res, role_res)
+
+        # POST-PROCESSING: Validate "Answer" labels (requires both interaction + role)
+        if enable_interaction_type and enable_role and interaction_type and role_label:
+            if interaction_type == "Answer":
+                if previous_interaction != "Question" or previous_role != "Analyst":
+                    interaction_type = "Admin"
+
+            # Boost "Question" detection for Analyst segments
+            if role_label == "Analyst" and interaction_type != "Question":
+                question_indicators = [
+                    "have two", "have a question", "wondering", "curious", "want to ask",
+                    "can you", "could you", "would you", "will you",
+                    "how do", "how does", "how should", "how would",
+                    "what", "why", "when", "where", "which",
+                    "talk about", "comment on", "thoughts on", "perspective on"
+                ]
+                lower_text = text.lower()
+                if any(indicator in lower_text for indicator in question_indicators):
+                    interaction_type = "Question"
+
+        # Session tracking (requires role to detect Operator transitions)
+        if enable_sessions:
             lower_text = text.lower()
-            if any(indicator in lower_text for indicator in question_indicators):
-                interaction_type = "Question"
+            is_operator = role_label == "Operator" if role_label else False
+            has_session_start_keyword = session_start_regex.search(lower_text)
+            is_transition_text = any(k in lower_text for k in ["question", "line of", "analyst"])
 
-        # Session tracking:
-        # We trigger a new session if we see strong "next question" pattern
-        lower_text = text.lower()
-        is_operator = role_label == "Operator"
-        has_session_start_keyword = session_start_regex.search(lower_text)
-        is_transition_text = any(k in lower_text for k in ["question", "line of", "analyst"])
+            if (is_operator and is_transition_text) or has_session_start_keyword:
+                current_session_id += 1
 
-        if (is_operator and is_transition_text) or has_session_start_keyword:
-            current_session_id += 1
+        # Build enrichment data for this segment
+        if enrichment_results:
+            detected = enrichment_results[i]
+        else:
+            detected = None
 
-        detected = enrichment_results[i]
         if not detected:
             detected = [{
                 "topic": None,
@@ -867,20 +941,25 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
                 "transcript_id": row['transcript_id'],
                 "paragraph_number": row['paragraph_number'],
                 "speaker": row['speaker'],
-                "qa_session_id": current_session_id,
-                "interaction_type": interaction_type,
-                "role": role_label,
-                "issue_area": ISSUE_AREA_MAP.get(d.get('topic'), "Unknown"),
-                "issue_subtopic": d.get('topic'),
-                "sentiment_label": d.get('sentiment'),
-                "sentiment_score": d.get('sentiment_score'),
-                "all_scores": d.get('all_scores'),
-                "similarity_score": d.get('similarity_score'),
-                "matched_anchor": d.get('matched_anchor'),
             }
 
+            if enable_sessions:
+                res_row["qa_session_id"] = current_session_id
+            if enable_interaction_type:
+                res_row["interaction_type"] = interaction_type
+            if enable_role:
+                res_row["role"] = role_label
+            if enable_topics:
+                res_row["issue_area"] = ISSUE_AREA_MAP.get(d.get('topic'), "Unknown")
+                res_row["issue_subtopic"] = d.get('topic')
+                res_row["similarity_score"] = d.get('similarity_score')
+                res_row["matched_anchor"] = d.get('matched_anchor')
+            if enable_sentiment:
+                res_row["sentiment_label"] = d.get('sentiment')
+                res_row["sentiment_score"] = d.get('sentiment_score')
+                res_row["all_scores"] = d.get('all_scores')
+
             # Add all metadata columns from BigQuery
-            # This includes report_date, symbol, and any other metadata fields
             for col in row.index:
                 if col not in ['transcript_id', 'paragraph_number', 'speaker', 'content']:
                     res_row[col] = row[col]
@@ -891,7 +970,7 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
 
             all_results.append(res_row)
 
-        # Update previous interaction tracking for next iteration (outside detected loop)
+        # Update previous interaction tracking for next iteration
         previous_interaction = interaction_type
         previous_role = role_label
 
@@ -918,7 +997,6 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
         # Calculate statistics
         unique_transcripts = results_df['transcript_id'].nunique()
         unique_companies = results_df.get('symbol', pd.Series()).nunique()
-        topics_detected = results_df['issue_subtopic'].notna().sum()
         avg_processing_rate = len(df) / elapsed_time
 
         print(f"\n{'='*80}")
@@ -932,7 +1010,8 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
         print(f"  Transcripts: {unique_transcripts}")
         if unique_companies > 0:
             print(f"  Companies: {unique_companies}")
-        print(f"  Topics detected: {topics_detected:,}")
+        if 'issue_subtopic' in results_df.columns:
+            print(f"  Topics detected: {results_df['issue_subtopic'].notna().sum():,}")
         print(f"\nPerformance:")
         print(f"  Time taken: {time_str}")
         print(f"  Processing rate: {avg_processing_rate:.1f} segments/sec")
@@ -1021,6 +1100,18 @@ Examples:
                        help='Execute analysis on Cloud Run instead of locally')
     parser.add_argument('--cloud-url', type=str, default=DEFAULT_CLOUD_URL,
                        help=f'Cloud Run service URL (default: {DEFAULT_CLOUD_URL})')
+
+    # Enrichment toggles
+    parser.add_argument('--no-interaction-type', action='store_true',
+                       help='Skip interaction type classification (Question/Answer/Admin)')
+    parser.add_argument('--no-role', action='store_true',
+                       help='Skip speaker role classification (Analyst/Executive/Operator/Admin)')
+    parser.add_argument('--no-topics', action='store_true',
+                       help='Skip topic detection (pattern matching + semantic similarity)')
+    parser.add_argument('--no-sentiment', action='store_true',
+                       help='Skip sentiment analysis (VADER)')
+    parser.add_argument('--no-sessions', action='store_true',
+                       help='Skip Q&A session grouping')
 
     # Parallelization options (local execution only)
     parser.add_argument('--no-parallel', action='store_true',
@@ -1111,7 +1202,12 @@ Examples:
             use_parallel=not args.no_parallel,
             num_workers=args.workers,
             sentiment_batch_size=args.sentiment_batch_size,
-            classification_batch_size=args.classification_batch_size
+            classification_batch_size=args.classification_batch_size,
+            enable_interaction_type=not args.no_interaction_type,
+            enable_role=not args.no_role,
+            enable_topics=not args.no_topics,
+            enable_sentiment=not args.no_sentiment,
+            enable_sessions=not args.no_sessions
         )
 
 if __name__ == "__main__":

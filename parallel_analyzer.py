@@ -248,13 +248,14 @@ class ParallelAnalyzer:
 
         return sent_results_flat
 
-    def analyze_batch_parallel(self, texts: List[str], show_progress=True) -> List[List[Dict]]:
+    def analyze_batch_parallel(self, texts: List[str], show_progress=True, skip_sentiment=False) -> List[List[Dict]]:
         """
         Full parallel analysis pipeline: topics + sentiment.
 
         Args:
             texts: List of text segments
             show_progress: Show progress bars
+            skip_sentiment: If True, skip sentiment analysis step
 
         Returns:
             List of enrichment results (one per input text)
@@ -279,7 +280,7 @@ class ParallelAnalyzer:
                 })
 
         # 3. Batch sentiment analysis
-        if sentiment_queue:
+        if sentiment_queue and not skip_sentiment:
             if show_progress:
                 print(f"   Running batch sentiment analysis for {len(sentiment_queue)} topic pairs...")
 
