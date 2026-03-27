@@ -1,0 +1,1 @@
+python cli_analysis.py --company-file f500_tickers.csv --start-date 2025-03-01 --end-date 2026-03-13 --mode full --output f500_test.csv --workers 10
