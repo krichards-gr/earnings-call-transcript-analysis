@@ -897,6 +897,10 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
                 if previous_interaction != "Question" or previous_role != "Analyst":
                     interaction_type = "Admin"
 
+            # Enforce: Question interaction type → Analyst role
+            if interaction_type == "Question" and role_label != "Analyst":
+                role_label = "Analyst"
+
             # Boost "Question" detection for Analyst segments
             if role_label == "Analyst" and interaction_type != "Question":
                 question_indicators = [

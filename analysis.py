@@ -766,6 +766,10 @@ def process_pipeline(config=None, return_data=False):
                         # Not a valid answer context - reclassify as Admin
                         interaction_type = "Admin"
 
+                # Enforce: Question interaction type → Analyst role
+                if interaction_type == "Question" and role_label != "Analyst":
+                    role_label = "Analyst"
+
                 # POST-PROCESSING: Boost "Question" detection for Analyst segments
                 # If an Analyst segment contains question indicators, prioritize labeling it as "Question"
                 # This handles edge cases where operator intro text confused the classifier
