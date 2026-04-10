@@ -1132,6 +1132,41 @@ Examples:
     # Parse parsing options
     generate_all(from_raw=args.parse_raw, keyword_file=args.keyword_file)
 
+    # If a custom keyword file was provided (or raw parsing was requested),
+    # reinitialize the analyzer so it picks up the newly generated topics.json
+    if args.keyword_file or args.parse_raw:
+        global issue_analyzer, nlp, embedder, anchor_embeddings, anchor_metadata
+        global matcher, EXCLUSIONS_MAP, ISSUE_AREA_MAP, parallel_analyzer
+
+        print("Reinitializing analyzer with updated topics...")
+        issue_analyzer = IssueAnalyzer(
+            similarity_threshold=SIMILARITY_THRESHOLD,
+            embedding_model=EMBEDDING_MODEL_PATH
+        )
+        nlp = issue_analyzer.nlp
+        embedder = issue_analyzer.embedder
+        anchor_embeddings = issue_analyzer.anchor_embeddings
+        anchor_metadata = issue_analyzer.anchor_metadata
+        matcher = issue_analyzer.matcher
+        EXCLUSIONS_MAP = issue_analyzer.exclusions_map
+        ISSUE_AREA_MAP = issue_analyzer.issue_area_map
+
+        parallel_analyzer = ParallelAnalyzer(
+            sentiment_analyzer=sentiment_analyzer,
+            interaction_classifier=interaction_classifier,
+            role_classifier=role_classifier,
+            embedder=embedder,
+            nlp=nlp,
+            matcher=matcher,
+            anchor_embeddings=anchor_embeddings,
+            anchor_metadata=anchor_metadata,
+            exclusions_map=EXCLUSIONS_MAP,
+            similarity_threshold=SIMILARITY_THRESHOLD,
+            num_workers=OPTIMAL_CONFIG['num_workers'],
+            sentiment_batch_size=OPTIMAL_CONFIG['sentiment_batch_size'],
+            classification_batch_size=OPTIMAL_CONFIG['classification_batch_size']
+        )
+
     # Parse companies
     company_symbols = None
     if args.companies:
