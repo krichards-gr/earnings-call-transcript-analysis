@@ -31,7 +31,8 @@ Analyzes earnings call transcripts from BigQuery, detecting topics, assessing se
 **Data source:** Google BigQuery — `sri-benchmarking-databases.pressure_monitoring`
 - Source table: `earnings_call_transcript_content`
 - Metadata table: `earnings_call_transcript_metadata`
-- Output table: `earnings_call_transcript_enriched_local`
+- Output table (local CLI): `earnings_call_transcript_enriched_local`
+- Output table (Cloud Run): `earnings_call_transcript_enriched`
 
 **Outputs:** Timestamped CSV files in `outputs/`
 
@@ -172,6 +173,18 @@ If neither `--start-date` nor `--end-date` is provided, defaults to the last `--
 | `--cloud` | Send request to Cloud Run instead of running locally |
 | `--cloud-url URL` | Override default Cloud Run service URL |
 
+### Enrichment Toggles
+
+Disable individual pipeline stages to speed up runs or isolate specific outputs:
+
+| Argument | Description |
+|---|---|
+| `--no-interaction-type` | Skip interaction type classification |
+| `--no-role` | Skip speaker role classification |
+| `--no-topics` | Skip topic detection |
+| `--no-sentiment` | Skip sentiment analysis |
+| `--no-sessions` | Skip Q&A session grouping |
+
 ### Parallelization (local only)
 
 | Argument | Description |
@@ -198,6 +211,13 @@ python cli_analysis.py --keyword-file inputs/anti-us-sentiment-key-terms.csv --c
 ```
 
 The file must have the columns `issue_area`, `topic`, `term`, and `type` (same format as `updated_issue_config_inputs.csv`). This overrides the default config without touching any project files.
+
+Several pre-built keyword files are available in `inputs/`:
+- `anti-us-sentiment-key-terms.csv` — Anti-US sentiment tracking
+- `ai_layoffs_terms.csv` — AI and layoffs topic tracking
+- `tech_key_terms.csv` — Technology sector key terms
+
+Matching ticker files (`anti-us-sentiment-tickers.csv`, `ai_layoffs_tickers.csv`) can be used with `--company-file`.
 
 #### 2. `updated_issue_config_inputs.csv` (default intermediate format)
 
@@ -312,6 +332,7 @@ Each row in the output CSV represents one transcript segment × one detected top
 | `all_scores` | Full VADER breakdown: `pos`, `neu`, `neg`, `compound` |
 | `similarity_score` | Cosine similarity score (vector-match rows only; null for pattern-match rows) |
 | `matched_anchor` | The anchor phrase that triggered the match (vector-match rows only) |
+| `key_terms_found` | Pipe-separated list of exact matched keywords (pattern-match rows) or matched anchor phrase (vector-match rows) |
 | `report_date` | Earnings call date from BigQuery metadata |
 | `symbol` | Company ticker symbol |
 | `content` | Original transcript text (omitted if `--no-content`) |

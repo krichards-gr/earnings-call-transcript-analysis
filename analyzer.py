@@ -70,9 +70,13 @@ class IssueAnalyzer:
 
         # 1. spaCy Matcher (Exact Patterns)
         matches = self.matcher(doc)
-        found_topics = set()
+        found_topics = {}  # topic -> set of matched terms
         for match_id, start, end in matches:
-            found_topics.add(self.nlp.vocab.strings[match_id])
+            topic_label = self.nlp.vocab.strings[match_id]
+            matched_text = doc[start:end].text
+            if topic_label not in found_topics:
+                found_topics[topic_label] = set()
+            found_topics[topic_label].add(matched_text.lower())
 
         # 2. Vector Similarity Fallback / Augmentation
         if self.anchor_embeddings is not None:
@@ -82,11 +86,14 @@ class IssueAnalyzer:
             for idx, score in enumerate(cos_scores):
                 if score.item() >= self.similarity_threshold:
                     topic_label = self.anchor_metadata[idx][0]
-                    found_topics.add(topic_label)
+                    anchor_text = self.anchor_metadata[idx][1]
+                    if topic_label not in found_topics:
+                        found_topics[topic_label] = set()
+                    found_topics[topic_label].add(anchor_text.lower())
 
         # 3. Apply Exclusions
         results = []
-        for topic in found_topics:
+        for topic, matched_terms in found_topics.items():
             exclusions = self.exclusions_map.get(topic, [])
             is_excluded = False
             for ext in exclusions:
@@ -98,7 +105,8 @@ class IssueAnalyzer:
                 results.append({
                     "topic": topic,
                     "issue_area": self.issue_area_map.get(topic, "Unknown"),
-                    "issue_subtopic": self.issue_subtopic_map.get(topic, "Unknown")
+                    "issue_subtopic": self.issue_subtopic_map.get(topic, "Unknown"),
+                    "key_terms_found": "|".join(sorted(matched_terms))
                 })
 
         return results

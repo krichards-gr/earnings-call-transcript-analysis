@@ -956,6 +956,7 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
             if enable_topics:
                 res_row["issue_area"] = ISSUE_AREA_MAP.get(d.get('topic'), "Unknown")
                 res_row["issue_subtopic"] = d.get('topic')
+                res_row["key_terms_found"] = d.get('key_terms_found')
                 res_row["similarity_score"] = d.get('similarity_score')
                 res_row["matched_anchor"] = d.get('matched_anchor')
             if enable_sentiment:

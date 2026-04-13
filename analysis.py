@@ -819,6 +819,7 @@ def process_pipeline(config=None, return_data=False):
                         "role": role_label,
                         "issue_area": ISSUE_AREA_MAP.get(d.get('topic'), "Unknown"),
                         "issue_subtopic": d.get('topic'),
+                        "key_terms_found": d.get('key_terms_found'),
                         "sentiment_label": d.get('sentiment'),
                         "sentiment_score": d.get('sentiment_score'),
                         "all_scores": d.get('all_scores'),

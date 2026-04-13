@@ -120,16 +120,24 @@ class ParallelAnalyzer:
             matches = self.matcher(doc)
 
             if matches:
-                found_topics = set()
+                found_topics = {}  # topic -> set of matched terms
                 for match_id, start, end in matches:
-                    found_topics.add(self.nlp.vocab.strings[match_id])
+                    topic_label = self.nlp.vocab.strings[match_id]
+                    matched_text = doc[start:end].text
+                    if topic_label not in found_topics:
+                        found_topics[topic_label] = set()
+                    found_topics[topic_label].add(matched_text.lower())
 
                 text_results = []
-                for topic in found_topics:
+                for topic, matched_terms in found_topics.items():
                     exclusions = self.exclusions_map.get(topic, [])
                     if any(ext.lower() in text.lower() for ext in exclusions):
                         continue
-                    text_results.append({"topic": topic, "idx": idx})
+                    text_results.append({
+                        "topic": topic,
+                        "idx": idx,
+                        "key_terms_found": "|".join(sorted(matched_terms))
+                    })
 
                 results.append((idx, text_results))
                 continue
@@ -154,19 +162,26 @@ class ParallelAnalyzer:
                     if any(ext.lower() in text.lower() for ext in exclusions):
                         continue
 
+                    anchor_text = self.anchor_metadata[anchor_idx][1]
                     text_results.append({
                         "topic": topic,
                         "score": score.item(),
                         "idx": idx,
-                        "matched_anchor": self.anchor_metadata[anchor_idx][1]
+                        "matched_anchor": anchor_text,
+                        "key_terms_found": anchor_text.lower()
                     })
 
-            # Sort and keep top 3
+            # Sort and keep top 3, merging key_terms_found for same topic
             text_results.sort(key=lambda x: x['score'], reverse=True)
             unique = {}
             for r in text_results:
                 if r['topic'] not in unique:
                     unique[r['topic']] = r
+                    unique[r['topic']]['_all_terms'] = {r.get('key_terms_found', '')}
+                else:
+                    unique[r['topic']]['_all_terms'].add(r.get('key_terms_found', ''))
+            for entry in unique.values():
+                entry['key_terms_found'] = "|".join(sorted(t for t in entry.pop('_all_terms') if t))
             top_topics = list(unique.values())[:3]
 
             results.append((idx, top_topics))
