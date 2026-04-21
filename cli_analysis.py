@@ -931,49 +931,63 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
             detected = None
 
         if not detected:
-            detected = [{
-                "topic": None,
-                "sentiment": None,
-                "sentiment_score": None,
-                "all_scores": None,
-                "similarity_score": None,
-                "matched_anchor": None
-            }]
+            detected = []
 
-        for d in detected:
-            res_row = {
-                "transcript_id": row['transcript_id'],
-                "paragraph_number": row['paragraph_number'],
-                "speaker": row['speaker'],
-            }
+        # Build one row per segment with pipe-delimited topic fields
+        res_row = {
+            "transcript_id": row['transcript_id'],
+            "paragraph_number": row['paragraph_number'],
+            "speaker": row['speaker'],
+        }
 
-            if enable_sessions:
-                res_row["qa_session_id"] = current_session_id
-            if enable_interaction_type:
-                res_row["interaction_type"] = interaction_type
-            if enable_role:
-                res_row["role"] = role_label
-            if enable_topics:
-                res_row["issue_area"] = ISSUE_AREA_MAP.get(d.get('topic'), "Unknown")
-                res_row["issue_subtopic"] = d.get('topic')
-                res_row["key_terms_found"] = d.get('key_terms_found')
-                res_row["similarity_score"] = d.get('similarity_score')
-                res_row["matched_anchor"] = d.get('matched_anchor')
-            if enable_sentiment:
-                res_row["sentiment_label"] = d.get('sentiment')
-                res_row["sentiment_score"] = d.get('sentiment_score')
-                res_row["all_scores"] = d.get('all_scores')
+        if enable_sessions:
+            res_row["qa_session_id"] = current_session_id
+        if enable_interaction_type:
+            res_row["interaction_type"] = interaction_type
+        if enable_role:
+            res_row["role"] = role_label
+        if enable_topics:
+            if detected:
+                areas = [ISSUE_AREA_MAP.get(d.get('topic'), "Unknown") for d in detected]
+                subtopics = [d.get('topic') for d in detected if d.get('topic')]
+                terms = [d.get('key_terms_found') for d in detected if d.get('key_terms_found')]
+                scores = [str(d.get('similarity_score')) for d in detected if d.get('similarity_score') is not None]
+                anchors = [d.get('matched_anchor') for d in detected if d.get('matched_anchor')]
+                # Deduplicate areas while preserving order
+                seen_areas = set()
+                unique_areas = []
+                for a in areas:
+                    if a not in seen_areas:
+                        seen_areas.add(a)
+                        unique_areas.append(a)
+                res_row["issue_area"] = "|".join(unique_areas) if unique_areas else "Unknown"
+                res_row["issue_subtopic"] = "|".join(subtopics) if subtopics else None
+                res_row["key_terms_found"] = "|".join(terms) if terms else None
+                res_row["similarity_score"] = "|".join(scores) if scores else None
+                res_row["matched_anchor"] = "|".join(anchors) if anchors else None
+            else:
+                res_row["issue_area"] = "Unknown"
+                res_row["issue_subtopic"] = None
+                res_row["key_terms_found"] = None
+                res_row["similarity_score"] = None
+                res_row["matched_anchor"] = None
+        if enable_sentiment:
+            # Sentiment is per-segment (same for all topics), take from first detected or None
+            first = detected[0] if detected else {}
+            res_row["sentiment_label"] = first.get('sentiment')
+            res_row["sentiment_score"] = first.get('sentiment_score')
+            res_row["all_scores"] = first.get('all_scores')
 
-            # Add all metadata columns from BigQuery
-            for col in row.index:
-                if col not in ['transcript_id', 'paragraph_number', 'speaker', 'content']:
-                    res_row[col] = row[col]
+        # Add all metadata columns from BigQuery
+        for col in row.index:
+            if col not in ['transcript_id', 'paragraph_number', 'speaker', 'content']:
+                res_row[col] = row[col]
 
-            # Add content if requested
-            if include_content:
-                res_row["content"] = text
+        # Add content if requested
+        if include_content:
+            res_row["content"] = text
 
-            all_results.append(res_row)
+        all_results.append(res_row)
 
         # Update previous interaction tracking for next iteration
         previous_interaction = interaction_type
