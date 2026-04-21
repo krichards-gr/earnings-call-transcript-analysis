@@ -1,0 +1,30 @@
+﻿issue_area,topic,term,type
+None,Capital Expenditures,Capex,pattern
+None,Business Growth,New Market Entry,pattern
+None,Business Constraints,Tariffs,pattern
+None,Grid Capacity,Grid Capacity,pattern
+None,Capital Expenditures,Capital investment,pattern
+None,Capital Expenditures,Capital budget,pattern
+None,Capital Expenditures,Capital allocation,pattern
+None,Capital Expenditures,Asset acquisition,pattern
+None,Business Growth,Revenu growth,pattern
+None,Business Growth,Market expansion,pattern
+None,Business Growth,Growth strategy,pattern
+None,Business Growth,Scale,pattern
+None,Business Growth,Growth target,pattern
+None,Business Growth,Growth forecast,pattern
+None,Business Growth,Market penetration,pattern
+None,Business Growth,Market share,pattern
+None,Business Constraints,Supply chain,pattern
+None,Business Constraints,Delay,pattern
+None,Business Constraints,Shortage,pattern
+None,Business Constraints,Limiting factor,pattern
+None,Business Constraints,Regulatory contraint,pattern
+None,Grid Capacity,Distribution capacity,pattern
+None,Grid Capacity,Available capacity,pattern
+None,Grid Capacity,Grid modernization,pattern
+None,Grid Capacity,Grid investment,pattern
+None,Grid Capacity,Grid reliability,pattern
+None,Grid Capacity,Voltage level,pattern
+None,Grid Capacity,Circuit loading,pattern
+None,Grid Capacity,Voltage limit,pattern

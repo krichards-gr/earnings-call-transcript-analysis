@@ -1,320 +1,78 @@
 {
   "topics": [
     {
-      "label": "Layoffs",
-      "issue_area": "AI",
-      "issue_subtopic": "Layoffs",
+      "label": "Capital Expenditures",
+      "issue_area": NaN,
+      "issue_subtopic": "Capital Expenditures",
       "patterns": [
         [
           {
-            "LOWER": "layoffs"
+            "LOWER": "capex"
           }
         ],
         [
           {
-            "LOWER": "layoff"
-          }
-        ],
-        [
-          {
-            "LOWER": "reduction"
+            "LOWER": "capital"
           },
           {
-            "LOWER": "in"
+            "LOWER": "investment"
+          }
+        ],
+        [
+          {
+            "LOWER": "capital"
           },
           {
-            "LOWER": "force"
+            "LOWER": "budget"
           }
         ],
         [
           {
-            "LOWER": "rif"
-          }
-        ],
-        [
-          {
-            "LOWER": "workforce"
+            "LOWER": "capital"
           },
           {
-            "LOWER": "reduction"
+            "LOWER": "allocation"
           }
         ],
         [
           {
-            "LOWER": "headcount"
+            "LOWER": "asset"
           },
           {
-            "LOWER": "reduction"
+            "LOWER": "acquisition"
           }
-        ],
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Business Growth",
+      "issue_area": NaN,
+      "issue_subtopic": "Business Growth",
+      "patterns": [
         [
           {
-            "LOWER": "restructuring"
-          }
-        ],
-        [
-          {
-            "LOWER": "restructuring"
+            "LOWER": "new"
           },
           {
-            "LOWER": "charges"
-          }
-        ],
-        [
-          {
-            "LOWER": "severance"
-          }
-        ],
-        [
-          {
-            "LOWER": "separation"
+            "LOWER": "market"
           },
           {
-            "LOWER": "costs"
+            "LOWER": "entry"
           }
         ],
         [
           {
-            "LOWER": "involuntary"
+            "LOWER": "revenu"
           },
           {
-            "LOWER": "attrition"
+            "LOWER": "growth"
           }
         ],
         [
           {
-            "LOWER": "position"
-          },
-          {
-            "LOWER": "eliminations"
-          }
-        ],
-        [
-          {
-            "LOWER": "automation"
-          }
-        ],
-        [
-          {
-            "LOWER": "ai-driven"
-          },
-          {
-            "LOWER": "efficiencies"
-          }
-        ],
-        [
-          {
-            "LOWER": "ai-enabled"
-          },
-          {
-            "LOWER": "productivity"
-          }
-        ],
-        [
-          {
-            "LOWER": "ai"
-          },
-          {
-            "LOWER": "tools"
-          },
-          {
-            "LOWER": "replacing"
-          }
-        ],
-        [
-          {
-            "LOWER": "software"
-          },
-          {
-            "LOWER": "replacing"
-          }
-        ],
-        [
-          {
-            "LOWER": "tech-driven"
-          },
-          {
-            "LOWER": "reduction"
-          }
-        ],
-        [
-          {
-            "LOWER": "intelligent"
-          },
-          {
-            "LOWER": "automation"
-          }
-        ],
-        [
-          {
-            "LOWER": "agentic"
-          }
-        ],
-        [
-          {
-            "LOWER": "agents"
-          }
-        ],
-        [
-          {
-            "LOWER": "fewer"
-          },
-          {
-            "LOWER": "engineers"
-          }
-        ],
-        [
-          {
-            "LOWER": "fewer"
-          },
-          {
-            "LOWER": "headcount"
-          }
-        ],
-        [
-          {
-            "LOWER": "operating"
-          },
-          {
-            "LOWER": "leverage"
-          }
-        ],
-        [
-          {
-            "LOWER": "efficiency"
-          },
-          {
-            "LOWER": "gains"
-          }
-        ],
-        [
-          {
-            "LOWER": "productivity"
-          },
-          {
-            "LOWER": "improvements"
-          }
-        ],
-        [
-          {
-            "LOWER": "doing"
-          },
-          {
-            "LOWER": "more"
-          },
-          {
-            "LOWER": "with"
-          },
-          {
-            "LOWER": "less"
-          }
-        ],
-        [
-          {
-            "LOWER": "headcount"
-          },
-          {
-            "LOWER": "discipline"
-          }
-        ],
-        [
-          {
-            "LOWER": "right-sizing"
-          }
-        ],
-        [
-          {
-            "LOWER": "streamlining"
-          },
-          {
-            "LOWER": "operations"
-          }
-        ],
-        [
-          {
-            "LOWER": "flattening"
-          },
-          {
-            "LOWER": "the"
-          },
-          {
-            "LOWER": "org"
-          }
-        ],
-        [
-          {
-            "LOWER": "redeployment"
-          }
-        ],
-        [
-          {
-            "LOWER": "reskilling"
-          }
-        ],
-        [
-          {
-            "LOWER": "upskilling"
-          }
-        ],
-        [
-          {
-            "LOWER": "slowing"
-          },
-          {
-            "LOWER": "hiring"
-          }
-        ],
-        [
-          {
-            "LOWER": "hiring"
-          },
-          {
-            "LOWER": "pause"
-          }
-        ],
-        [
-          {
-            "LOWER": "natural"
-          },
-          {
-            "LOWER": "attrition"
-          }
-        ],
-        [
-          {
-            "LOWER": "backfill"
-          }
-        ],
-        [
-          {
-            "LOWER": "no"
-          },
-          {
-            "LOWER": "backfill"
-          }
-        ],
-        [
-          {
-            "LOWER": "net"
-          },
-          {
-            "LOWER": "headcount"
-          },
-          {
-            "LOWER": "flat"
-          }
-        ],
-        [
-          {
-            "LOWER": "headcount"
-          },
-          {
-            "LOWER": "neutral"
-          }
-        ],
-        [
-          {
-            "LOWER": "margin"
+            "LOWER": "market"
           },
           {
             "LOWER": "expansion"
@@ -322,40 +80,176 @@
         ],
         [
           {
-            "LOWER": "labor"
+            "LOWER": "growth"
           },
           {
-            "LOWER": "cost"
-          },
-          {
-            "LOWER": "reduction"
+            "LOWER": "strategy"
           }
         ],
         [
           {
-            "LOWER": "sg&a"
-          },
-          {
-            "LOWER": "reduction"
+            "LOWER": "scale"
           }
         ],
         [
           {
-            "LOWER": "opex"
+            "LOWER": "growth"
           },
           {
-            "LOWER": "efficiency"
+            "LOWER": "target"
           }
         ],
         [
           {
-            "LOWER": "cost"
+            "LOWER": "growth"
           },
           {
-            "LOWER": "per"
+            "LOWER": "forecast"
+          }
+        ],
+        [
+          {
+            "LOWER": "market"
           },
           {
-            "LOWER": "employee"
+            "LOWER": "penetration"
+          }
+        ],
+        [
+          {
+            "LOWER": "market"
+          },
+          {
+            "LOWER": "share"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Business Constraints",
+      "issue_area": NaN,
+      "issue_subtopic": "Business Constraints",
+      "patterns": [
+        [
+          {
+            "LOWER": "tariffs"
+          }
+        ],
+        [
+          {
+            "LOWER": "supply"
+          },
+          {
+            "LOWER": "chain"
+          }
+        ],
+        [
+          {
+            "LOWER": "delay"
+          }
+        ],
+        [
+          {
+            "LOWER": "shortage"
+          }
+        ],
+        [
+          {
+            "LOWER": "limiting"
+          },
+          {
+            "LOWER": "factor"
+          }
+        ],
+        [
+          {
+            "LOWER": "regulatory"
+          },
+          {
+            "LOWER": "contraint"
+          }
+        ]
+      ],
+      "anchors": [],
+      "exclusions": []
+    },
+    {
+      "label": "Grid Capacity",
+      "issue_area": NaN,
+      "issue_subtopic": "Grid Capacity",
+      "patterns": [
+        [
+          {
+            "LOWER": "grid"
+          },
+          {
+            "LOWER": "capacity"
+          }
+        ],
+        [
+          {
+            "LOWER": "distribution"
+          },
+          {
+            "LOWER": "capacity"
+          }
+        ],
+        [
+          {
+            "LOWER": "available"
+          },
+          {
+            "LOWER": "capacity"
+          }
+        ],
+        [
+          {
+            "LOWER": "grid"
+          },
+          {
+            "LOWER": "modernization"
+          }
+        ],
+        [
+          {
+            "LOWER": "grid"
+          },
+          {
+            "LOWER": "investment"
+          }
+        ],
+        [
+          {
+            "LOWER": "grid"
+          },
+          {
+            "LOWER": "reliability"
+          }
+        ],
+        [
+          {
+            "LOWER": "voltage"
+          },
+          {
+            "LOWER": "level"
+          }
+        ],
+        [
+          {
+            "LOWER": "circuit"
+          },
+          {
+            "LOWER": "loading"
+          }
+        ],
+        [
+          {
+            "LOWER": "voltage"
+          },
+          {
+            "LOWER": "limit"
           }
         ]
       ],

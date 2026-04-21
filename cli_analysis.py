@@ -948,7 +948,7 @@ def run_analysis(companies, start_date=None, end_date=None, limit=None, latest=N
             res_row["role"] = role_label
         if enable_topics:
             if detected:
-                areas = [ISSUE_AREA_MAP.get(d.get('topic'), "Unknown") for d in detected]
+                areas = [str(ISSUE_AREA_MAP.get(d.get('topic'), "Unknown") or "Unknown") for d in detected]
                 subtopics = [d.get('topic') for d in detected if d.get('topic')]
                 terms = [d.get('key_terms_found') for d in detected if d.get('key_terms_found')]
                 scores = [str(d.get('similarity_score')) for d in detected if d.get('similarity_score') is not None]
